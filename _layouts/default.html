@@ -12,6 +12,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{ page_title }}</title>
   {% include seo.html %}
+  <link rel="stylesheet" href="{{ "/assets/css/main.css" | relative_url }}">
 </head>
 <body>
   <header>
@@ -29,8 +30,14 @@
       {% endfor %}
     </nav>
   </header>
-  <main>
-    {{ content }}
-  </main>
+  <div class="site-body">
+    {% comment %} Placeholder -- real sidebar content (Menu hero on Hjem, breadcrumb+image on product pages, etc.) lands in later milestones. {% endcomment %}
+    <aside class="sidebar"></aside>
+    <main class="content">
+      {{ content }}
+    </main>
+  </div>
+  {% comment %} Placeholder -- real Footer component (contact info, social links, disclaimer) lands in M2. {% endcomment %}
+  <footer></footer>
 </body>
 </html>

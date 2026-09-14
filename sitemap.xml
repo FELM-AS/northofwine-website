@@ -7,12 +7,17 @@ layout: none
   Every page's .url, nothing else -- not the jekyll-sitemap gem (see
   CLAUDE.md's jekyll-feed note for why). Excludes 404/sitemap/robots by
   name; Contentful-generated pages are always named "index.html", so
-  never match.
+  never match. Also excludes anything under /assets/ -- e.g. a Sass
+  entry point (assets/css/main.scss) needs Jekyll front matter to be
+  processed, which makes it a site.pages entry (and its .map alongside
+  it) even though neither is a real content page.
 {% endcomment %}
 {% assign sitemap_pages = site.pages | where_exp: "p", "p.name != '404.html' and p.name != 'sitemap.xml' and p.name != 'robots.txt'" %}
 {% for p in sitemap_pages %}
+  {% unless p.url contains '/assets/' %}
   <url>
     <loc>{{ p.url | absolute_url }}</loc>
   </url>
+  {% endunless %}
 {% endfor %}
 </urlset>
