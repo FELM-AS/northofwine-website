@@ -1,0 +1,18 @@
+# Manufacturer `country` (fixed 13-value Contentful enum) -> language code,
+# for the `lang` attribute on product/manufacturer names (see
+# planning/Plan.md "Formatting" and "Hyphenation"). Deliberately explicit,
+# not derived from the country name, since the mapping isn't 1:1 in
+# general (only happens to be for these 13 values today).
+Frankrike: fr
+Italia: it
+Tyskland: de
+Østerrike: de
+Spania: es
+Portugal: pt
+Ungarn: hu
+Chile: es
+Argentina: es
+Australia: en
+New Zealand: en
+USA: en
+Norge: nb

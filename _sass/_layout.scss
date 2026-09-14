@@ -1,0 +1,44 @@
+// Structural scaffold only -- header/sidebar/main/footer skeleton and the
+// mobile breakpoint that stacks the sidebar above the content, per
+// planning/Plan.md's Layout section. No typography/color/font decisions
+// here; those land once real brand assets are supplied.
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.site-body {
+  display: flex;
+  gap: 1.5rem;
+  // align-items left at its default (stretch): equal-height columns on
+  // desktop, and lets .content take the full stacked width on mobile
+  // without needing its own explicit width override there.
+}
+
+.sidebar {
+  flex: 0 0 240px;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+$mobile-breakpoint: 640px;
+
+@media (max-width: $mobile-breakpoint) {
+  .site-body {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    flex-basis: auto;
+    width: 100%;
+  }
+}
