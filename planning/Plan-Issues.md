@@ -85,7 +85,7 @@ Regenerated from the current Plan.md (supersedes the earlier version of this fil
 **Depends on:** #9
 
 ### 13. Filter component — products
-**Body:** Filter by `productTypeName` and `webProductTypeName` (when set) as flat sibling values, not a hierarchy — a product with both set appears on both static filter pages (e.g. `productTypeName: Hvitvin` + `webProductTypeName: Tokaji` → listed on `/utvalg/hvitvin/` and `/utvalg/tokaji/`). `subProductTypeName`, `productGroupName`, and `mainProductTypeName` are Vinmonopolet classification fields and are NOT used for filtering.
+**Body:** Filter by `productTypeName` and `webProductTypeName` (when set) as flat sibling values, not a hierarchy — a product with both set appears on both static filter pages (e.g. `productTypeName: Hvitvin` + `webProductTypeName: Tokaj` → listed on `/utvalg/hvitvin/` and `/utvalg/tokaj/`). `subProductTypeName`, `productGroupName`, and `mainProductTypeName` are Vinmonopolet classification fields and are NOT used for filtering.
 **Acceptance criteria:**
 - Each distinct `productTypeName`/`webProductTypeName` value has its own static, indexable URL
 - A product with both fields set appears on both corresponding pages
@@ -106,12 +106,12 @@ Regenerated from the current Plan.md (supersedes the earlier version of this fil
 ## Card Components
 
 ### 16. Product card
-**Body:** Metadata (`productTypeName` + `webProductTypeName` when set, shown together e.g. "Hvitvin · Tokaji"; `country`; `region`), image, name, and a button group showing sales price only if `productId` and `salesPrice` both exist (only `salesPrice` — the Vinmonopolet retail price — is ever shown; `salesPriceHoreca` is never public) plus an arrow-right icon. Entire card links to the product detail page. Product name carries the `lang` attribute (see #26).
+**Body:** Metadata (`productTypeName` + `webProductTypeName` when set, shown together e.g. "Hvitvin · Tokaj"; `country`; `region`), image, name, and a button group showing sales price only if `productId` and `salesPrice` both exist (only `salesPrice` — the Vinmonopolet retail price — is ever shown; `salesPriceHoreca` is never public) plus an arrow-right icon. Entire card links to the product detail page. Product name carries the `lang` attribute (see #26).
 **Depends on:** #2, #8
 
 ### 17. Manufacturer card
-**Body:** Image, logo, name (with `lang` attribute, see #26), external link (opens in a new tab), description, and a link to that manufacturer's product listing (#23). No manufacturer detail page.
-**Depends on:** #2, #8
+**Body:** Image, logo, name (with `lang` attribute, see #26), external link (opens in a new tab), description, and an inline list of links to that manufacturer's own products (product name → its Utvalg detail page) — not a separate page. No manufacturer detail page.
+**Depends on:** #2, #8, #16
 
 ### 18. Person card
 **Body:** Image, name, email, phone, description.
@@ -137,12 +137,8 @@ Regenerated from the current Plan.md (supersedes the earlier version of this fil
 **Depends on:** #15, #16
 
 ### 22. Produsenter (manufacturers) page + country filter pages
-**Body:** Full manufacturer listing plus the static per-country filter pages (#14), built with the Manufacturer card (#17). Receives inbound anchor links from product detail pages (#21).
+**Body:** Full manufacturer listing plus the static per-country filter pages (#14), built with the Manufacturer card (#17) — each card inline-lists its own products, no separate per-manufacturer page (matches the current site: a single `/produsenter/` page). Receives inbound anchor links from product detail pages (#21).
 **Depends on:** #14, #17
-
-### 23. Per-manufacturer product listing page
-**Body:** For each manufacturer, a static page (e.g. `/produsenter/<slug>/viner/`) listing that manufacturer's own products, built from products' required `manufacturer` reference field. Resolves the product↔manufacturer cross-linking requirement, mirroring and extending the current site.
-**Depends on:** #2, #16, #22
 
 ### 24. Om oss (about) page
 **Body:** Company text + list of people (Person card, #18). Absorbs contact info — no separate Kontakt page/nav item.

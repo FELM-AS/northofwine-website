@@ -56,8 +56,8 @@
 - **Produsenter** (manufacturers)
   - Lists all manufacturers.
   - Sidebar filters by country: fixed set of 13 countries (see Filter component).
-  - No manufacturer detail page — represented as a card only.
-  - Manufacturer card links to a static per-manufacturer product listing (e.g. `/produsenter/<slug>/viner/`), built from products' required `manufacturer` reference field.
+  - No manufacturer detail page and no separate per-manufacturer URL — represented as a card only, on this single page (matches the current site: one `/produsenter/` page, no `/produsenter/<slug>/...` pages).
+  - Manufacturer card inline-lists that manufacturer's own products (product name linking directly to its Utvalg detail page), built from products' required `manufacturer` reference field.
   - Product detail pages link back here to the manufacturer's card (anchor link).
 - **Om oss** (about)
   - Company text + list of people.
@@ -110,7 +110,7 @@
   - Image, logo, name.
   - Link (external, opens in a new tab).
   - Description.
-  - Links to that manufacturer's product listing (see Produsenter).
+  - Inline list of links to that manufacturer's own products (see Produsenter) — not a separate page.
 - **Person**
   - Image, name, email, phone, description.
 
