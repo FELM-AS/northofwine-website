@@ -1,11 +1,11 @@
-title: Contentful + GitHub Pages
-description: A Jekyll site whose content is fetched from Contentful at build time.
+title: North of Wine
+description: North of Wine AS – vinimportør i Trondheim.
 baseurl: ""
-url: ""
+url: "https://northofwine.no"
 # Primary language for <html lang> (see _layouts/default.html) -- update
 # if the primary locale below isn't English. Other configured locales get
 # their own <html lang> from their Contentful locale code automatically.
-lang: en
+lang: nb
 
 # Contentful content types this site pulls entries from. Each entry
 # becomes a generated page at /<dir>/<slug>/ (dir: "" = site root).
@@ -19,15 +19,15 @@ lang: en
 # exposed as page.social_image either way.
 # Add or remove collections here to adapt this template to a new site.
 contentful_collections:
-  - content_type: post
+  # Only Product gets a generated page per entry (see planning/Plan.md and
+  # planning/Contentful-Content-Model.md). `layout: single` is a placeholder
+  # until a dedicated product layout exists for the full detail page
+  # (grape composition, sensory ratings, food pairing -- Plan-Issues.md #21).
+  # `description` is Product's body-ish field; there's no literal `body`.
+  - content_type: product
     layout: single
-    dir: posts
-    home: true
-    order: "-fields.publishDate"
-  - content_type: page
-    layout: single
-    dir: ""
-    nav: true
+    dir: utvalg
+    body_field: description
 
 # Optional: how deep a linked entry's own fields get flattened before
 # falling back to an {id, link_type} stub. Defaults to 2 if unset.
@@ -47,11 +47,17 @@ contentful_collections:
 # Content types fetched into site.data.<name> instead of generated pages
 # -- for entries only ever linked to from others (e.g. authors,
 # manufacturers), with no page of their own.
-# contentful_data_collections:
-#   - content_type: author
-#     name: authors
+# Manufacturer and Person have no detail page of their own (Plan.md) --
+# fetched as data, consumed by Product pages and the Produsenter/Om oss
+# pages once those exist.
+contentful_data_collections:
+  - content_type: manufacturer
+    name: manufacturers
+  - content_type: person
+    name: people
 
 exclude:
   - README.md
   - CLAUDE.md
   - .env.example
+  - planning/

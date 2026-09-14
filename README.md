@@ -1,6 +1,8 @@
-# github-pages-contentful
+# northofwine.no
 
-A Jekyll template for basic Contentful-backed sites: content is fetched from Contentful at build time and deployed to GitHub Pages via GitHub Actions.
+The website for [North of Wine AS](https://northofwine.no), a Norwegian wine importer based in Trondheim, hosted under the FELM-AS GitHub organization. Content (products, manufacturers, people) is authored and edited in Contentful, fetched at build time, and rendered by Jekyll into a static site deployed to GitHub Pages via GitHub Actions.
+
+Built on the `github-pages-contentful` template's Contentful → Jekyll → GitHub Pages architecture. See [`planning/Plan.md`](planning/Plan.md) for the site's pages, components, and content model, [`planning/Plan-Issues.md`](planning/Plan-Issues.md) for the implementation breakdown, and [`planning/Contentful-Content-Model.md`](planning/Contentful-Content-Model.md) for the actual Contentful field reference.
 
 Native GitHub Pages builds run Jekyll in "safe mode," which disables custom plugins and network access — so this site can't rely on GitHub's built-in Jekyll build. Instead, a GitHub Actions workflow ([.github/workflows/deploy.yml](.github/workflows/deploy.yml)) runs `jekyll build` with full plugin support and deploys the resulting `_site/` to Pages.
 
@@ -23,7 +25,7 @@ To build against draft (unpublished) content instead of only published entries, 
 
 ## Content model
 
-The build reads the `contentful_collections` list in [_config.yml](_config.yml) and generates one page per Contentful entry per collection — this is the extension point for adapting the template to a new site:
+The build reads the `contentful_collections` list in [_config.yml](_config.yml) and generates one page per Contentful entry per collection — this is the extension point for adapting the generator to a content type. `_config.yml` currently still has the template's placeholder `post`/`page` collections; see [`planning/Contentful-Content-Model.md`](planning/Contentful-Content-Model.md) for this site's real `product`/`manufacturer`/`person` content types and [`planning/Plan.md`](planning/Plan.md) for how they map onto pages.
 
 ```yaml
 contentful_collections:
@@ -122,14 +124,6 @@ Every page automatically gets a canonical link, a meta description, and Open Gra
 `sitemap.xml` and `robots.txt` are generated at the site root from every page's `.url`, so they stay correct automatically as content is added or removed — no extra config. A custom `404.html` is included too (required by GitHub Pages to show something other than GitHub's own default 404 page).
 
 **All of this needs `url` set correctly in `_config.yml`** (see the next section) — without a real absolute URL, canonical links, Open Graph tags, and the sitemap all render broken/relative links.
-
-## Using this repo as a template
-
-This repo is a GitHub template repo. To start a new site from it:
-
-1. Click "Use this template" on GitHub (or `gh repo create <new-repo> --template pettersuul/github-pages-contentful`) to create your new repo.
-2. Update `title`/`description`/`url` in `_config.yml` (the last one to the site's real deployed URL, e.g. `https://<user>.github.io` — canonical links, Open Graph tags, and the sitemap all need a real absolute URL to be correct), and adjust `contentful_collections` to match the new site's content types.
-3. Point it at a new Contentful space via `.env` locally and the three Actions secrets in the new repo (see Setup above).
 
 ## Commands
 

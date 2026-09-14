@@ -2,6 +2,20 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project
+
+This repo builds and deploys **northofwine.no**, the website for North of Wine AS, a Norwegian wine importer based in Trondheim, hosted under the FELM-AS GitHub organization. It replaces the previous production site at `northofwine/northofwine.github.io` once ready.
+
+The site is built on the `github-pages-contentful` template's Contentful → Jekyll → GitHub Pages architecture (see "Architecture" below for how that machinery works), but this repo is no longer a reusable template itself — it's the concrete site for one company, meant to be modified in place.
+
+The target design, content model, and implementation breakdown live in [`planning/`](planning/):
+
+- [`planning/Plan.md`](planning/Plan.md) — pages, components, content model, formatting, i18n, accessibility, SEO, and analytics requirements.
+- [`planning/Plan-Issues.md`](planning/Plan-Issues.md) — the same plan broken into ready-to-paste GitHub issues with dependencies.
+- [`planning/Contentful-Content-Model.md`](planning/Contentful-Content-Model.md) — field-by-field reference for the `product`, `manufacturer`, and `person` content types actually configured in the Contentful space (generated from a Contentful export).
+
+As of this writing the repo is still at the template's initial state — `_config.yml` still has the template's placeholder `post`/`page` collections, not yet the site's real `product`/`manufacturer`/`person` content types described in `planning/`. Consult `planning/` before implementing a page or component.
+
 ## Commands
 
 - `bundle install` — install Ruby dependencies (run after cloning or after editing the Gemfile)
@@ -13,7 +27,7 @@ There is no test suite or linter configured. Verify changes by running `bundle e
 
 ## Architecture
 
-This repo is a **GitHub template repo** for basic Contentful-backed Jekyll sites — it's meant to be reused via "Use this template" rather than modified in place for one specific site. The reuse mechanism is config-driven: adapting the template to a new site's content types means editing `_config.yml`, not the generator plugin.
+The generator plugin architecture described in this section is inherited from the `github-pages-contentful` template and is config-driven: adapting it to a content type means editing `_config.yml`, not the generator plugin (see the `contentful_collections`/`contentful_data_collections` table below). This section documents that generic machinery; the North of Wine-specific content model and page requirements live in `planning/` (see "Project" above).
 
 The site pulls its content from Contentful at **build time** rather than storing pages as files in the repo. Five plugin files split that work along its natural seams:
 
