@@ -1,0 +1,18 @@
+---
+layout: none
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{% comment %}
+  Every page's .url, nothing else -- not the jekyll-sitemap gem (see
+  CLAUDE.md's jekyll-feed note for why). Excludes 404/sitemap/robots by
+  name; Contentful-generated pages are always named "index.html", so
+  never match.
+{% endcomment %}
+{% assign sitemap_pages = site.pages | where_exp: "p", "p.name != '404.html' and p.name != 'sitemap.xml' and p.name != 'robots.txt'" %}
+{% for p in sitemap_pages %}
+  <url>
+    <loc>{{ p.url | absolute_url }}</loc>
+  </url>
+{% endfor %}
+</urlset>

@@ -1,0 +1,36 @@
+<!doctype html>
+{% comment %}
+  Assigned once here and read by seo.html's include, so <title>/<html lang>
+  can't drift from og:title/og:locale. Jekyll's Liquid shares assign-scope
+  between an includer and its {% include %}.
+{% endcomment %}
+{% assign page_title = page.title | default: site.title %}
+{% assign page_lang = page.locale | default: site.lang | default: "en" %}
+<html lang="{{ page_lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page_title }}</title>
+  {% include seo.html %}
+</head>
+<body>
+  <header>
+    <a href="{{ '/' | relative_url }}">{{ site.title }}</a>
+    <nav>
+      {% comment %}
+        page.locale is unset on every primary-locale page, so this `where`
+        is then a no-op (Jekyll's `where`, not raw Liquid's, matches nil
+        to nil) and lists every nav page. With multiple locales, it scopes
+        the nav to the page currently being rendered.
+      {% endcomment %}
+      {% assign nav_pages = site.pages | where: "nav", true | where: "locale", page.locale | sort: "title" %}
+      {% for p in nav_pages %}
+        <a href="{{ p.url | relative_url }}">{{ p.title }}</a>
+      {% endfor %}
+    </nav>
+  </header>
+  <main>
+    {{ content }}
+  </main>
+</body>
+</html>
