@@ -1,44 +1,42 @@
-// Structural scaffold only -- header/sidebar/main/footer skeleton and the
-// mobile breakpoint that stacks the sidebar above the content, per
-// planning/Plan.md's Layout section. No typography/color/font decisions
-// here; those land once real brand assets are supplied.
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+// The one deliberate layout rule this site uses CSS for at all (see
+// planning/Plan.md's Layout section): the sidebar sits beside the main
+// content on wider screens and stacks above it on small screens. Plain
+// unstyled HTML would just stack at any width, so this one requirement
+// needs a media query -- everything else on the site stays unstyled,
+// semantic HTML with no classes and no decorative CSS.
 
 body {
-  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "header header"
+    "aside  main"
+    "footer footer";
 }
 
-.site-body {
-  display: flex;
-  gap: 1.5rem;
-  // align-items left at its default (stretch): equal-height columns on
-  // desktop, and lets .content take the full stacked width on mobile
-  // without needing its own explicit width override there.
+header {
+  grid-area: header;
 }
 
-.sidebar {
-  flex: 0 0 240px;
+aside {
+  grid-area: aside;
 }
 
-.content {
-  flex: 1;
-  min-width: 0;
+main {
+  grid-area: main;
 }
 
-$mobile-breakpoint: 640px;
+footer {
+  grid-area: footer;
+}
 
-@media (max-width: $mobile-breakpoint) {
-  .site-body {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    flex-basis: auto;
-    width: 100%;
+@media (max-width: 640px) {
+  body {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "aside"
+      "main"
+      "footer";
   }
 }
