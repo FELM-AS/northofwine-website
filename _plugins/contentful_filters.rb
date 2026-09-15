@@ -16,6 +16,9 @@
 #
 # `country_lang`: see its own comment below.
 # `nb_number`: see its own comment below.
+# `unescape_html`: see its own comment below.
+require "cgi"
+
 module ContentfulJekyll
   module TemplateFilters
     def dir_href(dir)
@@ -55,6 +58,20 @@ module ContentfulJekyll
     # sync with a single lookup.
     def country_lang(country)
       @context.registers[:site].data["countries"][country]
+    end
+
+    # _includes/seo.html's meta-description fallback runs `strip_html` on
+    # a page's already-*rendered* `content` (e.g. a manufacturer
+    # description that went through `| escape` in manufacturer-card.html,
+    # or Rich Text markup) -- `strip_html` removes tags but leaves HTML
+    # entities like `&quot;`/`&amp;` as literal text, which then get
+    # escaped a *second* time when interpolated into the meta tag
+    # (`&quot;` -> `&amp;quot;`). Unescaping once here, between
+    # `strip_html` and the final `| escape`, undoes exactly that one
+    # extra round of escaping -- not a general-purpose HTML-to-text
+    # filter, just the fix for this specific double-escape.
+    def unescape_html(value)
+      CGI.unescapeHTML(value.to_s)
     end
   end
 end

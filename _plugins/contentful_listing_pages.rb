@@ -233,6 +233,7 @@ module ContentfulJekyll
       page.content = ""
       page.data["layout"] = "listing"
       page.data["title"] = value || dir.capitalize
+      page.data["description"] = description_for(item_type, value)
       page.data["items"] = items
       page.data["item_type"] = item_type
       page.data["products_by_manufacturer"] = products_by_manufacturer
@@ -242,6 +243,21 @@ module ContentfulJekyll
       page.data["locale"] = locale.code unless locale.primary?
 
       page
+    end
+
+    # Plan-Issues.md #33 ("Manufacturer/Om oss/Hjem get sensible
+    # page-specific defaults"): page.content is "" on every listing page
+    # (see #build_page above), so without an explicit page.description,
+    # _includes/seo.html's generic fallback would fall through to the
+    # rendered card list instead -- a meaningless run-on of product/
+    # manufacturer card text truncated at 160 characters, not a sentence.
+    def description_for(item_type, value)
+      case item_type
+      when "product"
+        value ? "#{value} i North of Wine sitt vinutvalg." : "Hele vinutvalget til North of Wine, vinimportør i Trondheim."
+      when "manufacturer"
+        value ? "Vinprodusenter fra #{value} i North of Wine sitt utvalg." : "Vinprodusentene bak North of Wine sitt vinutvalg."
+      end
     end
   end
 end

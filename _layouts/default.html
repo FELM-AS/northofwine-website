@@ -24,6 +24,16 @@
     with no dependency on the DOM being ready.
   {% endcomment %}
   <script src="{{ "/assets/js/image-fallback.js" | relative_url }}"></script>
+  {% if site.goatcounter_code %}
+  {% comment %}
+    Cookie-less analytics (Plan.md's Analytics section) -- on every
+    page via this one shared layout, 404.html included, since it has
+    no special-cased layout of its own (CLAUDE.md's "SEO, sitemap,
+    robots.txt, 404" section). Inert (this whole block renders nothing)
+    until _config.yml's goatcounter_code is set.
+  {% endcomment %}
+  <script data-goatcounter="https://{{ site.goatcounter_code }}.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  {% endif %}
 </head>
 <body>
   {% comment %}
