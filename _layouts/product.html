@@ -40,7 +40,7 @@ layout: default
 
   {{ content }}
 
-  {% if page.manufacturer.id %}
+  {% if page.manufacturer.id and page.manufacturer.title %}
   <p>
     <a href="{{ site.produsenter_dir | dir_href | relative_url }}#{{ page.manufacturer.id }}">{{ page.manufacturer.title | escape }}</a>
   </p>
@@ -49,18 +49,28 @@ layout: default
   {% if page.grape_desc.size > 0 %}
   <h2>Druetyper</h2>
   <dl>
-    {% for grape in page.grape_desc %}
+    {% comment %}
+      grapeDesc/grapePct are two independent Contentful list fields, paired
+      positionally -- nothing in Contentful ties their lengths together, so
+      an editor can add/remove one side without the other. Only pairing up
+      to the shorter list's length (rather than looping page.grape_desc and
+      indexing into a possibly-shorter page.grape_pct) avoids ever showing a
+      grape name next to a blank/missing percentage.
+    {% endcomment %}
+    {% assign grape_pair_count = page.grape_desc.size %}
+    {% if page.grape_pct.size < grape_pair_count %}{% assign grape_pair_count = page.grape_pct.size %}{% endif %}
+    {% for grape in page.grape_desc limit: grape_pair_count %}
     <dt>{{ grape | escape }}</dt>
     <dd>{{ page.grape_pct[forloop.index0] | escape }}</dd>
     {% endfor %}
   </dl>
   {% endif %}
 
-  {% if page.colour or page.odour or page.taste or page.fullness or page.freshness or third_axis_value %}
+  {% if page.colour.size > 0 or page.odour.size > 0 or page.taste.size > 0 or page.fullness or page.freshness or third_axis_value %}
   <h2>Sensorikk</h2>
-  {% if page.colour %}<p>Farge: {{ page.colour | escape }}</p>{% endif %}
-  {% if page.odour %}<p>Lukt: {{ page.odour | escape }}</p>{% endif %}
-  {% if page.taste %}<p>Smak: {{ page.taste | escape }}</p>{% endif %}
+  {% if page.colour.size > 0 %}<p>Farge: {{ page.colour | escape }}</p>{% endif %}
+  {% if page.odour.size > 0 %}<p>Lukt: {{ page.odour | escape }}</p>{% endif %}
+  {% if page.taste.size > 0 %}<p>Smak: {{ page.taste | escape }}</p>{% endif %}
   {% if page.fullness or page.freshness or third_axis_value %}
   <ul>
     {% if page.fullness %}
@@ -85,12 +95,12 @@ layout: default
   </ul>
   {% endif %}
 
-  {% if page.alcohol_content or page.volume or page.sku or page.production_method_storage %}
+  {% if page.alcohol_content or page.volume or page.sku.size > 0 or page.production_method_storage.size > 0 %}
   <dl>
     {% if page.alcohol_content %}<dt>Alkohol</dt><dd>{{ page.alcohol_content }}%</dd>{% endif %}
     {% if page.volume %}<dt>Volum</dt><dd>{{ page.volume }}</dd>{% endif %}
-    {% if page.sku %}<dt>SKU</dt><dd>{{ page.sku | escape }}</dd>{% endif %}
-    {% if page.production_method_storage %}<dt>Produksjonsmetode / lagring</dt><dd>{{ page.production_method_storage | escape | newline_to_br }}</dd>{% endif %}
+    {% if page.sku.size > 0 %}<dt>SKU</dt><dd>{{ page.sku | escape }}</dd>{% endif %}
+    {% if page.production_method_storage.size > 0 %}<dt>Produksjonsmetode / lagring</dt><dd>{{ page.production_method_storage | escape | newline_to_br }}</dd>{% endif %}
   </dl>
   {% endif %}
 </article>

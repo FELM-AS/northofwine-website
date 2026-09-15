@@ -14,7 +14,7 @@ The target design, content model, and implementation breakdown live in [`plannin
 - [`planning/Plan-Issues.md`](planning/Plan-Issues.md) — the same plan broken into ready-to-paste GitHub issues with dependencies.
 - [`planning/Contentful-Content-Model.md`](planning/Contentful-Content-Model.md) — field-by-field reference for the `product`, `manufacturer`, and `person` content types actually configured in the Contentful space (generated from a Contentful export).
 
-As of this writing the repo is still at the template's initial state — `_config.yml` still has the template's placeholder `post`/`page` collections, not yet the site's real `product`/`manufacturer`/`person` content types described in `planning/`. Consult `planning/` before implementing a page or component.
+`_config.yml` already configures the site's real `product`/`manufacturer`/`person` content types described in `planning/` (not the template's original placeholder `post`/`page` collections) — Header/Footer/Menu/Button, the Product/Manufacturer/Person cards, the listing/filter-page generator, and the real pages (Hjem, Utvalg, Produsenter, Om oss, 404) are all built. Consult `planning/` before implementing a page or component, and check `git log`/the issue tracker for what's still open against `planning/Plan-Issues.md`.
 
 ## Commands
 
@@ -29,7 +29,7 @@ There is no test suite or linter configured. Verify changes by running `bundle e
 
 The generator plugin architecture described in this section is inherited from the `github-pages-contentful` template and is config-driven: adapting it to a content type means editing `_config.yml`, not the generator plugin (see the `contentful_collections`/`contentful_data_collections` table below). This section documents that generic machinery; the North of Wine-specific content model and page requirements live in `planning/` (see "Project" above).
 
-The site pulls its content from Contentful at **build time** rather than storing pages as files in the repo. Five plugin files split that work along its natural seams:
+The site pulls its content from Contentful at **build time** rather than storing pages as files in the repo. Seven plugin files split that work along its natural seams:
 
 | File | Responsibility |
 | --- | --- |
@@ -38,6 +38,8 @@ The site pulls its content from Contentful at **build time** rather than storing
 | `_plugins/contentful_rich_text.rb` | Rich Text → HTML rendering rules. The extension point for custom embed/markup. |
 | `_plugins/contentful_serializer.rb` | Turns a `Contentful::Entry` into plain Jekyll data (a Hash for `page.data`/`site.data`, plus rendered body HTML). |
 | `_plugins/contentful_entries_generator.rb` | The `Jekyll::Generator` that drives the build: reads `_config.yml`, fetches entries, and turns each one into a generated page or a `site.data` entry. |
+| `_plugins/contentful_listing_pages.rb` | A second `Jekyll::Generator` (priority `:low`, runs after `contentful_entries_generator.rb`'s priority `:high`) that builds this site's Utvalg/Produsenter listing and filter pages — not part of the generic template, specific to this site's Plan.md requirements (see "Homepage & navigation" below). |
+| `_plugins/contentful_filters.rb` | Registers the `dir_href` Liquid filter (`"/<dir>/"`), the one shared place templates turn a resolved collection `dir` into a URL. |
 
 ### Connecting to Contentful
 
@@ -55,7 +57,7 @@ Set `CONTENTFUL_PREVIEW=true` to build against draft content instead of only pub
    - For each entry in `contentful_collections`, fetch its entries and turn each into a `Jekyll::PageWithoutAFile` at `/<dir>/<slug>/` (`dir: ""` → site root; locale-prefixed for a non-primary locale). There are no files on disk for individual entries — they only exist as generated pages during a build.
    - For each entry in `contentful_data_collections`, fetch its entries into `site.data.<name>` instead (see "Data-only collections" below).
 
-To add a new content type, add a `contentful_collections` entry and a matching layout in `_layouts/` — no Ruby changes needed. The default `post` and `page` collections both point at `_layouts/single.html` (`layout: default` + `{% include article.html %}`) since they render identically; give a new collection its own layout file only once it actually needs different markup. A `contentful_collections` entry supports:
+To add a new content type, add a `contentful_collections` entry and a matching layout in `_layouts/` — no Ruby changes needed. `_layouts/product.html` (`layout: default` + its own markup) is this site's example of a collection-specific layout; give a new collection its own layout file only once it actually needs different markup from the others. A `contentful_collections` entry supports:
 
 | Key | Required | Meaning |
 | --- | --- | --- |
@@ -70,7 +72,7 @@ To add a new content type, add a `contentful_collections` entry and a matching l
 
 A top-level `contentful_entry_depth` setting (default 2) controls how deep linked entries get flattened before degrading to a stub — see "Field exposure" below.
 
-Entries are fetched with `include: 10` (resolves up to 10 levels of linked entries — required for the linked-entry flattening described below) and paginated in `MAX_PAGE_SIZE`-sized (1000, the CDA's hard limit) requests until exhausted, via the shared `each_page` loop, so content types with more entries than one page are no longer silently truncated. `each_page` is generic over any Contentful CDA list endpoint (entries, content types, ...), since `Contentful::Array#next_page` dispatches by the resource's own type.
+Entries are fetched with `include` set to `contentful_entry_depth` (capped at the CDA's own hard maximum of 10 levels) — asking the CDA to resolve more levels than `EntrySerializer` will ever flatten would just be extra JSON fetched and parsed for nothing — and paginated in `MAX_PAGE_SIZE`-sized (1000, the CDA's hard limit) requests until exhausted, via the shared `each_page` loop, so content types with more entries than one page are no longer silently truncated. `each_page` is generic over any Contentful CDA list endpoint (entries, content types, ...), since `Contentful::Array#next_page` dispatches by the resource's own type.
 
 ### Content type conventions
 
@@ -79,7 +81,7 @@ Every content type needs a **`slug`** field (used as the URL segment) and a **bo
 - **Body field**: `body` by default; set `body_field` on a `contentful_collections` entry to use a different field name. Necessary if the field is literally named `content`, since that collides with Jekyll's own reserved `page.content`/`{{ content }}` and is otherwise unreachable — `body_field` is the only way to use such a field as the page body.
 - **Title**: `page.title` (and a linked/data-collection entry's own `title`) always comes from that content type's "Entry title" setting — its `displayField` in the CDA, configured per content type in Contentful's UI — not from a literal `title` field. This is fetched once per build (`fetch_display_fields`) and applied in `EntrySerializer#flatten_fields`, reading straight from `entry.fields` rather than from the Hash being built, so it's correct even when the displayField happens to be the same field configured as `body_field`. Content types are free to name their title field anything (e.g. `headline`, `eventName`) with zero template changes.
 
-The default `post` collection additionally uses `publishDate` for ordering and display, and `slug` is sanitized into a URL-safe form (`Jekyll::Utils.slugify` — the same normalization Jekyll uses for post permalinks) if it isn't one already, with a build warning logged when that happens. If two entries produce the same URL (a raw collision, two slugs that sanitize to the same value, or a blank/missing slug on a `dir: ""` collection landing on `"/"`), a build warning names the colliding entry and only the last one written survives in the output — `@built_dirs` (`build_page`, `generate`) is seeded with every already-existing page's URL (including static files like `index.html`) before any Contentful entry is fetched, specifically so this covers a Contentful entry colliding with the site's own static pages, not just with each other. Jekyll's own generic "destination shared by multiple files" conflict warning also fires for this case regardless, but doesn't say which entry caused it and is easy to miss among this template's other routine build warnings.
+The default `post` collection additionally uses `publishDate` for ordering and display, and `slug` is sanitized into a URL-safe form (`Jekyll::Utils.slugify` — the same normalization Jekyll uses for post permalinks) if it isn't one already, with a build warning logged when that happens. An entry with no `slug` at all is skipped entirely (with its own build warning naming the entry) rather than built — a blank/missing slug must never fall through to `build_page`, since it would otherwise land on the bare collection `dir` (e.g. `""` → `/`, or `"utvalg"` → `/utvalg/`), silently colliding with that collection's own auto-generated root listing page (`contentful_listing_pages.rb`) or another static page. If two entries still produce the same URL some other way (a raw collision, or two slugs that sanitize to the same value), a build warning names the colliding entry and only the last one written survives in the output — `@built_dirs` (`build_page`, `generate`) is seeded with every already-existing page's URL (including static files like `index.html`) before any Contentful entry is fetched, specifically so this covers a Contentful entry colliding with the site's own static pages, not just with each other. Jekyll's own generic "destination shared by multiple files" conflict warning also fires for this case regardless, but doesn't say which entry caused it and is easy to miss among this template's other routine build warnings.
 
 ### Rich Text rendering (`contentful_rich_text.rb`)
 

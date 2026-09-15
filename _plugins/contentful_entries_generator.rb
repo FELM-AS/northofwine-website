@@ -15,9 +15,10 @@ module ContentfulJekyll
 
     LOG_TAG = "Contentful:"
 
-    # CDA hard limits: 1000 entries per request, include up to 10 levels of links.
+    # CDA hard limits: 1000 entries per request, up to 10 levels of linked
+    # entries resolvable via `include`.
     MAX_PAGE_SIZE = 1000
-    INCLUDE_DEPTH = 10
+    MAX_INCLUDE_DEPTH = 10
 
     # Per-collection/locale constants, computed once in fetch_collection
     # and passed as one object to build_page instead of growing its param list.
@@ -34,6 +35,12 @@ module ContentfulJekyll
 
       display_fields = fetch_display_fields(client)
       entry_depth = site.config["contentful_entry_depth"] || EntrySerializer::DEFAULT_ENTRY_DEPTH
+      # EntrySerializer never flattens past entry_depth levels regardless
+      # of how much Contentful resolves, so asking the CDA to resolve more
+      # than that (up to its own MAX_INCLUDE_DEPTH hard cap) would just be
+      # extra JSON fetched and parsed for nothing on every entry, every
+      # locale pass.
+      @entry_include_depth = [entry_depth, MAX_INCLUDE_DEPTH].min
       # Seeded with every existing static page's URL, so a Contentful
       # entry colliding with one (e.g. a blank slug on dir: "" -> "/")
       # gets a specific warning naming the entry, not just Jekyll's
@@ -74,7 +81,7 @@ module ContentfulJekyll
       query = {
         content_type: collection["content_type"],
         order: collection["order"] || "-sys.updatedAt",
-        include: INCLUDE_DEPTH,
+        include: @entry_include_depth,
         limit: MAX_PAGE_SIZE
       }
       query[:locale] = locale.code if locale.code
@@ -92,7 +99,8 @@ module ContentfulJekyll
       )
 
       each_entry(client, entries_query(collection, locale)) do |entry|
-        site.pages << build_page(site, entry, context)
+        page = build_page(site, entry, context)
+        site.pages << page if page
       end
     end
 
@@ -144,8 +152,20 @@ module ContentfulJekyll
       end
     end
 
+    # Returns nil (skipping the entry, with a warning) if the entry has no
+    # slug -- a blank/missing slug must never fall through to build_page,
+    # since [nil, ...].reject(&:empty?) would silently land it on the bare
+    # collection dir (e.g. "/utvalg/"), colliding with that collection's
+    # own root listing page (see contentful_listing_pages.rb).
     def build_page(site, entry, context)
-      dir = [context.locale.url_prefix, context.dir, sanitized_slug(entry)].reject { |part| part.to_s.empty? }.join("/")
+      slug = sanitized_slug(entry)
+
+      if slug.nil?
+        Jekyll.logger.warn LOG_TAG, "entry #{entry.sys[:id]} (content_type: #{context.collection["content_type"]}) has no slug -- skipping, no page built for it"
+        return nil
+      end
+
+      dir = [context.locale.url_prefix, context.dir, slug].reject { |part| part.to_s.empty? }.join("/")
       page = Jekyll::PageWithoutAFile.new(site, site.source, dir, "index.html")
 
       unless @built_dirs.add?(page.url)

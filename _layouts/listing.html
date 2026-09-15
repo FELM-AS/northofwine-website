@@ -15,6 +15,7 @@ layout: default
 {% endfor %}
 {% elsif page.item_type == "manufacturer" %}
 {% for item in page.items %}
-{% include manufacturer-card.html manufacturer=item %}
+{% assign item_products = page.products_by_manufacturer[item.id] %}
+{% include manufacturer-card.html manufacturer=item products=item_products %}
 {% endfor %}
 {% endif %}

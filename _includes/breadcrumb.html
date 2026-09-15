@@ -1,10 +1,15 @@
 {% comment %}
   Breadcrumb component (Plan.md): <page> / productTypeName / webProductTypeName
   when both are set on the current product, else <page> / productTypeName.
-  Each segment links to its filter page from
-  _plugins/contentful_listing_pages.rb -- `| slugify: "latin"` here has
-  to match that plugin's Jekyll::Utils.slugify(value, mode: "latin")
-  exactly, which it does (same underlying method, verified directly).
+  Each segment links to its actual filter page, built by
+  _plugins/contentful_listing_pages.rb -- found here by matching that
+  page's own title (the raw productTypeName/webProductTypeName value the
+  generator titled it with), not by independently recomputing its
+  slug/URL. That way this can never drift out of sync with however the
+  generator actually builds the URL (previously this re-slugified the
+  value itself via Liquid's `slugify: "latin"`, which only stayed correct
+  by coincidentally matching the generator's own Ruby-side
+  Jekyll::Utils.slugify(value, mode: "latin") call).
   site.utvalg_dir is resolved once by that same plugin via
   ContentfulJekyll.dir_for, not looked up independently here -- see its
   class comment for why.
@@ -16,11 +21,15 @@
 <nav aria-label="Brødsmulesti">
   <a href="{{ utvalg_dir | relative_url }}">Utvalg</a>
   {% if include.product.product_type_name %}
-  {% assign type_slug = include.product.product_type_name | slugify: "latin" %}
-  / <a href="{{ utvalg_dir | append: type_slug | append: '/' | relative_url }}">{{ include.product.product_type_name | escape }}</a>
+  {% assign type_page = site.pages | where: "item_type", "product" | where: "title", include.product.product_type_name | first %}
+  {% if type_page %}
+  / <a href="{{ type_page.url | relative_url }}">{{ include.product.product_type_name | escape }}</a>
+  {% endif %}
   {% endif %}
   {% if include.product.web_product_type_name %}
-  {% assign web_type_slug = include.product.web_product_type_name | slugify: "latin" %}
-  / <a href="{{ utvalg_dir | append: web_type_slug | append: '/' | relative_url }}">{{ include.product.web_product_type_name | escape }}</a>
+  {% assign web_type_page = site.pages | where: "item_type", "product" | where: "title", include.product.web_product_type_name | first %}
+  {% if web_type_page %}
+  / <a href="{{ web_type_page.url | relative_url }}">{{ include.product.web_product_type_name | escape }}</a>
+  {% endif %}
   {% endif %}
 </nav>

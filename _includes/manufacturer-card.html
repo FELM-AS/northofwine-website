@@ -6,22 +6,10 @@
   roadmap decision this follows). No card-wide link, unlike the Product
   card -- there's nowhere for the whole card to link to.
 
-  Matched to its own products by id, not name (names aren't guaranteed
-  unique, ids are) -- and only when the manufacturer actually has an
-  id: `nil == nil` is true in Liquid, so without this guard a
-  manufacturer missing an id would match every *other* page lacking a
-  `manufacturer` field too (404.html, listing pages, ...), not just
-  fail to match zero products. Every real manufacturer has one (always
-  set by EntrySerializer#serialize_entry), so this only matters for
-  malformed/test input. Not locale-scoped (matches
-  contentful_listing_pages.rb's own documented locale-unawareness,
-  deferred to #27/M6) -- fine today since contentful_locales isn't
-  configured, but with 2+ locales this would need to also check the
-  matched product's locale against the current page's.
-
   lang on the name comes directly from the manufacturer's own `country`
-  (the fixed enum) via _data/countries.yml (#8) -- no indirection
-  needed here, unlike the Product card.
+  (the fixed enum, see the `country_lang` filter in
+  _plugins/contentful_filters.rb) -- no indirection needed here, unlike
+  the Product card.
 
   Every editor-controlled field below is escaped -- name/description
   are free text with no pattern validation, and `link`'s own
@@ -32,21 +20,29 @@
   page's "back to manufacturer" link (Plan.md) -- Contentful entry ids
   are plain alphanumeric strings, valid HTML id values as-is.
 
-  Params: manufacturer (required) -- a manufacturer Hash, e.g. an item
-  off site.data.manufacturers or a listing page's page.items.
+  Params:
+    manufacturer (required) -- a manufacturer Hash, e.g. an item off
+      site.data.manufacturers or a listing page's page.items.
+    products -- that manufacturer's own product pages, precomputed once
+      per build by _plugins/contentful_listing_pages.rb (matched by
+      manufacturer id, not name -- names aren't guaranteed unique, ids
+      are) and passed in via _layouts/listing.html's
+      page.products_by_manufacturer[item.id], rather than this card
+      rediscovering them itself by scanning site.pages on every render.
+      Not locale-scoped (matches contentful_listing_pages.rb's own
+      documented locale-unawareness, deferred to #27/M6) -- fine today
+      since contentful_locales isn't configured, but with 2+ locales
+      this would need to also filter by the matched product's locale.
 {% endcomment %}
 {% assign manufacturer = include.manufacturer %}
-{% assign manufacturer_lang = site.data.countries[manufacturer.country] %}
-{% assign manufacturer_products = "" | split: "," %}
-{% if manufacturer.id %}
-{% assign manufacturer_products = site.pages | where_exp: "p", "p.manufacturer.id == manufacturer.id" %}
-{% endif %}
+{% assign manufacturer_lang = manufacturer.country | country_lang %}
+{% assign manufacturer_products = include.products %}
 <article{% if manufacturer.id %} id="{{ manufacturer.id }}"{% endif %}>
   {% include contentful-image.html asset=manufacturer.image width=600 fallback_alt=manufacturer.title %}
   {% assign logo_alt = manufacturer.title | append: " logo" %}
   {% include contentful-image.html asset=manufacturer.logo width=200 fallback_alt=logo_alt %}
   <h2{% if manufacturer_lang %} lang="{{ manufacturer_lang }}"{% endif %}>{{ manufacturer.title | escape }}</h2>
-  {% if manufacturer.link %}
+  {% if manufacturer.link.size > 0 %}
   <p><a href="{{ manufacturer.link | escape }}" target="_blank" rel="noopener">Nettside</a></p>
   {% endif %}
   <p>{{ manufacturer.description | escape | newline_to_br }}</p>

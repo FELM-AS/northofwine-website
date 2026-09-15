@@ -13,8 +13,9 @@
   lang on the product name comes from the *manufacturer's* country (a
   fixed enum), not the product's own free-text country field, which
   isn't guaranteed to match spelling-wise (Plan.md's Hyphenation
-  section) -- via _data/countries.yml (#8). Omitted if the product has
-  no resolved manufacturer (a handful of entries currently do -- see
+  section) -- via the `country_lang` filter in
+  _plugins/contentful_filters.rb. Omitted if the product has no
+  resolved manufacturer (a handful of entries currently do -- see
   planning/Plan-Issues.md #6) or that country isn't in the lookup.
 
   Every editor-controlled field below is escaped -- these are free
@@ -26,7 +27,7 @@
   product detail page, or an item off a listing page's `page.items`.
 {% endcomment %}
 {% assign product = include.product %}
-{% assign product_lang = site.data.countries[product.manufacturer.country] %}
+{% assign product_lang = product.manufacturer.country | country_lang %}
 <a href="{{ product.url | relative_url }}">
   <article>
     {% include contentful-image.html asset=product.image width=600 fallback_alt=product.title %}

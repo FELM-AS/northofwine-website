@@ -16,10 +16,10 @@
   {% include contentful-image.html asset=person.image width=400 fallback_alt=person.title %}
   <h2>{{ person.title | escape }}</h2>
   <p>{{ person.description | escape | newline_to_br }}</p>
-  {% if person.email %}
+  {% if person.email.size > 0 %}
   <p><a href="mailto:{{ person.email | escape }}">{{ person.email | escape }}</a></p>
   {% endif %}
-  {% if person.phone %}
+  {% if person.phone.size > 0 %}
   <p><a href="tel:{{ person.phone | escape }}">{{ person.phone | escape }}</a></p>
   {% endif %}
 </article>

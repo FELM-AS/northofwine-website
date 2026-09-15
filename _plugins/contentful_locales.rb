@@ -45,7 +45,13 @@ module ContentfulJekyll
     return [entry, entry] unless entry.is_a?(Hash)
 
     code = entry["code"] || raise("contentful_locales: entry is missing \"code\": #{entry.inspect}")
+    # `entry.fetch("prefix", code)` only falls back to `code` when the key
+    # is absent entirely -- a `prefix:` key present in YAML with no value
+    # (as opposed to omitted) parses as an explicit nil, which #fetch
+    # would return as-is rather than falling back. Treat that the same as
+    # "not set".
     prefix = entry.fetch("prefix", code)
+    prefix = code if prefix.nil?
 
     # YAML parses bare no/yes/on/off as booleans -- catches the
     # `prefix: no` (Norwegian) trap before it silently falls back to `code`.
