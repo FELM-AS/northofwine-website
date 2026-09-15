@@ -165,11 +165,13 @@ Contentful credentials must be present both locally (`.env`, gitignored) and in 
 
 Plan-Issues.md #3: a build+deploy should also fire when an editor publishes in Contentful, not just on push to `main`. `deploy.yml`'s `repository_dispatch: types: [contentful-publish]` trigger is the GitHub-side half of this; the Contentful-side half has to be configured directly in Contentful's UI (no webhook-management API/tool is used here) since there's no config-as-code path between the two products:
 
-1. In GitHub, create a fine-grained personal access token scoped to just this repo with **Contents: read** and **read-and-write Actions** permissions (needed to call the `dispatches` endpoint below).
+1. In GitHub, create a fine-grained personal access token scoped to just this repo with **Contents: read and write** permission (what the `dispatches` endpoint below actually checks -- an Actions permission is not enough and gets a 403). Use a dedicated machine/bot account if one is available rather than a personal account's token, and rotate it periodically -- Contentful's webhook config is outside this repo's own secret storage/rotation.
 2. In Contentful, **Settings → Webhooks → Add webhook**, triggered on Entry **Publish** (and Unpublish, if desired):
    - URL: `https://api.github.com/repos/FELM-AS/northofwine-website/dispatches`
    - Method: `POST`, Content type: `application/json`
    - Headers: `Authorization: Bearer <the PAT from step 1>`, `Accept: application/vnd.github+json`
    - Payload: `{"event_type": "contentful-publish"}`
 
-To pause this during a bulk content edit without touching Contentful's webhook config at all, set the `CONTENTFUL_AUTOBUILD_DISABLED` repo variable to `true` (`gh variable set CONTENTFUL_AUTOBUILD_DISABLED --body true`, or GitHub's Settings → Secrets and variables → Actions → Variables) — `deploy.yml`'s `build` job skips only `repository_dispatch`-triggered runs while this is set; push-to-`main` and manual `workflow_dispatch` runs are unaffected. Unset it (or set any other value) to resume.
+`repository_dispatch` only fires for a workflow definition already on the repo's default branch -- testing the webhook against a not-yet-merged version of `deploy.yml` will get a 200 from GitHub's API but silently trigger no run at all.
+
+To pause this during a bulk content edit without touching Contentful's webhook config at all, set the `CONTENTFUL_AUTOBUILD_DISABLED` repo variable to `true` (`gh variable set CONTENTFUL_AUTOBUILD_DISABLED --body true`, or GitHub's Settings → Secrets and variables → Actions → Variables) — `deploy.yml`'s `build` job skips only `repository_dispatch`-triggered runs while this is set; push-to-`main` and manual `workflow_dispatch` runs are unaffected. Unset it (or set any other value) to resume. This is a manual switch, not an automatic debounce: several publishes in quick succession without it set each queue their own full build+deploy run (the workflow's `concurrency: pages` block queues rather than cancels), which can also delay a push-to-`main` deploy queued behind them -- flip the toggle before a bulk edit session, not just after noticing a backlog.
