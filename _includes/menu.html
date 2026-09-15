@@ -3,16 +3,15 @@
   the header's overlay (_includes/header.html) and Hjem's inline sidebar
   use (#19/M5) -- same content, different container.
 
-  URLs: Hjem is always "/". Utvalg/Produsenter come from _config.yml's
-  `dir` on the product collection / manufacturer data collection (not
-  hardcoded here), so they stay correct if either is ever renamed. Om
-  oss has no config value to read (it's not a Contentful collection).
+  URLs: Hjem is always "/". Utvalg/Produsenter read site.utvalg_dir /
+  site.produsenter_dir, resolved once by contentful_listing_pages.rb
+  via ContentfulJekyll.dir_for (not looked up independently here) --
+  see that file's class comment for why. Om oss has no config value to
+  read (it's not a Contentful collection).
 {% endcomment %}
-{% assign product_collection = site.contentful_collections | where: "content_type", "product" | first %}
-{% assign manufacturer_collection = site.contentful_data_collections | where: "content_type", "manufacturer" | first %}
 <ul>
   <li><a href="{{ '/' | relative_url }}">Hjem</a></li>
-  <li><a href="{{ product_collection.dir | prepend: '/' | append: '/' | relative_url }}">Utvalg</a></li>
-  <li><a href="{{ manufacturer_collection.dir | prepend: '/' | append: '/' | relative_url }}">Produsenter</a></li>
+  <li><a href="{{ site.utvalg_dir | prepend: '/' | append: '/' | relative_url }}">Utvalg</a></li>
+  <li><a href="{{ site.produsenter_dir | prepend: '/' | append: '/' | relative_url }}">Produsenter</a></li>
   <li><a href="{{ '/omoss/' | relative_url }}">Om oss</a></li>
 </ul>

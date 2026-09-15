@@ -5,12 +5,14 @@
   _plugins/contentful_listing_pages.rb -- `| slugify: "latin"` here has
   to match that plugin's Jekyll::Utils.slugify(value, mode: "latin")
   exactly, which it does (same underlying method, verified directly).
+  site.utvalg_dir is resolved once by that same plugin via
+  ContentfulJekyll.dir_for, not looked up independently here -- see its
+  class comment for why.
 
   Params: product (required) -- a product's page data, e.g. `page` on a
   product detail page.
 {% endcomment %}
-{% assign product_collection = site.contentful_collections | where: "content_type", "product" | first %}
-{% assign utvalg_dir = product_collection.dir | prepend: "/" | append: "/" %}
+{% assign utvalg_dir = site.utvalg_dir | prepend: "/" | append: "/" %}
 <nav aria-label="Brødsmulesti">
   <a href="{{ utvalg_dir | relative_url }}">Utvalg</a>
   {% if include.product.product_type_name %}
