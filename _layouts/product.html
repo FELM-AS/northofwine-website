@@ -17,7 +17,24 @@ layout: default
   for every other productTypeName -- never both, matching the current
   live site's own pattern (cross-checked against vinmonopolet.no,
   whose classification this content model mirrors).
+
+  third_axis_value/third_axis_label resolve once, above, to whichever
+  of tannins/sweetness actually applies to this product's
+  productTypeName -- nothing in the Contentful schema stops a product
+  from having the *other* one filled in too (e.g. tannins on a Hvitvin),
+  so both the Sensorikk heading guard and the ratings <ul> guard check
+  this resolved value rather than "tannins or sweetness" directly, or a
+  product with only the non-matching field set would render an empty
+  <ul>/section instead of being suppressed like every other empty block
+  here.
 {% endcomment %}
+{% if page.product_type_name == "Rødvin" %}
+{% assign third_axis_label = "Garvestoffer" %}
+{% assign third_axis_value = page.tannins %}
+{% else %}
+{% assign third_axis_label = "Sødme" %}
+{% assign third_axis_value = page.sweetness %}
+{% endif %}
 <article>
   <h1>{{ page.title | escape }}</h1>
 
@@ -25,7 +42,7 @@ layout: default
 
   {% if page.manufacturer.id %}
   <p>
-    <a href="{{ site.produsenter_dir | prepend: '/' | append: '/' | relative_url }}#{{ page.manufacturer.id }}">{{ page.manufacturer.title | escape }}</a>
+    <a href="{{ site.produsenter_dir | dir_href | relative_url }}#{{ page.manufacturer.id }}">{{ page.manufacturer.title | escape }}</a>
   </p>
   {% endif %}
 
@@ -39,12 +56,12 @@ layout: default
   </dl>
   {% endif %}
 
-  {% if page.colour or page.odour or page.taste or page.fullness or page.freshness or page.tannins or page.sweetness %}
+  {% if page.colour or page.odour or page.taste or page.fullness or page.freshness or third_axis_value %}
   <h2>Sensorikk</h2>
   {% if page.colour %}<p>Farge: {{ page.colour | escape }}</p>{% endif %}
   {% if page.odour %}<p>Lukt: {{ page.odour | escape }}</p>{% endif %}
   {% if page.taste %}<p>Smak: {{ page.taste | escape }}</p>{% endif %}
-  {% if page.fullness or page.freshness or page.tannins or page.sweetness %}
+  {% if page.fullness or page.freshness or third_axis_value %}
   <ul>
     {% if page.fullness %}
     <li>Fylde: <meter min="1" max="12" value="{{ page.fullness }}">{{ page.fullness }} av 12</meter></li>
@@ -52,12 +69,8 @@ layout: default
     {% if page.freshness %}
     <li>Friskhet: <meter min="1" max="12" value="{{ page.freshness }}">{{ page.freshness }} av 12</meter></li>
     {% endif %}
-    {% if page.product_type_name == "Rødvin" %}
-    {% if page.tannins %}
-    <li>Garvestoffer: <meter min="1" max="12" value="{{ page.tannins }}">{{ page.tannins }} av 12</meter></li>
-    {% endif %}
-    {% elsif page.sweetness %}
-    <li>Sødme: <meter min="1" max="12" value="{{ page.sweetness }}">{{ page.sweetness }} av 12</meter></li>
+    {% if third_axis_value %}
+    <li>{{ third_axis_label }}: <meter min="1" max="12" value="{{ third_axis_value }}">{{ third_axis_value }} av 12</meter></li>
     {% endif %}
   </ul>
   {% endif %}
@@ -77,7 +90,7 @@ layout: default
     {% if page.alcohol_content %}<dt>Alkohol</dt><dd>{{ page.alcohol_content }}%</dd>{% endif %}
     {% if page.volume %}<dt>Volum</dt><dd>{{ page.volume }}</dd>{% endif %}
     {% if page.sku %}<dt>SKU</dt><dd>{{ page.sku | escape }}</dd>{% endif %}
-    {% if page.production_method_storage %}<dt>Produksjonsmetode / lagring</dt><dd>{{ page.production_method_storage | escape }}</dd>{% endif %}
+    {% if page.production_method_storage %}<dt>Produksjonsmetode / lagring</dt><dd>{{ page.production_method_storage | escape | newline_to_br }}</dd>{% endif %}
   </dl>
   {% endif %}
 </article>

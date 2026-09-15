@@ -12,4 +12,4 @@ home_hero: true
 {% endcomment %}
 <h1>North of Wine</h1>
 <p>Vinimport for det nasjonale og trønderske markedet.</p>
-<p><a href="{{ site.utvalg_dir | prepend: '/' | append: '/' | relative_url }}">Se utvalget</a></p>
+<p><a href="{{ site.utvalg_dir | dir_href | relative_url }}">Se utvalget</a></p>

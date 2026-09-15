@@ -7,16 +7,22 @@
   needed for it.
 
   Which section (Utvalg or Produsenter) is picked from the current
-  page's own URL, since this same include is shared by both.
+  page's own URL, since this same include is shared by both -- neither
+  prefix matching is treated as "no section" (an empty sidebar) rather
+  than silently guessing one, so a future third listing section sharing
+  this layout doesn't inherit Produsenter's filter list by accident.
 {% endcomment %}
-{% assign utvalg_prefix = site.utvalg_dir | prepend: "/" | append: "/" %}
-{% assign produsenter_prefix = site.produsenter_dir | prepend: "/" | append: "/" %}
+{% assign utvalg_prefix = site.utvalg_dir | dir_href %}
+{% assign produsenter_prefix = site.produsenter_dir | dir_href %}
+{% assign siblings = "" | split: "," %}
 {% if page.url contains utvalg_prefix %}
 {% assign section_prefix = utvalg_prefix %}
-{% else %}
+{% elsif page.url contains produsenter_prefix %}
 {% assign section_prefix = produsenter_prefix %}
 {% endif %}
+{% if section_prefix %}
 {% assign siblings = site.pages | where_exp: "p", "p.layout == 'listing' and p.url contains section_prefix" %}
+{% endif %}
 <nav aria-label="Filter">
   <ul>
     {% for sibling in siblings %}

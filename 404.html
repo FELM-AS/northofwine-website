@@ -14,7 +14,7 @@ title: Siden finnes ikke
 <h1>Siden finnes ikke</h1>
 <p>Beklager, denne siden finnes ikke.</p>
 <ul>
-  <li><a href="{{ site.utvalg_dir | prepend: '/' | append: '/' | relative_url }}">Utvalg</a></li>
-  <li><a href="{{ site.produsenter_dir | prepend: '/' | append: '/' | relative_url }}">Produsenter</a></li>
+  <li><a href="{{ site.utvalg_dir | dir_href | relative_url }}">Utvalg</a></li>
+  <li><a href="{{ site.produsenter_dir | dir_href | relative_url }}">Produsenter</a></li>
   <li><a href="{{ '/omoss/' | relative_url }}">Om oss</a></li>
 </ul>

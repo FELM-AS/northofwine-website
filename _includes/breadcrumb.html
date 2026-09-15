@@ -12,7 +12,7 @@
   Params: product (required) -- a product's page data, e.g. `page` on a
   product detail page.
 {% endcomment %}
-{% assign utvalg_dir = site.utvalg_dir | prepend: "/" | append: "/" %}
+{% assign utvalg_dir = site.utvalg_dir | dir_href %}
 <nav aria-label="Brødsmulesti">
   <a href="{{ utvalg_dir | relative_url }}">Utvalg</a>
   {% if include.product.product_type_name %}
