@@ -18,3 +18,10 @@ social:
   - name: Instagram
     url: https://www.instagram.com/northofwine/
 helsenorge_url: https://helsenorge.no/rus-og-avhengighet/alkohol/alkohol-og-helse
+# Plan.md's SEO section: "Site-wide fallback image for pages without
+# one" -- read by _includes/seo.html for any page with no social_image
+# of its own (every Utvalg/Produsenter listing/filter page, Om oss,
+# Hjem). A site-relative path (run through `absolute_url`, so this
+# isn't itself a full URL) to an image checked into assets/, not a
+# Contentful asset -- unset until a real logo/photo exists.
+# social_image: /assets/images/og-fallback.jpg

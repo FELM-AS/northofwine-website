@@ -23,6 +23,10 @@ lang: nb
 # set, so leaving it unset keeps every page (including 404.html) free
 # of any analytics request, same as today. Set to the site code (the
 # <mysite> in https://<mysite>.goatcounter.com) once an account exists.
+# Quote the value if it could otherwise read as a YAML boolean (a bare
+# yes/no/on/off, same trap contentful_locales' `prefix` documents below) --
+# unlikely for a GoatCounter site code, but `{% if site.goatcounter_code %}`
+# would silently treat a YAML `false` the same as unset either way.
 # goatcounter_code: mysite
 
 # Contentful content types this site pulls entries from. Each entry

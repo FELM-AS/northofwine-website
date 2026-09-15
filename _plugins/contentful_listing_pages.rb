@@ -233,7 +233,7 @@ module ContentfulJekyll
       page.content = ""
       page.data["layout"] = "listing"
       page.data["title"] = value || dir.capitalize
-      page.data["description"] = description_for(item_type, value)
+      page.data["description"] = description_for(item_type, value, label)
       page.data["items"] = items
       page.data["item_type"] = item_type
       page.data["products_by_manufacturer"] = products_by_manufacturer
@@ -251,12 +251,31 @@ module ContentfulJekyll
     # _includes/seo.html's generic fallback would fall through to the
     # rendered card list instead -- a meaningless run-on of product/
     # manufacturer card text truncated at 160 characters, not a sentence.
-    def description_for(item_type, value)
+    #
+    # Hardcoded Norwegian, unlike dir_for/home_label_for (contentful_locales.rb),
+    # which support a Hash-keyed-by-locale-code override for exactly this
+    # kind of "content that needs translating beyond what the prefix
+    # covers" (CLAUDE.md's Locales section) -- there's no second locale
+    # to translate for yet (_config.yml's contentful_locales is still
+    # just [nb-NO]), so this follows the same "reserved, not built"
+    # precedent as the header/footer's language-switcher spot. Give this
+    # the same locale-aware treatment once a second locale actually
+    # exists, or every non-primary-locale listing page will silently
+    # keep this Norwegian text instead of erroring.
+    def description_for(item_type, value, label)
       case item_type
       when "product"
         value ? "#{value} i North of Wine sitt vinutvalg." : "Hele vinutvalget til North of Wine, vinimportør i Trondheim."
       when "manufacturer"
         value ? "Vinprodusenter fra #{value} i North of Wine sitt utvalg." : "Vinprodusentene bak North of Wine sitt vinutvalg."
+      else
+        # Not reachable today -- build_page is only ever called with
+        # "product"/"manufacturer" (see #generate above). Warn loudly
+        # rather than silently returning nil: a nil page.data["description"]
+        # would resurrect the exact garbled-fallback bug this method
+        # exists to prevent, with nothing in the build log to explain why.
+        Jekyll.logger.warn LOG_TAG, "description_for has no description template for item_type \"#{item_type}\" (#{label}) -- this page's meta description will fall back to its own rendered content instead"
+        nil
       end
     end
   end
