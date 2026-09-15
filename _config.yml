@@ -49,10 +49,14 @@ contentful_collections:
 # manufacturers), with no page of their own.
 # Manufacturer and Person have no detail page of their own (Plan.md) --
 # fetched as data, consumed by Product pages and the Produsenter/Om oss
-# pages once those exist.
+# pages once those exist. `dir` here isn't read by the Contentful
+# generator itself (data collections still don't get per-entry pages)
+# -- it's a single source of truth for the Produsenter root/country
+# listing pages that _plugins/contentful_listing_pages.rb builds.
 contentful_data_collections:
   - content_type: manufacturer
     name: manufacturers
+    dir: produsenter
   - content_type: person
     name: people
 

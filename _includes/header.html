@@ -1,9 +1,17 @@
 {% comment %}
-  Header component (Plan.md): Home button + menu button. The menu
-  button doesn't do anything yet -- opening the Menu overlay (nav
-  list, focus trap, Escape to close) is #12/M3.
+  Header component (Plan.md): Home button + menu button, opening the
+  Menu overlay. Uses a native <dialog> (assets/js/menu.js just calls
+  showModal()) -- focus trapping and Escape-to-close are native <dialog>
+  modal behavior, not hand-rolled. Closing is a <form method="dialog">
+  submit button, needing no JS at all.
 {% endcomment %}
 <header>
   <a href="{{ '/' | relative_url }}">{{ site.title }}</a>
-  <button type="button">Meny</button>
+  <button type="button" id="menu-open" aria-controls="menu-dialog">Meny</button>
 </header>
+<dialog id="menu-dialog">
+  {% include menu.html %}
+  <form method="dialog">
+    <button type="submit">Lukk</button>
+  </form>
+</dialog>
