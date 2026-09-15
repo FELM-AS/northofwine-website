@@ -37,7 +37,6 @@ contentful_collections:
   - content_type: page
     layout: single
     dir: ""
-    nav: true
 ```
 
 | Key | Required | Meaning |
@@ -45,7 +44,6 @@ contentful_collections:
 | `content_type` | yes | The Contentful content type id to fetch. |
 | `layout` | yes | Which layout in [_layouts/](_layouts/) renders the page. |
 | `dir` | yes | URL path prefix; `posts` builds `/posts/<slug>/`, `""` builds pages at the site root (`/<slug>/`). With `contentful_locales` configured, `dir` can be a Hash keyed by locale code (`{en-US: products, nb-NO: produkter}`) instead of one string, if the path segment itself should be translated too, not just prefixed with the locale — see Locales below. |
-| `nav` | no | `true` lists this collection's pages in the site nav (see `_layouts/default.html`). |
 | `home` | no | `true` groups this collection's pages into a section on the homepage (see `index.html`). |
 | `label` | no | Homepage section heading for this collection, if `home` is set. A plain string, or a Hash keyed by locale code (mirroring `dir`) for a translated heading per locale. Defaults to a humanized `content_type` (e.g. `newsArticle` → "News Article") for any locale without one. |
 | `order` | no | A [Contentful CDA order value](https://www.contentful.com/developers/docs/references/content-delivery-api/#/reference/search-parameters/order) (e.g. `fields.publishDate` or `-fields.publishDate`) controlling fetch/display order; defaults to `-sys.updatedAt`. |
@@ -105,7 +103,7 @@ contentful_locales:
 
 **Quote a `prefix` if it could look like a YAML boolean** — `no`, `yes`, `on`, `off` (any case) parse as `true`/`false`, not the string you meant, if left bare. Unquoted `prefix: no` silently becomes `prefix: false`; the build catches this specific case and fails with a clear message rather than silently falling back to the full locale code.
 
-The primary locale's URLs and `site.data` keys are unprefixed, exactly as if `contentful_locales` weren't set at all — adding a second locale to an existing single-locale site never changes its existing URLs (as long as the locale you're already using stays first in the list). This includes a single-entry list too: `contentful_locales: [nb-NO]` always fetches `nb-NO` explicitly, even if your Contentful space's own default locale is something else — only omitting `contentful_locales` entirely skips sending a `locale` param and relies on the space's default. Every other locale gets its own `/<locale>/...` URL prefix (`/nb-NO/products/vin/`) and its own suffixed `site.data.<name>_<locale>` key (`site.data.authors_nb_no`), fetched and rendered entirely separately — a linked entry resolves to that locale's own translated fields, not the primary locale's. The homepage (`index.html`) only ever shows the primary locale's content; a fully localized homepage needs its own `index.html` per locale (e.g. `nb-NO/index.html`), following the same pattern — including `locale: nb-NO` in that file's own front matter, so its nav renders correctly instead of silently behaving like a primary-locale page. The nav in `_layouts/default.html` automatically scopes itself to whichever locale the page currently being rendered belongs to.
+The primary locale's URLs and `site.data` keys are unprefixed, exactly as if `contentful_locales` weren't set at all — adding a second locale to an existing single-locale site never changes its existing URLs (as long as the locale you're already using stays first in the list). This includes a single-entry list too: `contentful_locales: [nb-NO]` always fetches `nb-NO` explicitly, even if your Contentful space's own default locale is something else — only omitting `contentful_locales` entirely skips sending a `locale` param and relies on the space's default. Every other locale gets its own `/<locale>/...` URL prefix (`/nb-NO/products/vin/`) and its own suffixed `site.data.<name>_<locale>` key (`site.data.authors_nb_no`), fetched and rendered entirely separately — a linked entry resolves to that locale's own translated fields, not the primary locale's. The homepage (`index.html`) only ever shows the primary locale's content; a fully localized homepage needs its own `index.html` per locale (e.g. `nb-NO/index.html`), following the same pattern — including `locale: nb-NO` in that file's own front matter, so it's scoped correctly instead of silently behaving like a primary-locale page.
 
 The locale prefix only affects the URL segment `each_locale` adds — the `dir` segment itself (e.g. "products") stays whatever you configured, in every locale, unless you make it a per-locale Hash (see the `dir` row above): `dir: products` gives `/products/vin/` (primary) and `/nb-NO/products/vin/` (secondary) — same word, just prefixed. `dir: {en-US: products, nb-NO: produkter}` gives `/products/vin/` and `/nb-NO/produkter/vin/` — a genuinely translated path, not just a translated prefix.
 

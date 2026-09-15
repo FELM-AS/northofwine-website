@@ -1,0 +1,23 @@
+{% comment %}
+  Footer component (Plan.md): contact emails, business info, social
+  links, and the Helsenorge alcohol-advertising disclaimer. `ordre@`
+  is intentionally dropped (Plan.md). Real content, sourced from the
+  current live site -- not placeholder text.
+{% endcomment %}
+<footer>
+  <address>
+    North of Wine AS<br>
+    Fosenkaia 7, 7010 Trondheim<br>
+    Org.nr. NO 927 128 047 MVA<br>
+    <a href="mailto:post@northofwine.no">post@northofwine.no</a><br>
+    <a href="mailto:faktura@northofwine.no">faktura@northofwine.no</a>
+  </address>
+  <ul>
+    <li>{% include button.html href="https://www.facebook.com/northofwine/" text="Facebook" %}</li>
+    <li>{% include button.html href="https://www.instagram.com/northofwine/" text="Instagram" %}</li>
+  </ul>
+  <p>
+    Bruk av alkohol kan gi ulike skadevirkninger. Nærmere informasjon finner du hos
+    <a href="https://helsenorge.no/rus-og-avhengighet/alkohol/alkohol-og-helse">Helsenorge</a>.
+  </p>
+</footer>

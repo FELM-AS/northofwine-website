@@ -1,0 +1,9 @@
+{% comment %}
+  Header component (Plan.md): Home button + menu button. The menu
+  button doesn't do anything yet -- opening the Menu overlay (nav
+  list, focus trap, Escape to close) is #12/M3.
+{% endcomment %}
+<header>
+  <a href="{{ '/' | relative_url }}">{{ site.title }}</a>
+  <button type="button">Meny</button>
+</header>
