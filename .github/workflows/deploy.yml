@@ -3,6 +3,12 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: ["main"]
+  # Fired by a Contentful webhook, set up outside this repo -- see
+  # CLAUDE.md's "Contentful publish trigger" section for the full setup
+  # (webhook config, PAT, and the CONTENTFUL_AUTOBUILD_DISABLED toggle
+  # the `if:` below reads).
+  repository_dispatch:
+    types: [contentful-publish]
   workflow_dispatch:
 
 permissions:
@@ -16,6 +22,12 @@ concurrency:
 
 jobs:
   build:
+    # Skips only repository_dispatch-triggered runs when
+    # CONTENTFUL_AUTOBUILD_DISABLED is "true" -- see CLAUDE.md's
+    # "Contentful publish trigger" section for how to set that and why.
+    # `needs: build` below means `deploy` is skipped too whenever this
+    # skips `build`.
+    if: github.event_name != 'repository_dispatch' || vars.CONTENTFUL_AUTOBUILD_DISABLED != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
