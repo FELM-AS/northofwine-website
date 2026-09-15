@@ -1,0 +1,15 @@
+---
+layout: default
+---
+{% comment %}
+  Placeholder listing content for the pages _plugins/contentful_listing_pages.rb
+  generates -- real Product/Manufacturer-card rendering lands in M4/M5.
+  Manufacturers have no page of their own (Plan.md), so `item.url` is
+  blank for them -- shown as plain text rather than a broken link.
+{% endcomment %}
+<h1>{{ page.title }}</h1>
+<ul>
+  {% for item in page.items %}
+  <li>{% if item.url %}<a href="{{ item.url | relative_url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}</li>
+  {% endfor %}
+</ul>
