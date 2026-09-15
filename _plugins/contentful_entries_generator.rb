@@ -165,7 +165,7 @@ module ContentfulJekyll
         return nil
       end
 
-      dir = [context.locale.url_prefix, context.dir, slug].reject { |part| part.to_s.empty? }.join("/")
+      dir = context.locale.path_for(context.dir, slug)
       page = Jekyll::PageWithoutAFile.new(site, site.source, dir, "index.html")
 
       unless @built_dirs.add?(page.url)

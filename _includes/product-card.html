@@ -43,7 +43,7 @@
       {% endif %}
     </p>
     <h2{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ product.title | escape }}</h2>
-    {% if product.product_id and product.sales_price and product.sales_price > 0 %}
+    {% if product.product_id and product.sales_price > 0 %}
     <p>{{ product.sales_price | nb_number: 2 }} kr →</p>
     {% endif %}
   </article>

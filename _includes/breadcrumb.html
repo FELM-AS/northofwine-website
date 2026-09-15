@@ -21,26 +21,32 @@
   always resolve to whichever locale's page happened to be built first
   (the primary locale's), linking a non-primary-locale product's
   breadcrumb to the wrong locale's filter page. Same
-  `where: "locale", <a page's own locale>` idiom index.html uses to
-  scope itself to one locale at a time (see
-  _plugins/contentful_locales.rb's Locales section in CLAUDE.md) -- a
-  no-op today since every page's `locale` is nil (only nb-NO is
-  configured, see _config.yml).
+  `where: "locale", <a page's own locale>` idiom CLAUDE.md's Locales
+  section documents for index.html's homepage grouping (currently inert
+  there -- no collection sets `home: true` yet) -- a no-op here too
+  today, since every page's `locale` is nil (only nb-NO is configured,
+  see _config.yml).
+
+  `product_filter_pages` precomputes the item_type/locale scoping shared
+  by both the productTypeName and webProductTypeName lookups below, so
+  a future change to that scoping can't be applied to one and missed on
+  the other.
 
   Params: product (required) -- a product's page data, e.g. `page` on a
   product detail page.
 {% endcomment %}
 {% assign utvalg_dir = site.utvalg_dir | dir_href %}
+{% assign product_filter_pages = site.pages | where: "item_type", "product" | where: "locale", include.product.locale %}
 <nav aria-label="Brødsmulesti">
   <a href="{{ utvalg_dir | relative_url }}">Utvalg</a>
   {% if include.product.product_type_name %}
-  {% assign type_page = site.pages | where: "item_type", "product" | where: "title", include.product.product_type_name | where: "locale", include.product.locale | first %}
+  {% assign type_page = product_filter_pages | where: "title", include.product.product_type_name | first %}
   {% if type_page %}
   / <a href="{{ type_page.url | relative_url }}">{{ include.product.product_type_name | escape }}</a>
   {% endif %}
   {% endif %}
   {% if include.product.web_product_type_name %}
-  {% assign web_type_page = site.pages | where: "item_type", "product" | where: "title", include.product.web_product_type_name | where: "locale", include.product.locale | first %}
+  {% assign web_type_page = product_filter_pages | where: "title", include.product.web_product_type_name | first %}
   {% if web_type_page %}
   / <a href="{{ web_type_page.url | relative_url }}">{{ include.product.web_product_type_name | escape }}</a>
   {% endif %}

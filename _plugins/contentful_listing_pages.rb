@@ -86,12 +86,13 @@ module ContentfulJekyll
       if product_collection
         dir = ContentfulJekyll.dir_for(product_collection, locale)
         site.config["utvalg_dir"] = dir if locale.primary?
-        # EntriesGenerator prefixes a non-primary locale's own generated
-        # pages with locale.url_prefix (nil for the primary locale) --
-        # matching that same prefix here, rather than filtering by
-        # page.data["locale"], scopes to this locale's product pages
-        # using the exact same URL convention the pages were built with.
-        url_dir = [locale.url_prefix, dir].compact.join("/")
+        # locale.path_for is the same helper EntriesGenerator's build_page
+        # (contentful_entries_generator.rb) uses to prefix a non-primary
+        # locale's own generated pages -- using it here too, rather than
+        # filtering by page.data["locale"], scopes to this locale's
+        # product pages using the exact same URL convention the pages
+        # were built with.
+        url_dir = locale.path_for(dir)
         product_pages = site.pages.select { |page| page.url.start_with?("/#{url_dir}/") }
         products_by_manufacturer = product_pages.group_by { |page| page.data.dig("manufacturer", "id") }
 
@@ -221,10 +222,7 @@ module ContentfulJekyll
     # listing page, which never reads it.
     def build_page(site, locale, dir, value, items, label, item_type, products_by_manufacturer = {})
       slug = Jekyll::Utils.slugify(value, mode: "latin") if value
-      # Same locale.url_prefix convention as EntriesGenerator#build_page
-      # (contentful_entries_generator.rb) -- nil for the primary locale,
-      # so this is a no-op there.
-      page_dir = [locale.url_prefix, dir, slug].compact.join("/")
+      page_dir = locale.path_for(dir, slug)
       page = Jekyll::PageWithoutAFile.new(site, site.source, page_dir, "index.html")
 
       if @built_dirs.key?(page.url)

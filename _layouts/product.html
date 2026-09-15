@@ -110,10 +110,10 @@ layout: default
   </ul>
   {% endif %}
 
-  {% if page.alcohol_content or page.volume or page.sku.size > 0 or page.production_method_storage.size > 0 %}
+  {% if page.alcohol_content or page.volume > 0 or page.sku.size > 0 or page.production_method_storage.size > 0 %}
   <dl>
     {% if page.alcohol_content %}<dt>Alkohol</dt><dd>{{ page.alcohol_content | nb_number }}%</dd>{% endif %}
-    {% if page.volume %}<dt>Volum</dt><dd>{{ page.volume | nb_number }}</dd>{% endif %}
+    {% if page.volume > 0 %}<dt>Volum</dt><dd>{{ page.volume | nb_number }}</dd>{% endif %}
     {% if page.sku.size > 0 %}<dt>SKU</dt><dd>{{ page.sku | escape }}</dd>{% endif %}
     {% if page.production_method_storage.size > 0 %}<dt>Produksjonsmetode / lagring</dt><dd>{{ page.production_method_storage | escape | newline_to_br }}</dd>{% endif %}
   </dl>
