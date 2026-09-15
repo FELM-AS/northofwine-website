@@ -7,7 +7,13 @@
   card -- there's nowhere for the whole card to link to.
 
   Matched to its own products by id, not name (names aren't guaranteed
-  unique, ids are).
+  unique, ids are) -- and only when the manufacturer actually has an
+  id: `nil == nil` is true in Liquid, so without this guard a
+  manufacturer missing an id would match every *other* page lacking a
+  `manufacturer` field too (404.html, listing pages, ...), not just
+  fail to match zero products. Every real manufacturer has one (always
+  set by EntrySerializer#serialize_entry), so this only matters for
+  malformed/test input.
 
   lang on the name comes directly from the manufacturer's own `country`
   (the fixed enum) via _data/countries.yml (#8) -- no indirection
@@ -18,7 +24,10 @@
 {% endcomment %}
 {% assign manufacturer = include.manufacturer %}
 {% assign manufacturer_lang = site.data.countries[manufacturer.country] %}
+{% assign manufacturer_products = "" | split: "," %}
+{% if manufacturer.id %}
 {% assign manufacturer_products = site.pages | where_exp: "p", "p.manufacturer.id == manufacturer.id" %}
+{% endif %}
 <article>
   {% if manufacturer.image.url %}
   {% include contentful-image.html asset=manufacturer.image width=600 fallback_alt=manufacturer.title %}
@@ -29,9 +38,9 @@
   {% endif %}
   <h2{% if manufacturer_lang %} lang="{{ manufacturer_lang }}"{% endif %}>{{ manufacturer.title | strip }}</h2>
   {% if manufacturer.link %}
-  <p><a href="{{ manufacturer.link }}" target="_blank" rel="noopener">Nettside</a></p>
+  <p><a href="{{ manufacturer.link | escape }}" target="_blank" rel="noopener">Nettside</a></p>
   {% endif %}
-  <p>{{ manufacturer.description }}</p>
+  <p>{{ manufacturer.description | newline_to_br }}</p>
   {% if manufacturer_products.size > 0 %}
   <ul>
     {% for product in manufacturer_products %}

@@ -8,6 +8,14 @@
   original asset's, so they still correctly reserve layout space and
   don't lie about what's actually being downloaded.
 
+  An asset can have a `url` but no `width` (CLAUDE.md: a non-image
+  asset, or one that hasn't finished processing yet, e.g. under
+  CONTENTFUL_PREVIEW) -- resizing needs a real width to compute the
+  proportional height from, so that case falls back to the original,
+  unresized image instead (Plan.md's Error Handling: "Image resizing
+  failures fall back to the original image"), rather than dividing by
+  a blank/zero width.
+
   Params:
     asset        - required, a serialized Contentful asset (.url,
                    .width, .height, .description)
@@ -17,6 +25,9 @@
                    `description` set in Contentful (Plan.md: alt text
                    "from Contentful where possible")
 {% endcomment %}
-{% assign height = include.width | times: include.asset.height | divided_by: include.asset.width %}
 {% assign alt = include.asset.description | default: include.fallback_alt %}
-<img src="{{ include.asset.url }}?w={{ include.width }}" alt="{{ alt | strip }}" width="{{ include.width }}" height="{{ height }}">
+{% if include.asset.width > 0 %}
+<img src="{{ include.asset.url }}?w={{ include.width }}" alt="{{ alt | strip }}" width="{{ include.width }}" height="{{ include.width | times: include.asset.height | divided_by: include.asset.width }}">
+{% else %}
+<img src="{{ include.asset.url }}" alt="{{ alt | strip }}">
+{% endif %}

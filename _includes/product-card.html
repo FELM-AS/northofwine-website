@@ -29,7 +29,9 @@
     {% endif %}
     <p>
       {{ product.product_type_name }}{% if product.web_product_type_name %} · {{ product.web_product_type_name }}{% endif %}
-      — {{ product.country }}{% if product.region %}, {{ product.region }}{% endif %}
+      {% if product.country.size > 0 or product.region.size > 0 %}
+      — {% if product.country.size > 0 %}{{ product.country }}{% endif %}{% if product.country.size > 0 and product.region.size > 0 %}, {% endif %}{% if product.region.size > 0 %}{{ product.region }}{% endif %}
+      {% endif %}
     </p>
     <h2{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ product.title | strip }}</h2>
     {% if product.product_id and product.sales_price %}
