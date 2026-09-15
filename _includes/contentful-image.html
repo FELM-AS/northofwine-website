@@ -54,17 +54,15 @@
 {% endif %}
 {% assign asset_url = include.asset.url | escape %}
 {% comment %}
-  Explicitly reset on every call (not just assigned inside the `if`
-  above): {% include %} doesn't give assigns their own scope in Jekyll's
-  Liquid, so a stale value from a *previous* call to this same include
-  earlier on the page (e.g. a manufacturer-card.html image with a
-  known width, followed by one still processing under
-  CONTENTFUL_PREVIEW) would otherwise leak onto this one.
+  img_height is only ever read inside the same `if` it's assigned in
+  below (unlike size_attrs in an earlier version of this include, which
+  had to be reset on every call since {% include %} doesn't give
+  assigns their own scope in Jekyll's Liquid) -- so no reset needed
+  here, same inline-conditional-attribute convention as `lang` in
+  product-card.html/manufacturer-card.html.
 {% endcomment %}
-{% assign size_attrs = "" %}
 {% if include.asset.width > 0 %}
 {% assign img_height = include.width | times: include.asset.height | divided_by: include.asset.width %}
-{% assign size_attrs = ' width="' | append: include.width | append: '" height="' | append: img_height | append: '"' %}
 {% endif %}
-<img src="{{ asset_url }}?w={{ include.width }}" alt="{{ alt | escape }}"{{ size_attrs }} data-original="{{ asset_url }}">
+<img src="{{ asset_url }}?w={{ include.width }}" alt="{{ alt | escape }}"{% if include.asset.width > 0 %} width="{{ include.width }}" height="{{ img_height }}"{% endif %} data-original="{{ asset_url }}">
 {% endif %}

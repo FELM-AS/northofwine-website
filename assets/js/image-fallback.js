@@ -34,6 +34,7 @@ document.addEventListener(
 
     if (src === img.dataset.original) {
       img.src = PLACEHOLDER;
+      // Keep in sync with the visible text inside placeholder.svg.
       img.alt = "Bilde utilgjengelig";
     } else {
       img.src = img.dataset.original;

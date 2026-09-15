@@ -54,22 +54,29 @@ jobs:
         # resolving a root-relative internal link (e.g. from
         # `relative_url`) to a file under _site/ -- Jekyll prefixes
         # such URLs with it, but doesn't nest the built output under a
-        # matching subdirectory. Update/remove this alongside
-        # `baseurl` once the custom domain (#4) replaces this temporary
-        # GitHub Pages project-site path.
+        # matching subdirectory. Update/remove this alongside `baseurl`
+        # (and --ignore-urls below, and `url`) once the custom domain
+        # (#4) replaces this temporary GitHub Pages project-site path.
         #
         # --ignore-urls (regex, wrapped in /.../ per html-proofer's own
-        # CLI convention) covers what --swap-urls can't: _includes/seo.html's
-        # canonical <link> is an *absolute* URL (`https://felm-as.github.io/...`,
-        # via `absolute_url`), not a root-relative one, so --swap-urls
-        # never touches it and it's checked as an external link against
-        # the *currently deployed* site instead of this build's own
-        # output. Without this, a build adding or renaming any page
-        # deadlocks: that page's own canonical 404s (the URL doesn't
-        # exist until this deploy publishes it), which fails this
-        # check, which blocks the deploy job (`needs: build`) that
-        # would have published it. Verified by reproducing the 404
-        # locally against a fixture page and confirming this ignores it.
+        # CLI convention) covers what --swap-urls can't: any *absolute*
+        # link to this site's own domain+baseurl (not just
+        # _includes/seo.html's canonical <link>, though that's the
+        # motivating case -- via `absolute_url`, so --swap-urls never
+        # touches it) is checked as an external link against the
+        # *currently deployed* site instead of this build's own output.
+        # Without this, a build adding or renaming any page deadlocks:
+        # that page's own canonical 404s (the URL doesn't exist until
+        # this deploy publishes it), which fails this check, which
+        # blocks the deploy job (`needs: build`) that would have
+        # published it. Verified by reproducing the 404 locally against
+        # a fixture page and confirming this ignores it. Side effect:
+        # an editor-entered absolute link to our own domain (e.g. a
+        # copy-paste mistake in a manufacturer `link` field) would also
+        # go unchecked -- accepted, since that's a narrower and rarer
+        # content mistake than the deadlock this exists to prevent, and
+        # this ignore can't be scoped to "just the canonical tag" (it
+        # matches by URL, not by element).
         #
         # --no-enforce-https: Plan.md only asks for *broken* links to
         # be caught (its own example is a link missing a scheme +
@@ -79,12 +86,16 @@ jobs:
         #
         # --only-4xx: an external site redirecting or timing out isn't
         # something this repo can fix and shouldn't fail every build
-        # over. Note this also means a *5xx* response is silently
-        # treated as fine, not just tolerated redirects/timeouts --
-        # accepted here for the same reason (this repo can't fix a
-        # third party's server error either, and Plan.md's own example
-        # of a "genuinely broken" link, a missing scheme/domain, fails
-        # as a 4xx/connection error, not a 5xx).
+        # over. This also silently accepts a few things beyond
+        # redirects/timeouts, per html-proofer's own source
+        # (url_validator/external.rb): a *5xx* response, a connection
+        # failure (DNS/unreachable host -- e.g. a typo'd manufacturer
+        # `link` domain), and a missing hash fragment on an otherwise-OK
+        # external URL. All accepted for the same reason -- this repo
+        # can't fix a third party's server or DNS either, and Plan.md's
+        # own example of a "genuinely broken" link (missing scheme +
+        # domain) is an internal-link failure this flag doesn't touch,
+        # not one of these external cases.
         #
         # --ignore-status-codes 429: the remaining external checks
         # (manufacturer `link` fields, the two social links) run at
