@@ -23,6 +23,15 @@
   from Contentful fields editors control, same convention as
   _includes/button.html's href/text.
 
+  data-original feeds assets/js/image-fallback.js's two-stage fallback
+  (Plan.md's Error Handling section) -- see that file's own comment for
+  the full behavior. A plain data attribute, not inline `onerror`, so
+  every <img> this include renders is covered by one shared listener
+  instead of repeating the fallback logic per call site. The
+  placeholder path itself isn't repeated here -- it's one site-wide
+  constant, baked directly into image-fallback.js rather than restated
+  on every single image.
+
   Params:
     asset        - required, a serialized Contentful asset (.url,
                    .width, .height, .description)
@@ -43,9 +52,17 @@
 {% else %}
 {% assign alt = include.fallback_alt %}
 {% endif %}
+{% assign asset_url = include.asset.url | escape %}
+{% comment %}
+  img_height is only ever read inside the same `if` it's assigned in
+  below (unlike size_attrs in an earlier version of this include, which
+  had to be reset on every call since {% include %} doesn't give
+  assigns their own scope in Jekyll's Liquid) -- so no reset needed
+  here, same inline-conditional-attribute convention as `lang` in
+  product-card.html/manufacturer-card.html.
+{% endcomment %}
 {% if include.asset.width > 0 %}
-<img src="{{ include.asset.url | escape }}?w={{ include.width }}" alt="{{ alt | escape }}" width="{{ include.width }}" height="{{ include.width | times: include.asset.height | divided_by: include.asset.width }}">
-{% else %}
-<img src="{{ include.asset.url | escape }}?w={{ include.width }}" alt="{{ alt | escape }}">
+{% assign img_height = include.width | times: include.asset.height | divided_by: include.asset.width %}
 {% endif %}
+<img src="{{ asset_url }}?w={{ include.width }}" alt="{{ alt | escape }}"{% if include.asset.width > 0 %} width="{{ include.width }}" height="{{ img_height }}"{% endif %} data-original="{{ asset_url }}">
 {% endif %}

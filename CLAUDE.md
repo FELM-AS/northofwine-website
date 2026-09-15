@@ -22,8 +22,9 @@ The target design, content model, and implementation breakdown live in [`plannin
 - `bundle exec jekyll serve` — local dev server at `http://localhost:4000`, loads `.env` via the `dotenv` gem
 - `bundle exec jekyll build` — build the static site into `_site/`
 - `bundle exec jekyll build --trace` — build with full backtraces (use this when a plugin error is unclear)
+- `bundle exec htmlproofer ./_site --checks Links,Scripts --swap-urls "^/northofwine-website/:/" --ignore-urls "/^https:\/\/felm-as\.github\.io\/northofwine-website/" --no-enforce-https --only-4xx --ignore-status-codes 429` — the same link check CI runs (`.github/workflows/deploy.yml`) against a local `_site/`; run this after `bundle exec jekyll build` if you've touched links, since it isn't run by `jekyll build` itself
 
-There is no test suite or linter configured. Verify changes by running `bundle exec jekyll build --trace` and inspecting the generated HTML in `_site/`.
+There is no test suite, but CI does run the html-proofer link check above (a linter over the *built HTML*, not the Ruby/Liquid source) as part of the build job in `.github/workflows/deploy.yml`, gating deploy. Verify changes by running `bundle exec jekyll build --trace` and inspecting the generated HTML in `_site/`; run the htmlproofer command above too if the change could affect links.
 
 ## Architecture
 

@@ -30,6 +30,86 @@ jobs:
           CONTENTFUL_ENVIRONMENT: ${{ secrets.CONTENTFUL_ENVIRONMENT }}
           JEKYLL_ENV: production
         run: bundle exec jekyll build
+      - name: Check links (html-proofer)
+        # Plan.md's Testing section: catch broken internal/external
+        # links before they ship -- runs as part of this same build job
+        # so a failure here blocks the deploy job below (`needs: build`)
+        # the same way an actual Jekyll build failure would.
+        #
+        # --checks Links,Scripts: drops html-proofer's own default
+        # "Images" check, which would otherwise send every <img src>
+        # (i.e. every Contentful CDN asset) out as a live HTTP request.
+        # That's exactly what Plan.md's Error Handling section says
+        # *shouldn't* fail the build ("an entry missing a field the
+        # template depends on is skipped with a build warning, not a
+        # failed build") -- an editor unpublishing/deleting one image
+        # would otherwise block every deploy, and would make
+        # assets/js/image-fallback.js's own placeholder fallback
+        # (added alongside this CI check) unreachable in production,
+        # since a broken image would never make it past this gate to
+        # begin with. Plan.md's own ask here is specifically link
+        # checking, which this still fully covers.
+        #
+        # --swap-urls strips _config.yml's current `baseurl` before
+        # resolving a root-relative internal link (e.g. from
+        # `relative_url`) to a file under _site/ -- Jekyll prefixes
+        # such URLs with it, but doesn't nest the built output under a
+        # matching subdirectory. Update/remove this alongside `baseurl`
+        # (and --ignore-urls below, and `url`) once the custom domain
+        # (#4) replaces this temporary GitHub Pages project-site path.
+        #
+        # --ignore-urls (regex, wrapped in /.../ per html-proofer's own
+        # CLI convention) covers what --swap-urls can't: any *absolute*
+        # link to this site's own domain+baseurl (not just
+        # _includes/seo.html's canonical <link>, though that's the
+        # motivating case -- via `absolute_url`, so --swap-urls never
+        # touches it) is checked as an external link against the
+        # *currently deployed* site instead of this build's own output.
+        # Without this, a build adding or renaming any page deadlocks:
+        # that page's own canonical 404s (the URL doesn't exist until
+        # this deploy publishes it), which fails this check, which
+        # blocks the deploy job (`needs: build`) that would have
+        # published it. Verified by reproducing the 404 locally against
+        # a fixture page and confirming this ignores it. Side effect:
+        # an editor-entered absolute link to our own domain (e.g. a
+        # copy-paste mistake in a manufacturer `link` field) would also
+        # go unchecked -- accepted, since that's a narrower and rarer
+        # content mistake than the deadlock this exists to prevent, and
+        # this ignore can't be scoped to "just the canonical tag" (it
+        # matches by URL, not by element).
+        #
+        # --no-enforce-https: Plan.md only asks for *broken* links to
+        # be caught (its own example is a link missing a scheme +
+        # domain entirely), not for every external link to be https --
+        # an editor-entered manufacturer `link` using http is a content
+        # nit (#6), not a broken link.
+        #
+        # --only-4xx: an external site redirecting or timing out isn't
+        # something this repo can fix and shouldn't fail every build
+        # over. This also silently accepts a few things beyond
+        # redirects/timeouts, per html-proofer's own source
+        # (url_validator/external.rb): a *5xx* response, a connection
+        # failure (DNS/unreachable host -- e.g. a typo'd manufacturer
+        # `link` domain), and a missing hash fragment on an otherwise-OK
+        # external URL. All accepted for the same reason -- this repo
+        # can't fix a third party's server or DNS either, and Plan.md's
+        # own example of a "genuinely broken" link (missing scheme +
+        # domain) is an internal-link failure this flag doesn't touch,
+        # not one of these external cases.
+        #
+        # --ignore-status-codes 429: the remaining external checks
+        # (manufacturer `link` fields, the two social links) run at
+        # html-proofer's default concurrency; a 429 from a
+        # rate-limited/bot-protected host is that host's own defense
+        # working as intended, not a broken link.
+        run: |
+          bundle exec htmlproofer ./_site \
+            --checks Links,Scripts \
+            --swap-urls "^/northofwine-website/:/" \
+            --ignore-urls "/^https:\/\/felm-as\.github\.io\/northofwine-website/" \
+            --no-enforce-https \
+            --only-4xx \
+            --ignore-status-codes 429
       - uses: actions/upload-pages-artifact@v3
         with:
           path: "_site"

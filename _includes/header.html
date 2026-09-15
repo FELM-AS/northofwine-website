@@ -5,6 +5,12 @@
   modal behavior, not hand-rolled. Closing is a <form method="dialog">
   submit button, needing no JS at all.
 
+  aria-label gives the dialog an accessible name -- with only a plain
+  nav list inside and no heading of its own, it would otherwise
+  announce to screen readers as an unnamed dialog, undermining Plan.md's
+  Accessibility section (the menu overlay must be fully usable, which
+  includes being properly identified, not just operable).
+
   Reserved spot for a future language switcher (Plan.md's
   Internationalization section) -- deliberately no markup yet: with
   contentful_locales still just [nb-NO] (_config.yml), there's nothing
@@ -19,7 +25,7 @@
   <a href="{{ '/' | relative_url }}">{{ site.title }}</a>
   <button type="button" id="menu-open" aria-controls="menu-dialog">Meny</button>
 </header>
-<dialog id="menu-dialog">
+<dialog id="menu-dialog" aria-label="Meny">
   {% include menu.html %}
   <form method="dialog">
     <button type="submit">Lukk</button>
