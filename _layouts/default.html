@@ -15,27 +15,12 @@
   <link rel="stylesheet" href="{{ "/assets/css/main.css" | relative_url }}">
 </head>
 <body>
-  <header>
-    <a href="{{ '/' | relative_url }}">{{ site.title }}</a>
-    <nav>
-      {% comment %}
-        page.locale is unset on every primary-locale page, so this `where`
-        is then a no-op (Jekyll's `where`, not raw Liquid's, matches nil
-        to nil) and lists every nav page. With multiple locales, it scopes
-        the nav to the page currently being rendered.
-      {% endcomment %}
-      {% assign nav_pages = site.pages | where: "nav", true | where: "locale", page.locale | sort: "title" %}
-      {% for p in nav_pages %}
-        <a href="{{ p.url | relative_url }}">{{ p.title }}</a>
-      {% endfor %}
-    </nav>
-  </header>
+  {% include header.html %}
   {% comment %} Placeholder text -- real sidebar content (Menu hero on Hjem, breadcrumb+image on product pages, etc.) lands in later milestones. Not empty, so the sidebar/main layout is actually visible to check. {% endcomment %}
   <aside>Sidebar</aside>
   <main>
     {{ content }}
   </main>
-  {% comment %} Placeholder text -- real Footer component (contact info, social links, disclaimer) lands in M2. {% endcomment %}
-  <footer>Footer</footer>
+  {% include footer.html %}
 </body>
 </html>

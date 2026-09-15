@@ -9,15 +9,15 @@ lang: nb
 
 # Contentful content types this site pulls entries from. Each entry
 # becomes a generated page at /<dir>/<slug>/ (dir: "" = site root).
-# nav: true lists it in the site nav; home: true groups it into a
-# homepage section (see index.html), headed by label (string, or a Hash
-# keyed by locale code) or a humanized content_type. order takes a
-# Contentful CDA order value (default "-sys.updatedAt"). body_field sets
-# a different content field name (needed if it's literally "content",
-# which collides with Jekyll's page.content). image_field sets a
-# different Open Graph/Twitter image field (see _includes/seo.html),
-# exposed as page.social_image either way.
-# Add or remove collections here to adapt this template to a new site.
+# home: true groups it into a homepage section (see index.html), headed
+# by label (string, or a Hash keyed by locale code) or a humanized
+# content_type. order takes a Contentful CDA order value (default
+# "-sys.updatedAt"). body_field sets a different content field name
+# (needed if it's literally "content", which collides with Jekyll's
+# page.content). image_field sets a different Open Graph/Twitter image
+# field (see _includes/seo.html), exposed as page.social_image either
+# way. (No nav: true here -- this site's nav is the fixed Menu
+# component (planning/Plan-Issues.md #12), not collection-driven.)
 contentful_collections:
   # Only Product gets a generated page per entry (see planning/Plan.md and
   # planning/Contentful-Content-Model.md). `layout: single` is a placeholder

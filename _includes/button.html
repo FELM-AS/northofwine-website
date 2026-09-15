@@ -1,0 +1,19 @@
+{% comment %}
+  Button component (Plan.md's Strong/Subtle variants) -- a plain <a>,
+  optionally with an icon before or after the text. The two variants
+  are left structurally identical for now (no class/attribute hook);
+  visual distinction is deferred to manual styling added later.
+
+  Params:
+    href          - required. Escaped -- pass a plain URL string.
+    text          - required, link text. Escaped -- pass plain text.
+    icon          - optional, raw HTML for the icon (e.g. an inline SVG
+                    or entity) -- intentionally NOT escaped, unlike
+                    href/text, since it's meant to carry markup.
+    icon_position - "left" or "right" (default "right"). Normalized
+                    (case/whitespace-insensitive); anything other than
+                    "left" renders on the right, matching the default.
+{% endcomment %}
+{% assign icon_position = include.icon_position | default: "right" | downcase | strip %}
+{% assign has_icon = include.icon.size > 0 %}
+<a href="{{ include.href | escape }}">{% if has_icon and icon_position == "left" %}{{ include.icon }} {% endif %}{{ include.text | escape }}{% if has_icon and icon_position != "left" %} {{ include.icon }}{% endif %}</a>

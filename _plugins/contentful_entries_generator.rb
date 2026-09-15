@@ -154,7 +154,6 @@ module ContentfulJekyll
 
       page.content = @serializer.render_body(entry.fields[context.body_field])
       page.data["layout"] = context.collection["layout"]
-      page.data["nav"] = true if context.collection["nav"]
       page.data["home_label"] = context.home_label if context.home_label
       page.data["locale"] = context.locale.code unless context.locale.primary?
       page.data.merge!(@serializer.flatten_fields(entry, 0, skip: [context.body_field]))

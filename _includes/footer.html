@@ -1,0 +1,25 @@
+{% comment %}
+  Footer component (Plan.md): contact emails, business info, social
+  links, and the Helsenorge alcohol-advertising disclaimer. `ordre@`
+  is intentionally dropped (Plan.md). Content/URLs come from
+  _data/company.yml, not hardcoded here (Plan.md: "site-wide settings
+  ... stay as static Jekyll content/data").
+{% endcomment %}
+<footer>
+  <address>
+    {{ site.data.company.name }}<br>
+    {% for line in site.data.company.address %}{{ line }}<br>{% endfor %}
+    Org.nr. {{ site.data.company.org_number }}<br>
+    <a href="mailto:{{ site.data.company.emails.post }}">{{ site.data.company.emails.post }}</a><br>
+    <a href="mailto:{{ site.data.company.emails.faktura }}">{{ site.data.company.emails.faktura }}</a>
+  </address>
+  <ul>
+    {% for s in site.data.company.social %}
+    <li>{% include button.html href=s.url text=s.name %}</li>
+    {% endfor %}
+  </ul>
+  <p>
+    Bruk av alkohol kan gi ulike skadevirkninger. Nærmere informasjon finner du hos
+    <a href="{{ site.data.company.helsenorge_url }}">Helsenorge</a>.
+  </p>
+</footer>
