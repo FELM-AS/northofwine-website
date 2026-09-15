@@ -160,3 +160,16 @@ Most sites built from this template won't have blog/news-shaped content anyway (
 GitHub Pages' built-in Jekyll build runs in "safe mode," which disables custom plugins and network access — incompatible with a generator that calls the Contentful API. Because of this, the site is **not** deployed via GitHub's automatic Jekyll build; instead `.github/workflows/deploy.yml` runs `bundle exec jekyll build` directly (full plugin support) and publishes `_site/` via `actions/deploy-pages`. The GitHub repo's Pages source must be set to "GitHub Actions", not "Deploy from a branch".
 
 Contentful credentials must be present both locally (`.env`, gitignored) and in CI (repo Actions secrets: `CONTENTFUL_SPACE_ID`, `CONTENTFUL_ACCESS_TOKEN`, `CONTENTFUL_ENVIRONMENT`) — the generator silently produces zero generated pages if they're absent rather than failing the build.
+
+### Contentful publish trigger (manual setup, not in this repo)
+
+Plan-Issues.md #3: a build+deploy should also fire when an editor publishes in Contentful, not just on push to `main`. `deploy.yml`'s `repository_dispatch: types: [contentful-publish]` trigger is the GitHub-side half of this; the Contentful-side half has to be configured directly in Contentful's UI (no webhook-management API/tool is used here) since there's no config-as-code path between the two products:
+
+1. In GitHub, create a fine-grained personal access token scoped to just this repo with **Contents: read** and **read-and-write Actions** permissions (needed to call the `dispatches` endpoint below).
+2. In Contentful, **Settings → Webhooks → Add webhook**, triggered on Entry **Publish** (and Unpublish, if desired):
+   - URL: `https://api.github.com/repos/FELM-AS/northofwine-website/dispatches`
+   - Method: `POST`, Content type: `application/json`
+   - Headers: `Authorization: Bearer <the PAT from step 1>`, `Accept: application/vnd.github+json`
+   - Payload: `{"event_type": "contentful-publish"}`
+
+To pause this during a bulk content edit without touching Contentful's webhook config at all, set the `CONTENTFUL_AUTOBUILD_DISABLED` repo variable to `true` (`gh variable set CONTENTFUL_AUTOBUILD_DISABLED --body true`, or GitHub's Settings → Secrets and variables → Actions → Variables) — `deploy.yml`'s `build` job skips only `repository_dispatch`-triggered runs while this is set; push-to-`main` and manual `workflow_dispatch` runs are unaffected. Unset it (or set any other value) to resume.

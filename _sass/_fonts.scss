@@ -1,0 +1,52 @@
+// Self-hosted DM Sans/DM Mono (Plan.md: "self-hosted, not loaded from a
+// third-party CDN [e.g. Google Fonts]" -- avoids the same GDPR/IP-transfer
+// issue that ruled out Google Analytics, see the Analytics section). The
+// files under assets/fonts/ are the actual font binaries, fetched once
+// from Google's own CDN and committed here rather than linked to at
+// request time -- that's the actual distinction the requirement cares
+// about, not that the font itself has to originate somewhere other than
+// Google Fonts.
+//
+// Latin subset only (covers Norwegian plus the French/German/Italian/
+// Portuguese/Spanish diacritics this site's wine content actually uses,
+// all within Latin-1). A rare non-Latin-1 character (e.g. "Š" in one
+// manufacturer name) falls outside this subset's unicode-range and
+// simply falls back to the next font in the stack, same as any font
+// missing a glyph -- not a build or rendering error.
+//
+// Relative `url()` paths (not `relative_url`): this file has no Jekyll
+// front matter beyond what triggers Sass compilation, so it's never
+// run through Liquid -- but it doesn't need to be, since a path
+// relative to the compiled main.css's own location (assets/css/) is
+// correct regardless of _config.yml's `baseurl`.
+@font-face {
+  font-family: "DM Sans";
+  src: url("../fonts/dm-sans-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "DM Sans";
+  src: url("../fonts/dm-sans-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+// Self-hosted and declared here, but not yet applied to any element --
+// reserved for a specific future use (e.g. prices/numeric values) once
+// that's decided, same "reserved, not built" precedent as the header/
+// footer's language-switcher spot.
+@font-face {
+  font-family: "DM Mono";
+  src: url("../fonts/dm-mono-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  font-family: "DM Sans", sans-serif;
+}

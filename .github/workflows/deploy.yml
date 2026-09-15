@@ -3,6 +3,15 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: ["main"]
+  # Fired by a Contentful webhook (Settings -> Webhooks in Contentful,
+  # not configured here -- see CLAUDE.md's "Contentful publish trigger"
+  # section) calling GitHub's `POST /repos/{owner}/{repo}/dispatches`
+  # API with `{"event_type": "contentful-publish"}`. There's no
+  # equivalent "on entry publish" trigger this repo can declare itself
+  # -- Contentful only knows how to call an arbitrary webhook URL, and
+  # GitHub Actions only knows how to receive that as repository_dispatch.
+  repository_dispatch:
+    types: [contentful-publish]
   workflow_dispatch:
 
 permissions:
@@ -16,6 +25,17 @@ concurrency:
 
 jobs:
   build:
+    # Plan-Issues.md #3's "toggle to disable the Contentful-triggered
+    # auto-build during bulk edits": set the CONTENTFUL_AUTOBUILD_DISABLED
+    # repo variable to "true" (Settings -> Secrets and variables ->
+    # Actions -> Variables, or `gh variable set CONTENTFUL_AUTOBUILD_DISABLED
+    # --body true`) to skip only repository_dispatch-triggered builds --
+    # a push to main or a manual workflow_dispatch run always builds
+    # regardless, since this condition only applies to the Contentful
+    # path. Unset (or any value other than "true") behaves exactly like
+    # today. `needs: build` below means the deploy job is skipped too
+    # whenever this condition skips build, not just build itself.
+    if: github.event_name != 'repository_dispatch' || vars.CONTENTFUL_AUTOBUILD_DISABLED != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
