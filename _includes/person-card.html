@@ -1,0 +1,25 @@
+{% comment %}
+  Person card (Plan.md): image, name, email, phone, description. No
+  card-wide link -- Person has no detail page of its own.
+
+  Every editor-controlled field below is escaped -- name/description
+  are free text, and email/phone (while pattern-validated in
+  Contentful's own UI) aren't guaranteed clean if ever written via the
+  Management API instead, same convention as _includes/button.html's
+  href/text.
+
+  Params: person (required) -- a person Hash, e.g. an item off
+  site.data.people.
+{% endcomment %}
+{% assign person = include.person %}
+<article>
+  {% include contentful-image.html asset=person.image width=400 fallback_alt=person.title %}
+  <h2>{{ person.title | escape }}</h2>
+  <p>{{ person.description | escape | newline_to_br }}</p>
+  {% if person.email %}
+  <p><a href="mailto:{{ person.email | escape }}">{{ person.email | escape }}</a></p>
+  {% endif %}
+  {% if person.phone %}
+  <p><a href="tel:{{ person.phone | escape }}">{{ person.phone | escape }}</a></p>
+  {% endif %}
+</article>

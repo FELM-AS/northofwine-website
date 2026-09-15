@@ -73,6 +73,12 @@ module ContentfulJekyll
         reference_stub(value.id, value.link_type)
       when Array
         value.map { |item| serialize_field(item, depth) }
+      when String
+        # Normalized once here for every string field, every content
+        # type, every consumer -- not left to individual templates to
+        # remember (found via a real case: a manufacturer's `name` had
+        # a stray leading space in Contentful).
+        value.strip
       else
         value
       end
@@ -93,8 +99,8 @@ module ContentfulJekyll
       {
         "url" => url.nil? ? nil : absolute_url(url),
         "content_type" => safe_field(file, :content_type),
-        "title" => asset.fields[:title],
-        "description" => asset.fields[:description],
+        "title" => serialize_field(asset.fields[:title]),
+        "description" => serialize_field(asset.fields[:description]),
         "width" => image_details && image_details["width"],
         "height" => image_details && image_details["height"]
       }

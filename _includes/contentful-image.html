@@ -1,0 +1,51 @@
+{% comment %}
+  Renders an <img> for a Contentful asset, resized via the Images API
+  (https://www.contentful.com/developers/docs/concepts/images/) rather
+  than serving the original -- these can be several thousand px, which
+  is wasted bandwidth and (with no CSS yet to constrain size) renders
+  comically large. width/height attributes reflect the *resized*
+  dimensions (computed from the original aspect ratio), not the
+  original asset's, so they still correctly reserve layout space and
+  don't lie about what's actually being downloaded.
+
+  Renders nothing if the asset has no url at all -- callers don't need
+  their own "if x.image.url" guard around this include.
+
+  An asset can have a `url` but no `width` (CLAUDE.md: a non-image
+  asset, or one that hasn't finished processing yet, e.g. under
+  CONTENTFUL_PREVIEW) -- resizing still requests `?w=` (the Images API
+  resizes based on the source file, not on whether contentful.rb
+  happened to expose width/height metadata for it yet), just without
+  width/height attributes, since the resulting aspect ratio can't be
+  computed without an original width to scale from.
+
+  alt/src are escaped: `description`/`title`/url text ultimately come
+  from Contentful fields editors control, same convention as
+  _includes/button.html's href/text.
+
+  Params:
+    asset        - required, a serialized Contentful asset (.url,
+                   .width, .height, .description)
+    width        - required, target width in px; height is computed to
+                   preserve the original aspect ratio, not cropped
+    fallback_alt - alt text used when the asset itself has no
+                   `description` set in Contentful (Plan.md: alt text
+                   "from Contentful where possible"). Checked via
+                   `.size > 0`, not Liquid's `default` filter (which
+                   only substitutes for nil/false, not a blank string)
+                   -- relies on EntrySerializer#serialize_field having
+                   already stripped whitespace-only Contentful values
+                   down to "", not re-stripped here.
+{% endcomment %}
+{% if include.asset.url %}
+{% if include.asset.description.size > 0 %}
+{% assign alt = include.asset.description %}
+{% else %}
+{% assign alt = include.fallback_alt %}
+{% endif %}
+{% if include.asset.width > 0 %}
+<img src="{{ include.asset.url | escape }}?w={{ include.width }}" alt="{{ alt | escape }}" width="{{ include.width }}" height="{{ include.width | times: include.asset.height | divided_by: include.asset.width }}">
+{% else %}
+<img src="{{ include.asset.url | escape }}?w={{ include.width }}" alt="{{ alt | escape }}">
+{% endif %}
+{% endif %}
