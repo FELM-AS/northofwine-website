@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200">
+  <rect width="300" height="200" fill="#e5e5e5"/>
+  <rect x="0.5" y="0.5" width="299" height="199" fill="none" stroke="#bbb"/>
+  <path d="M110 130 L135 100 L155 122 L175 95 L200 130 Z" fill="#bbb"/>
+  <circle cx="120" cy="85" r="10" fill="#bbb"/>
+  <text x="150" y="165" font-family="sans-serif" font-size="14" fill="#888" text-anchor="middle">Bilde utilgjengelig</text>
+</svg>

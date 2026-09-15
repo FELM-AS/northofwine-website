@@ -30,6 +30,33 @@ jobs:
           CONTENTFUL_ENVIRONMENT: ${{ secrets.CONTENTFUL_ENVIRONMENT }}
           JEKYLL_ENV: production
         run: bundle exec jekyll build
+      - name: Check links (html-proofer)
+        # Plan.md's Testing section: catch broken internal/external
+        # links before they ship -- runs as part of this same build job
+        # so a failure here blocks the deploy job below (`needs: build`)
+        # the same way an actual Jekyll build failure would.
+        #
+        # --swap-urls strips _config.yml's current `baseurl` before
+        # resolving an internal link to a file under _site/ -- Jekyll
+        # prefixes URLs with it, but doesn't nest the built output
+        # under a matching subdirectory. Update/remove this alongside
+        # `baseurl` once the custom domain (#4) replaces this temporary
+        # GitHub Pages project-site path.
+        #
+        # --no-enforce-https: Plan.md only asks for *broken* links to
+        # be caught (its own example is a link missing a scheme +
+        # domain entirely), not for every external link to be https --
+        # an editor-entered manufacturer `link` using http is a content
+        # nit (#6), not a broken link.
+        #
+        # --only-4xx: an external site redirecting or timing out isn't
+        # something this repo can fix and shouldn't fail every build
+        # over -- only a real 4xx/5xx (link genuinely broken) does.
+        run: |
+          bundle exec htmlproofer ./_site \
+            --swap-urls "^/northofwine-website/:/" \
+            --no-enforce-https \
+            --only-4xx
       - uses: actions/upload-pages-artifact@v3
         with:
           path: "_site"

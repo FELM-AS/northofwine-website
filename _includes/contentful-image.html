@@ -23,6 +23,16 @@
   from Contentful fields editors control, same convention as
   _includes/button.html's href/text.
 
+  data-original/data-placeholder wire up assets/js/image-fallback.js's
+  two-stage fallback (Plan.md's Error Handling section): if the resized
+  `?w=` request itself fails (e.g. the Images API can't resize this
+  particular asset), fall back to the original, unresized image; if
+  that also fails (the asset is genuinely missing/broken), fall back to
+  a site-wide placeholder graphic. Both are plain data attributes, not
+  inline `onerror`, so every <img> this include renders is covered by
+  one shared listener instead of repeating the fallback logic per call
+  site.
+
   Params:
     asset        - required, a serialized Contentful asset (.url,
                    .width, .height, .description)
@@ -43,9 +53,10 @@
 {% else %}
 {% assign alt = include.fallback_alt %}
 {% endif %}
+{% assign placeholder = "/assets/images/placeholder.svg" | relative_url %}
 {% if include.asset.width > 0 %}
-<img src="{{ include.asset.url | escape }}?w={{ include.width }}" alt="{{ alt | escape }}" width="{{ include.width }}" height="{{ include.width | times: include.asset.height | divided_by: include.asset.width }}">
+<img src="{{ include.asset.url | escape }}?w={{ include.width }}" alt="{{ alt | escape }}" width="{{ include.width }}" height="{{ include.width | times: include.asset.height | divided_by: include.asset.width }}" data-original="{{ include.asset.url | escape }}" data-placeholder="{{ placeholder | escape }}">
 {% else %}
-<img src="{{ include.asset.url | escape }}?w={{ include.width }}" alt="{{ alt | escape }}">
+<img src="{{ include.asset.url | escape }}?w={{ include.width }}" alt="{{ alt | escape }}" data-original="{{ include.asset.url | escape }}" data-placeholder="{{ placeholder | escape }}">
 {% endif %}
 {% endif %}
