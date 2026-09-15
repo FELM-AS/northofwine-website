@@ -1,7 +1,16 @@
 title: North of Wine
 description: North of Wine AS – vinimportør i Trondheim.
-baseurl: ""
-url: "https://northofwine.no"
+# STAGING VALUES -- northofwine.no is still in use by the current
+# production site and won't be free to point here until this site
+# itself is ready to go live. Until then, GitHub Pages serves this repo
+# at https://felm-as.github.io/northofwine-website/ (a project-site
+# subpath, not a domain root), so baseurl has to carry that path or
+# every relative_url/absolute_url link, asset, and canonical/OG tag
+# 404s. When cutting over: set baseurl back to "", url to
+# "https://northofwine.no", and add a CNAME file (see CLAUDE.md's "Why
+# GitHub Actions instead of native GitHub Pages builds" section).
+baseurl: "/northofwine-website"
+url: "https://felm-as.github.io"
 # Primary language for <html lang> (see _layouts/default.html) -- update
 # if the primary locale below isn't English. Other configured locales get
 # their own <html lang> from their Contentful locale code automatically.
