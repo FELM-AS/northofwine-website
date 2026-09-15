@@ -1,0 +1,21 @@
+{% comment %}
+  Person card (Plan.md): image, name, email, phone, description. No
+  card-wide link -- Person has no detail page of its own.
+
+  Params: person (required) -- a person Hash, e.g. an item off
+  site.data.people.
+{% endcomment %}
+{% assign person = include.person %}
+<article>
+  {% if person.image.url %}
+  {% include contentful-image.html asset=person.image width=400 fallback_alt=person.title %}
+  {% endif %}
+  <h2>{{ person.title | strip }}</h2>
+  <p>{{ person.description }}</p>
+  {% if person.email %}
+  <p><a href="mailto:{{ person.email }}">{{ person.email }}</a></p>
+  {% endif %}
+  {% if person.phone %}
+  <p><a href="tel:{{ person.phone }}">{{ person.phone }}</a></p>
+  {% endif %}
+</article>

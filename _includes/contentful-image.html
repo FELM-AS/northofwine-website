@@ -1,0 +1,22 @@
+{% comment %}
+  Renders an <img> for a Contentful asset, resized via the Images API
+  (https://www.contentful.com/developers/docs/concepts/images/) rather
+  than serving the original -- these can be several thousand px, which
+  is wasted bandwidth and (with no CSS yet to constrain size) renders
+  comically large. width/height attributes reflect the *resized*
+  dimensions (computed from the original aspect ratio), not the
+  original asset's, so they still correctly reserve layout space and
+  don't lie about what's actually being downloaded.
+
+  Params:
+    asset        - required, a serialized Contentful asset (.url,
+                   .width, .height, .description)
+    width        - required, target width in px; height is computed to
+                   preserve the original aspect ratio, not cropped
+    fallback_alt - alt text used when the asset itself has no
+                   `description` set in Contentful (Plan.md: alt text
+                   "from Contentful where possible")
+{% endcomment %}
+{% assign height = include.width | times: include.asset.height | divided_by: include.asset.width %}
+{% assign alt = include.asset.description | default: include.fallback_alt %}
+<img src="{{ include.asset.url }}?w={{ include.width }}" alt="{{ alt | strip }}" width="{{ include.width }}" height="{{ height }}">

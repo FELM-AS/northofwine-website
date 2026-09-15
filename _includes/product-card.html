@@ -1,0 +1,39 @@
+{% comment %}
+  Product card (Plan.md): metadata (productTypeName + webProductTypeName
+  when set; country, region), image, name, and price + arrow icon (only
+  when both product_id and sales_price exist -- sales_price_horeca is
+  never shown, it's trade pricing given by request). Entire card links
+  to the product detail page -- so the price/arrow bit is plain content
+  here, not the Button include: nesting an <a> inside the card's own
+  wrapping <a> would be invalid HTML.
+
+  Price is the raw Contentful value -- Norwegian number/kr formatting
+  is #28/M6, not done here yet.
+
+  lang on the product name comes from the *manufacturer's* country (a
+  fixed enum), not the product's own free-text country field, which
+  isn't guaranteed to match spelling-wise (Plan.md's Hyphenation
+  section) -- via _data/countries.yml (#8). Omitted if the product has
+  no resolved manufacturer (a handful of entries currently do -- see
+  planning/Plan-Issues.md #6) or that country isn't in the lookup.
+
+  Params: product (required) -- a product page, e.g. `page` on a
+  product detail page, or an item off a listing page's `page.items`.
+{% endcomment %}
+{% assign product = include.product %}
+{% assign product_lang = site.data.countries[product.manufacturer.country] %}
+<a href="{{ product.url | relative_url }}">
+  <article>
+    {% if product.image.url %}
+    {% include contentful-image.html asset=product.image width=600 fallback_alt=product.title %}
+    {% endif %}
+    <p>
+      {{ product.product_type_name }}{% if product.web_product_type_name %} · {{ product.web_product_type_name }}{% endif %}
+      — {{ product.country }}{% if product.region %}, {{ product.region }}{% endif %}
+    </p>
+    <h2{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ product.title | strip }}</h2>
+    {% if product.product_id and product.sales_price %}
+    <p>{{ product.sales_price }} kr →</p>
+    {% endif %}
+  </article>
+</a>
