@@ -16,9 +16,24 @@
   <script src="{{ "/assets/js/menu.js" | relative_url }}" defer></script>
 </head>
 <body>
+  {% comment %}
+    Header/sidebar content varies per page, driven by data set on the
+    page itself (page.layout, or the home_hero flag) -- never by
+    inspecting page.url, matching this codebase's established
+    convention (see CLAUDE.md's Homepage & navigation section).
+  {% endcomment %}
+  {% unless page.home_hero %}
   {% include header.html %}
-  {% comment %} Placeholder text -- real sidebar content (Menu hero on Hjem, breadcrumb+image on product pages, etc.) lands in later milestones. Not empty, so the sidebar/main layout is actually visible to check. {% endcomment %}
-  <aside>Sidebar</aside>
+  {% endunless %}
+  {% if page.home_hero %}
+  <aside>{% include menu.html %}</aside>
+  {% elsif page.layout == "product" %}
+  <aside>{% include product-sidebar.html %}</aside>
+  {% elsif page.layout == "listing" %}
+  <aside>{% include filter-nav.html %}</aside>
+  {% else %}
+  <aside></aside>
+  {% endif %}
   <main>
     {{ content }}
   </main>

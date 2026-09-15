@@ -12,15 +12,15 @@
   Params: product (required) -- a product's page data, e.g. `page` on a
   product detail page.
 {% endcomment %}
-{% assign utvalg_dir = site.utvalg_dir | prepend: "/" | append: "/" %}
+{% assign utvalg_dir = site.utvalg_dir | dir_href %}
 <nav aria-label="Brødsmulesti">
   <a href="{{ utvalg_dir | relative_url }}">Utvalg</a>
   {% if include.product.product_type_name %}
   {% assign type_slug = include.product.product_type_name | slugify: "latin" %}
-  / <a href="{{ utvalg_dir | append: type_slug | append: '/' | relative_url }}">{{ include.product.product_type_name }}</a>
+  / <a href="{{ utvalg_dir | append: type_slug | append: '/' | relative_url }}">{{ include.product.product_type_name | escape }}</a>
   {% endif %}
   {% if include.product.web_product_type_name %}
   {% assign web_type_slug = include.product.web_product_type_name | slugify: "latin" %}
-  / <a href="{{ utvalg_dir | append: web_type_slug | append: '/' | relative_url }}">{{ include.product.web_product_type_name }}</a>
+  / <a href="{{ utvalg_dir | append: web_type_slug | append: '/' | relative_url }}">{{ include.product.web_product_type_name | escape }}</a>
   {% endif %}
 </nav>

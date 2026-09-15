@@ -2,14 +2,19 @@
 layout: default
 ---
 {% comment %}
-  Placeholder listing content for the pages _plugins/contentful_listing_pages.rb
-  generates -- real Product/Manufacturer-card rendering lands in M4/M5.
-  Manufacturers have no page of their own (Plan.md), so `item.url` is
-  blank for them -- shown as plain text rather than a broken link.
+  Listing pages built by _plugins/contentful_listing_pages.rb -- both
+  Utvalg (product) and Produsenter (manufacturer) root/filter pages
+  share this one layout, distinguished by page.item_type since a
+  product Page and a manufacturer Hash aren't otherwise distinguishable
+  here.
 {% endcomment %}
-<h1>{{ page.title }}</h1>
-<ul>
-  {% for item in page.items %}
-  <li>{% if item.url %}<a href="{{ item.url | relative_url }}">{{ item.title }}</a>{% else %}{{ item.title }}{% endif %}</li>
-  {% endfor %}
-</ul>
+<h1>{{ page.title | escape }}</h1>
+{% if page.item_type == "product" %}
+{% for item in page.items %}
+{% include product-card.html product=item %}
+{% endfor %}
+{% elsif page.item_type == "manufacturer" %}
+{% for item in page.items %}
+{% include manufacturer-card.html manufacturer=item %}
+{% endfor %}
+{% endif %}

@@ -56,9 +56,9 @@ module ContentfulJekyll
         site.config["utvalg_dir"] = dir
         product_pages = site.pages.select { |page| page.url.start_with?("/#{dir}/") }
 
-        site.pages << build_page(site, dir, nil, product_pages, "the root listing")
-        build_filter_pages(site, dir, product_pages, "product_type_name")
-        build_filter_pages(site, dir, product_pages, "web_product_type_name")
+        site.pages << build_page(site, dir, nil, product_pages, "the root listing", "product")
+        build_filter_pages(site, dir, product_pages, "product_type_name", "product")
+        build_filter_pages(site, dir, product_pages, "web_product_type_name", "product")
       end
 
       return unless manufacturer_collection && manufacturer_collection["dir"]
@@ -66,7 +66,7 @@ module ContentfulJekyll
       dir = ContentfulJekyll.dir_for(manufacturer_collection, PRIMARY_LOCALE)
       site.config["produsenter_dir"] = dir
       manufacturers = site.data["manufacturers"] || []
-      site.pages << build_page(site, dir, nil, manufacturers, "the root listing")
+      site.pages << build_page(site, dir, nil, manufacturers, "the root listing", "manufacturer")
       # Country is a fixed 13-value enum (planning/Contentful-Content-Model.md,
       # Plan-Issues.md #14: "Each of the 13 country values has its own
       # static URL") -- unlike product_type_name/web_product_type_name
@@ -78,7 +78,7 @@ module ContentfulJekyll
       # enum. If it drifts out of sync (e.g. a manufacturer added from
       # a genuinely new country), that country gets no filter page and
       # no build warning -- see the roadmap's "Known limitations".
-      build_enum_pages(site, dir, manufacturers, "country", (site.data["countries"] || {}).keys)
+      build_enum_pages(site, dir, manufacturers, "country", (site.data["countries"] || {}).keys, "manufacturer")
     end
 
     private
@@ -91,23 +91,23 @@ module ContentfulJekyll
     # `items` (the root "all items" page is built separately -- see
     # #generate -- since a collection can have more than one grouping
     # field, but only one root).
-    def build_filter_pages(site, dir, items, field)
+    def build_filter_pages(site, dir, items, field, item_type)
       grouped = items.group_by { |item| item_field(item, field) }
       grouped.delete(nil)
 
       grouped.each do |value, matching_items|
-        site.pages << build_page(site, dir, value, matching_items, "the #{field} filter")
+        site.pages << build_page(site, dir, value, matching_items, "the #{field} filter", item_type)
       end
     end
 
     # Like #build_filter_pages, but one page per value in `enum_values`
     # -- every one of them, not just values actually present among
     # `items` (possibly an empty list for a value nothing currently has).
-    def build_enum_pages(site, dir, items, field, enum_values)
+    def build_enum_pages(site, dir, items, field, enum_values, item_type)
       grouped = items.group_by { |item| item_field(item, field) }
 
       enum_values.each do |value|
-        site.pages << build_page(site, dir, value, grouped[value] || [], "the #{field} filter")
+        site.pages << build_page(site, dir, value, grouped[value] || [], "the #{field} filter", item_type)
       end
     end
 
@@ -137,7 +137,11 @@ module ContentfulJekyll
     # webProductTypeName value that happens to match a productTypeName
     # enum word collides for real, not just in theory -- worth a warning
     # that says exactly which two groupings collided.
-    def build_page(site, dir, value, items, label)
+    #
+    # item_type: "product" or "manufacturer" -- _layouts/listing.html
+    # needs to know which card to render `items` with, since a Page and
+    # a manufacturer Hash aren't otherwise distinguishable there.
+    def build_page(site, dir, value, items, label, item_type)
       page_dir = [dir, (Jekyll::Utils.slugify(value, mode: "latin") if value)].compact.join("/")
       page = Jekyll::PageWithoutAFile.new(site, site.source, page_dir, "index.html")
 
@@ -150,6 +154,7 @@ module ContentfulJekyll
       page.data["layout"] = "listing"
       page.data["title"] = value || dir.capitalize
       page.data["items"] = items
+      page.data["item_type"] = item_type
 
       page
     end

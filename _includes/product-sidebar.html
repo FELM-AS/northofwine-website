@@ -1,0 +1,5 @@
+{% comment %}
+  Product detail page sidebar (Plan.md): breadcrumb + product image.
+{% endcomment %}
+{% include breadcrumb.html product=page %}
+{% include contentful-image.html asset=page.image width=800 fallback_alt=page.title %}
