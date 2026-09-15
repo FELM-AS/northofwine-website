@@ -1,5 +1,6 @@
 require "set"
 require "jekyll"
+require_relative "contentful_locales"
 
 module ContentfulJekyll
   # Second generator, running after EntriesGenerator (see priority below):
@@ -12,6 +13,15 @@ module ContentfulJekyll
   # plus generated filter pages that could drift apart (e.g. if a
   # collection's `dir` is ever renamed).
   #
+  # Locale-unaware by design for now (unlike EntriesGenerator): doesn't
+  # loop contentful_locales, doesn't tag pages with `locale`, doesn't
+  # read locale-suffixed site.data keys. contentful_locales isn't
+  # configured anywhere in this site yet -- full locale support for this
+  # generator is #27/M6, alongside the rest of the site's i18n
+  # groundwork. It does still resolve `dir` via `dir_for` (not a raw
+  # `collection["dir"]` string), so a `dir` configured as a per-locale
+  # Hash fails loudly here rather than silently building a broken path.
+  #
   # Content is placeholder-minimal for now (see _layouts/listing.html) --
   # the real Product/Manufacturer-card rendering lands once those
   # components exist.
@@ -21,6 +31,10 @@ module ContentfulJekyll
 
     LOG_TAG = "Contentful:"
 
+    # Matches the primary-locale case of ContentfulJekyll.each_locale
+    # when contentful_locales isn't configured -- see the class comment.
+    PRIMARY_LOCALE = Locale.new(nil, nil)
+
     def generate(site)
       @built_dirs = Set.new(site.pages.map(&:url))
 
@@ -28,20 +42,31 @@ module ContentfulJekyll
       manufacturer_collection = find_collection(site.config["contentful_data_collections"], "manufacturer")
 
       if product_collection
-        product_pages = site.pages.select do |page|
-          page.url.start_with?("/#{product_collection["dir"]}/") && page.data["product_type_name"]
-        end
+        dir = ContentfulJekyll.dir_for(product_collection, PRIMARY_LOCALE)
+        product_pages = site.pages.select { |page| page.url.start_with?("/#{dir}/") }
 
-        site.pages << build_page(site, product_collection["dir"], nil, product_pages)
-        build_filter_pages(site, product_collection["dir"], product_pages, "product_type_name")
-        build_filter_pages(site, product_collection["dir"], product_pages, "web_product_type_name")
+        site.pages << build_page(site, dir, nil, product_pages)
+        build_filter_pages(site, dir, product_pages, "product_type_name")
+        build_filter_pages(site, dir, product_pages, "web_product_type_name")
       end
 
       return unless manufacturer_collection && manufacturer_collection["dir"]
 
+      dir = ContentfulJekyll.dir_for(manufacturer_collection, PRIMARY_LOCALE)
       manufacturers = site.data["manufacturers"] || []
-      site.pages << build_page(site, manufacturer_collection["dir"], nil, manufacturers)
-      build_filter_pages(site, manufacturer_collection["dir"], manufacturers, "country")
+      site.pages << build_page(site, dir, nil, manufacturers)
+      # Country is a fixed 13-value enum (planning/Contentful-Content-Model.md,
+      # Plan-Issues.md #14: "Each of the 13 country values has its own
+      # static URL") -- unlike product_type_name/web_product_type_name
+      # below, every enum value gets a page regardless of whether a
+      # manufacturer currently has it, so a Filter sidebar can link to
+      # all 13 without any of them 404ing. _data/countries.yml (#8) is
+      # used as the list of those 13 values -- NOT fetched from
+      # Contentful, a manually-maintained shadow of the real schema
+      # enum. If it drifts out of sync (e.g. a manufacturer added from
+      # a genuinely new country), that country gets no filter page and
+      # no build warning -- see the roadmap's "Known limitations".
+      build_enum_pages(site, dir, manufacturers, "country", site.data["countries"].keys)
     end
 
     private
@@ -50,9 +75,10 @@ module ContentfulJekyll
       (collections || []).find { |collection| collection["content_type"] == content_type }
     end
 
-    # One page per distinct value of `field` among `items` (the root "all
-    # items" page is built separately -- see #generate -- since a
-    # collection can have more than one grouping field, but only one root).
+    # One page per distinct value of `field` actually present among
+    # `items` (the root "all items" page is built separately -- see
+    # #generate -- since a collection can have more than one grouping
+    # field, but only one root).
     def build_filter_pages(site, dir, items, field)
       grouped = items.group_by { |item| item_field(item, field) }
       grouped.delete(nil)
@@ -62,11 +88,26 @@ module ContentfulJekyll
       end
     end
 
+    # Like #build_filter_pages, but one page per value in `enum_values`
+    # -- every one of them, not just values actually present among
+    # `items` (possibly an empty list for a value nothing currently has).
+    def build_enum_pages(site, dir, items, field, enum_values)
+      grouped = items.group_by { |item| item_field(item, field) }
+
+      enum_values.each do |value|
+        site.pages << build_page(site, dir, value, grouped[value] || [])
+      end
+    end
+
     # A Jekyll::Page's fields live in #data (String keys); a manufacturer
     # from site.data.manufacturers is already a plain String-keyed Hash
     # (EntrySerializer#serialize_entry) -- same key, different container.
+    # Blank/whitespace-only is treated the same as absent: a real value
+    # here becomes a URL segment (see #build_page), and a blank one would
+    # otherwise slugify to "" and collide with the collection's root page.
     def item_field(item, field)
-      item.respond_to?(:data) ? item.data[field] : item[field]
+      value = (item.respond_to?(:data) ? item.data[field] : item[field]).to_s.strip
+      value.empty? ? nil : value
     end
 
     # value: nil for the "all items" root page, else the filter value
