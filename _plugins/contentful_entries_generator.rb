@@ -119,7 +119,7 @@ module ContentfulJekyll
     # page per entry -- for entries that are only ever linked to from other
     # entries (e.g. authors, manufacturers) and have no page of their own.
     def fetch_data_collection(site, client, collection, locale)
-      name = [collection["name"], locale.data_suffix].compact.join("_")
+      name = locale.data_key_for(collection["name"])
 
       if site.data.key?(name)
         Jekyll.logger.warn LOG_TAG, "site.data.#{name} already exists (e.g. from a _data/#{name}.* file) and will be overwritten by the '#{collection["content_type"]}' data collection"
@@ -165,7 +165,7 @@ module ContentfulJekyll
         return nil
       end
 
-      dir = [context.locale.url_prefix, context.dir, slug].reject { |part| part.to_s.empty? }.join("/")
+      dir = context.locale.path_for(context.dir, slug)
       page = Jekyll::PageWithoutAFile.new(site, site.source, dir, "index.html")
 
       unless @built_dirs.add?(page.url)

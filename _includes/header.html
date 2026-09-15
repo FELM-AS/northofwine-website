@@ -4,6 +4,16 @@
   showModal()) -- focus trapping and Escape-to-close are native <dialog>
   modal behavior, not hand-rolled. Closing is a <form method="dialog">
   submit button, needing no JS at all.
+
+  Reserved spot for a future language switcher (Plan.md's
+  Internationalization section) -- deliberately no markup yet: with
+  contentful_locales still just [nb-NO] (_config.yml), there's nothing
+  to switch to, and a switcher with a single option would be confusing
+  UI, not a reservation of one. Add it here, next to the menu button,
+  once a second locale is actually configured -- each_locale
+  (_plugins/contentful_locales.rb) is already what every page's own
+  locale-prefixed URL comes from, so linking "this same page in locale
+  X" only needs each_locale's list, not a new mechanism.
 {% endcomment %}
 <header>
   <a href="{{ '/' | relative_url }}">{{ site.title }}</a>

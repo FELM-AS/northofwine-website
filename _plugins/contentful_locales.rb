@@ -15,6 +15,29 @@ module ContentfulJekyll
     def data_suffix
       url_prefix&.downcase&.tr("-", "_")
     end
+
+    # The site.data key for a locale-scoped collection fetched under
+    # `base` (e.g. "manufacturers") -- `base` for the primary locale,
+    # "<base>_<data_suffix>" for any other. Both contentful_entries_
+    # generator.rb#fetch_data_collection (which writes this key) and
+    # contentful_listing_pages.rb (which reads it back) call this, so the
+    # naming convention can't drift between the two -- previously each
+    # computed `[base, data_suffix].compact.join("_")` independently.
+    def data_key_for(base)
+      [base, data_suffix].compact.join("_")
+    end
+
+    # Joins `parts` into a URL path prefixed with this locale's own
+    # url_prefix (nil, a no-op, for the primary locale) -- the same
+    # locale-prefixing convention data_key_for applies to site.data keys,
+    # applied to URL paths instead. contentful_entries_generator.rb#
+    # build_page and contentful_listing_pages.rb#build_page both call
+    # this rather than each joining `[locale.url_prefix, ...]` inline, so
+    # the two can't independently drift on how blank/nil path segments
+    # get dropped.
+    def path_for(*parts)
+      [url_prefix, *parts].reject { |part| part.to_s.empty? }.join("/")
+    end
   end
 
   # Yields one Locale per contentful_locales entry, first = primary. A
