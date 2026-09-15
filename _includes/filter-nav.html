@@ -1,0 +1,26 @@
+{% comment %}
+  Filter sidebar (Plan.md's Filter component) for Utvalg/Produsenter
+  listing pages: links to every sibling listing page under the same
+  section (the root "all" page plus each filter value, all already
+  built by _plugins/contentful_listing_pages.rb) -- aria-current
+  marks the current one, the semantic "you are here" signal, no CSS
+  needed for it.
+
+  Which section (Utvalg or Produsenter) is picked from the current
+  page's own URL, since this same include is shared by both.
+{% endcomment %}
+{% assign utvalg_prefix = site.utvalg_dir | prepend: "/" | append: "/" %}
+{% assign produsenter_prefix = site.produsenter_dir | prepend: "/" | append: "/" %}
+{% if page.url contains utvalg_prefix %}
+{% assign section_prefix = utvalg_prefix %}
+{% else %}
+{% assign section_prefix = produsenter_prefix %}
+{% endif %}
+{% assign siblings = site.pages | where_exp: "p", "p.layout == 'listing' and p.url contains section_prefix" %}
+<nav aria-label="Filter">
+  <ul>
+    {% for sibling in siblings %}
+    <li><a href="{{ sibling.url | relative_url }}"{% if sibling.url == page.url %} aria-current="page"{% endif %}>{{ sibling.title | escape }}</a></li>
+    {% endfor %}
+  </ul>
+</nav>

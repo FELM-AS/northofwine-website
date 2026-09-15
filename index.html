@@ -1,23 +1,15 @@
 ---
 layout: default
-title: Home
+title: Hjem
+home_hero: true
 ---
 
-<h1>{{ site.title }}</h1>
-<p>{{ site.description }}</p>
-
 {% comment %}
-  Lives at the site root, so it only ever shows the primary locale's
-  content (page.locale is unset here). A localized homepage needs its
-  own index.html per locale (e.g. nb-NO/index.html).
+  Hjem (Plan.md #19): no header, sidebar is the nav itself
+  (_layouts/default.html's page.home_hero check) -- company name +
+  short intro text is all this page needs. Copy matches the current
+  live site (northofwine.no).
 {% endcomment %}
-{% assign home_pages = site.pages | where_exp: "p", "p.home_label" | where: "locale", page.locale %}
-{% assign home_groups = home_pages | group_by: "home_label" %}
-{% for group in home_groups %}
-  <h2>{{ group.name }}</h2>
-  <ul>
-    {% for entry in group.items %}
-    <li><a href="{{ entry.url | relative_url }}">{{ entry.title }}</a></li>
-    {% endfor %}
-  </ul>
-{% endfor %}
+<h1>North of Wine</h1>
+<p>Vinimport for det nasjonale og trønderske markedet.</p>
+<p><a href="{{ site.utvalg_dir | prepend: '/' | append: '/' | relative_url }}">Se utvalget</a></p>

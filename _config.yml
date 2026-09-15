@@ -20,12 +20,12 @@ lang: nb
 # component (planning/Plan-Issues.md #12), not collection-driven.)
 contentful_collections:
   # Only Product gets a generated page per entry (see planning/Plan.md and
-  # planning/Contentful-Content-Model.md). `layout: single` is a placeholder
-  # until a dedicated product layout exists for the full detail page
-  # (grape composition, sensory ratings, food pairing -- Plan-Issues.md #21).
-  # `description` is Product's body-ish field; there's no literal `body`.
+  # planning/Contentful-Content-Model.md). `layout: product` is the full
+  # detail page (grape composition, sensory ratings, food pairing --
+  # Plan-Issues.md #21, _layouts/product.html). `description` is
+  # Product's body-ish field; there's no literal `body`.
   - content_type: product
-    layout: single
+    layout: product
     dir: utvalg
     body_field: description
 

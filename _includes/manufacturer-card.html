@@ -28,6 +28,10 @@
   validation regex permits a literal `"`, same convention as
   _includes/button.html's href/text.
 
+  `id` on the <article> is the anchor target for the product detail
+  page's "back to manufacturer" link (Plan.md) -- Contentful entry ids
+  are plain alphanumeric strings, valid HTML id values as-is.
+
   Params: manufacturer (required) -- a manufacturer Hash, e.g. an item
   off site.data.manufacturers or a listing page's page.items.
 {% endcomment %}
@@ -37,7 +41,7 @@
 {% if manufacturer.id %}
 {% assign manufacturer_products = site.pages | where_exp: "p", "p.manufacturer.id == manufacturer.id" %}
 {% endif %}
-<article>
+<article id="{{ manufacturer.id }}">
   {% include contentful-image.html asset=manufacturer.image width=600 fallback_alt=manufacturer.title %}
   {% assign logo_alt = manufacturer.title | append: " logo" %}
   {% include contentful-image.html asset=manufacturer.logo width=200 fallback_alt=logo_alt %}
