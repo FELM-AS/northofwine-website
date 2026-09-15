@@ -29,10 +29,9 @@
       are) and passed in via _layouts/listing.html's
       page.products_by_manufacturer[item.id], rather than this card
       rediscovering them itself by scanning site.pages on every render.
-      Not locale-scoped (matches contentful_listing_pages.rb's own
-      documented locale-unawareness, deferred to #27/M6) -- fine today
-      since contentful_locales isn't configured, but with 2+ locales
-      this would need to also filter by the matched product's locale.
+      Scoped per locale by that generator itself (each locale pass
+      groups only its own locale's product pages), so this card never
+      needs to filter by locale independently.
 {% endcomment %}
 {% assign manufacturer = include.manufacturer %}
 {% assign manufacturer_lang = manufacturer.country | country_lang %}

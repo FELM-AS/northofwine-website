@@ -42,16 +42,25 @@ contentful_collections:
 # falling back to an {id, link_type} stub. Defaults to 2 if unset.
 # contentful_entry_depth: 2
 
-# Optional: build every collection/data collection once per locale (from
-# Contentful Settings > Locales). Omit for a single-locale site. With 2+
-# locales, the first is primary (unprefixed URLs/site.data keys); every
-# other locale gets its own /<prefix>/... URL prefix and
-# site.data.<name>_<prefix> key. An entry is a bare code (prefix == code)
-# or {code:, prefix:} for a different prefix -- quote a prefix that could
-# look like a YAML boolean (no/yes/on/off), or it becomes true/false.
-# contentful_locales:
-#   - en-US
-#   - nb-NO
+# Build every collection/data collection once per locale (from Contentful
+# Settings > Locales). With 2+ locales, the first is primary (unprefixed
+# URLs/site.data keys); every other locale gets its own /<prefix>/... URL
+# prefix and site.data.<name>_<prefix> key. An entry is a bare code
+# (prefix == code) or {code:, prefix:} for a different prefix -- quote a
+# prefix that could look like a YAML boolean (no/yes/on/off), or it
+# becomes true/false.
+#
+# Norwegian only at launch (planning/Plan.md's Internationalization
+# section) -- nb-NO listed explicitly, alone, rather than omitting this
+# setting entirely, so every query already sends its own explicit
+# `locale: nb-NO` param instead of silently relying on the Contentful
+# space's own default locale matching it. That's what "reserves" the
+# locale URL convention now: adding a second locale later (e.g. en-US,
+# appended after nb-NO so it stays primary) is a one-line config change,
+# not a migration -- nb-NO's own URLs/site.data keys don't change either
+# way, since the primary locale is always unprefixed.
+contentful_locales:
+  - nb-NO
 
 # Content types fetched into site.data.<name> instead of generated pages
 # -- for entries only ever linked to from others (e.g. authors,

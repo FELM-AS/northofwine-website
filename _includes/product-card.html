@@ -7,8 +7,9 @@
   here, not the Button include: nesting an <a> inside the card's own
   wrapping <a> would be invalid HTML.
 
-  Price is the raw Contentful value -- Norwegian number/kr formatting
-  is #28/M6, not done here yet.
+  Price is formatted per Norwegian convention (Plan.md's Formatting
+  section) via the `nb_number` filter in _plugins/contentful_filters.rb --
+  comma decimal separator, always 2 decimals, "kr" suffix (e.g. "550,00 kr").
 
   lang on the product name comes from the *manufacturer's* country (a
   fixed enum), not the product's own free-text country field, which
@@ -39,7 +40,7 @@
     </p>
     <h2{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ product.title | escape }}</h2>
     {% if product.product_id and product.sales_price %}
-    <p>{{ product.sales_price }} kr →</p>
+    <p>{{ product.sales_price | nb_number: 2 }} kr →</p>
     {% endif %}
   </article>
 </a>
