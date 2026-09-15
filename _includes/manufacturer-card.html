@@ -13,11 +13,20 @@
   `manufacturer` field too (404.html, listing pages, ...), not just
   fail to match zero products. Every real manufacturer has one (always
   set by EntrySerializer#serialize_entry), so this only matters for
-  malformed/test input.
+  malformed/test input. Not locale-scoped (matches
+  contentful_listing_pages.rb's own documented locale-unawareness,
+  deferred to #27/M6) -- fine today since contentful_locales isn't
+  configured, but with 2+ locales this would need to also check the
+  matched product's locale against the current page's.
 
   lang on the name comes directly from the manufacturer's own `country`
   (the fixed enum) via _data/countries.yml (#8) -- no indirection
   needed here, unlike the Product card.
+
+  Every editor-controlled field below is escaped -- name/description
+  are free text with no pattern validation, and `link`'s own
+  validation regex permits a literal `"`, same convention as
+  _includes/button.html's href/text.
 
   Params: manufacturer (required) -- a manufacturer Hash, e.g. an item
   off site.data.manufacturers or a listing page's page.items.
@@ -29,22 +38,18 @@
 {% assign manufacturer_products = site.pages | where_exp: "p", "p.manufacturer.id == manufacturer.id" %}
 {% endif %}
 <article>
-  {% if manufacturer.image.url %}
   {% include contentful-image.html asset=manufacturer.image width=600 fallback_alt=manufacturer.title %}
-  {% endif %}
-  {% if manufacturer.logo.url %}
   {% assign logo_alt = manufacturer.title | append: " logo" %}
   {% include contentful-image.html asset=manufacturer.logo width=200 fallback_alt=logo_alt %}
-  {% endif %}
-  <h2{% if manufacturer_lang %} lang="{{ manufacturer_lang }}"{% endif %}>{{ manufacturer.title | strip }}</h2>
+  <h2{% if manufacturer_lang %} lang="{{ manufacturer_lang }}"{% endif %}>{{ manufacturer.title | escape }}</h2>
   {% if manufacturer.link %}
   <p><a href="{{ manufacturer.link | escape }}" target="_blank" rel="noopener">Nettside</a></p>
   {% endif %}
-  <p>{{ manufacturer.description | newline_to_br }}</p>
+  <p>{{ manufacturer.description | escape | newline_to_br }}</p>
   {% if manufacturer_products.size > 0 %}
   <ul>
     {% for product in manufacturer_products %}
-    <li><a href="{{ product.url | relative_url }}">{{ product.title | strip }}</a></li>
+    <li><a href="{{ product.url | relative_url }}">{{ product.title | escape }}</a></li>
     {% endfor %}
   </ul>
   {% endif %}

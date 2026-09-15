@@ -17,6 +17,11 @@
   no resolved manufacturer (a handful of entries currently do -- see
   planning/Plan-Issues.md #6) or that country isn't in the lookup.
 
+  Every editor-controlled field below is escaped -- these are free
+  text (no pattern validation on productTypeName/webProductTypeName/
+  country/region/productShortName), same convention as
+  _includes/button.html's href/text.
+
   Params: product (required) -- a product page, e.g. `page` on a
   product detail page, or an item off a listing page's `page.items`.
 {% endcomment %}
@@ -24,16 +29,14 @@
 {% assign product_lang = site.data.countries[product.manufacturer.country] %}
 <a href="{{ product.url | relative_url }}">
   <article>
-    {% if product.image.url %}
     {% include contentful-image.html asset=product.image width=600 fallback_alt=product.title %}
-    {% endif %}
     <p>
-      {{ product.product_type_name }}{% if product.web_product_type_name %} · {{ product.web_product_type_name }}{% endif %}
+      {{ product.product_type_name | escape }}{% if product.web_product_type_name %} · {{ product.web_product_type_name | escape }}{% endif %}
       {% if product.country.size > 0 or product.region.size > 0 %}
-      — {% if product.country.size > 0 %}{{ product.country }}{% endif %}{% if product.country.size > 0 and product.region.size > 0 %}, {% endif %}{% if product.region.size > 0 %}{{ product.region }}{% endif %}
+      — {% if product.country.size > 0 %}{{ product.country | escape }}{% endif %}{% if product.country.size > 0 and product.region.size > 0 %}, {% endif %}{% if product.region.size > 0 %}{{ product.region | escape }}{% endif %}
       {% endif %}
     </p>
-    <h2{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ product.title | strip }}</h2>
+    <h2{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ product.title | escape }}</h2>
     {% if product.product_id and product.sales_price %}
     <p>{{ product.sales_price }} kr →</p>
     {% endif %}

@@ -8,13 +8,20 @@
   original asset's, so they still correctly reserve layout space and
   don't lie about what's actually being downloaded.
 
+  Renders nothing if the asset has no url at all -- callers don't need
+  their own "if x.image.url" guard around this include.
+
   An asset can have a `url` but no `width` (CLAUDE.md: a non-image
   asset, or one that hasn't finished processing yet, e.g. under
-  CONTENTFUL_PREVIEW) -- resizing needs a real width to compute the
-  proportional height from, so that case falls back to the original,
-  unresized image instead (Plan.md's Error Handling: "Image resizing
-  failures fall back to the original image"), rather than dividing by
-  a blank/zero width.
+  CONTENTFUL_PREVIEW) -- resizing still requests `?w=` (the Images API
+  resizes based on the source file, not on whether contentful.rb
+  happened to expose width/height metadata for it yet), just without
+  width/height attributes, since the resulting aspect ratio can't be
+  computed without an original width to scale from.
+
+  alt/src are escaped: `description`/`title`/url text ultimately come
+  from Contentful fields editors control, same convention as
+  _includes/button.html's href/text.
 
   Params:
     asset        - required, a serialized Contentful asset (.url,
@@ -23,11 +30,22 @@
                    preserve the original aspect ratio, not cropped
     fallback_alt - alt text used when the asset itself has no
                    `description` set in Contentful (Plan.md: alt text
-                   "from Contentful where possible")
+                   "from Contentful where possible"). Checked via
+                   `.size > 0`, not Liquid's `default` filter (which
+                   only substitutes for nil/false, not a blank string)
+                   -- relies on EntrySerializer#serialize_field having
+                   already stripped whitespace-only Contentful values
+                   down to "", not re-stripped here.
 {% endcomment %}
-{% assign alt = include.asset.description | default: include.fallback_alt %}
-{% if include.asset.width > 0 %}
-<img src="{{ include.asset.url }}?w={{ include.width }}" alt="{{ alt | strip }}" width="{{ include.width }}" height="{{ include.width | times: include.asset.height | divided_by: include.asset.width }}">
+{% if include.asset.url %}
+{% if include.asset.description.size > 0 %}
+{% assign alt = include.asset.description %}
 {% else %}
-<img src="{{ include.asset.url }}" alt="{{ alt | strip }}">
+{% assign alt = include.fallback_alt %}
+{% endif %}
+{% if include.asset.width > 0 %}
+<img src="{{ include.asset.url | escape }}?w={{ include.width }}" alt="{{ alt | escape }}" width="{{ include.width }}" height="{{ include.width | times: include.asset.height | divided_by: include.asset.width }}">
+{% else %}
+<img src="{{ include.asset.url | escape }}?w={{ include.width }}" alt="{{ alt | escape }}">
+{% endif %}
 {% endif %}
