@@ -1,0 +1,20 @@
+# Site-wide company/contact info for the Footer (planning/Plan.md:
+# "site-wide settings (footer contact info, social links) stay as
+# static Jekyll content/data", not pulled from Contentful). Keeping
+# this in _data/ rather than hardcoded in _includes/footer.html
+# matches the existing _data/countries.yml convention, and sets up
+# social/contact URLs to be checked once CI link-checking lands.
+name: North of Wine AS
+address:
+  - Fosenkaia 7
+  - 7010 Trondheim
+org_number: NO 927 128 047 MVA
+emails:
+  post: post@northofwine.no
+  faktura: faktura@northofwine.no
+social:
+  - name: Facebook
+    url: https://www.facebook.com/northofwine/
+  - name: Instagram
+    url: https://www.instagram.com/northofwine/
+helsenorge_url: https://helsenorge.no/rus-og-avhengighet/alkohol/alkohol-og-helse
