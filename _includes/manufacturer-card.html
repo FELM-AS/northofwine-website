@@ -41,7 +41,7 @@
 {% if manufacturer.id %}
 {% assign manufacturer_products = site.pages | where_exp: "p", "p.manufacturer.id == manufacturer.id" %}
 {% endif %}
-<article id="{{ manufacturer.id }}">
+<article{% if manufacturer.id %} id="{{ manufacturer.id }}"{% endif %}>
   {% include contentful-image.html asset=manufacturer.image width=600 fallback_alt=manufacturer.title %}
   {% assign logo_alt = manufacturer.title | append: " logo" %}
   {% include contentful-image.html asset=manufacturer.logo width=200 fallback_alt=logo_alt %}

@@ -104,9 +104,11 @@ This mirrors how Contentful's own [jekyll-contentful-data-import](https://github
 
 ### Homepage & navigation
 
-- **`index.html`** groups generated pages into homepage sections via `page.data["home_label"]`, which `build_page` sets (once per collection per locale pass, via `home_label_for` — `label` resolved for the current locale if it's a Hash, else a humanized `content_type`, same fallback-not-raise behavior as any other locale-missing lookup here) whenever a collection has `home: true`. The template filters `site.pages` for a truthy `home_label` and groups by it (Liquid's `group_by`) — no per-collection loop, no dependence on `dir`.
+**`index.html`** (Hjem) is a hand-authored static page, not a Contentful collection — company name + short intro text, with `home_hero: true` in its front matter. That flag tells `_layouts/default.html` to suppress the header entirely and render the Menu directly in the sidebar instead (Plan.md: Hjem has no header, sidebar *is* the nav) — driven by data on the page itself, never by inspecting `page.url`.
 
-This flag is collection-level and driven entirely by data set on the page itself (`home_label`) rather than by inspecting a page's URL or layout — a collection can be in the homepage grouping or not, regardless of its `dir`. (The generic template this repo is based on also supports a `nav: true` flag for a collection-driven site nav — removed here, since this site's nav is a fixed Menu component, not derived from which collections happen to be flagged.)
+The generic template this repo is based on also supports a **`home`/`label`** pair on a `contentful_collections` entry (see the table above), which `build_page` uses to set `page.data["home_label"]` so `index.html` can group generated pages into homepage sections (Liquid's `group_by` on `site.pages | where_exp: "p", "p.home_label"`). No collection on this site sets `home: true` today — Hjem is the static page described above instead — so this mechanism is currently unused, kept only as inherited, config-driven machinery for a future collection that might want a homepage section (e.g. news articles). `_includes/seo.html`'s `page.home_label` → `og:type: article` check (see "SEO, sitemap, robots.txt, 404" below) is correspondingly inert until some collection actually sets `home: true`.
+
+(The generic template also supports a `nav: true` flag for a collection-driven site nav — removed here, since this site's nav is a fixed Menu component, not derived from which collections happen to be flagged.)
 
 ### Data-only collections
 

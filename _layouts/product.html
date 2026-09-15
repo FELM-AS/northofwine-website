@@ -39,10 +39,12 @@ layout: default
   </dl>
   {% endif %}
 
+  {% if page.colour or page.odour or page.taste or page.fullness or page.freshness or page.tannins or page.sweetness %}
   <h2>Sensorikk</h2>
   {% if page.colour %}<p>Farge: {{ page.colour | escape }}</p>{% endif %}
   {% if page.odour %}<p>Lukt: {{ page.odour | escape }}</p>{% endif %}
   {% if page.taste %}<p>Smak: {{ page.taste | escape }}</p>{% endif %}
+  {% if page.fullness or page.freshness or page.tannins or page.sweetness %}
   <ul>
     {% if page.fullness %}
     <li>Fylde: <meter min="1" max="12" value="{{ page.fullness }}">{{ page.fullness }} av 12</meter></li>
@@ -58,6 +60,8 @@ layout: default
     <li>Sødme: <meter min="1" max="12" value="{{ page.sweetness }}">{{ page.sweetness }} av 12</meter></li>
     {% endif %}
   </ul>
+  {% endif %}
+  {% endif %}
 
   {% if page.recommended_food.size > 0 %}
   <h2>Passer til</h2>
@@ -68,10 +72,12 @@ layout: default
   </ul>
   {% endif %}
 
+  {% if page.alcohol_content or page.volume or page.sku or page.production_method_storage %}
   <dl>
     {% if page.alcohol_content %}<dt>Alkohol</dt><dd>{{ page.alcohol_content }}%</dd>{% endif %}
     {% if page.volume %}<dt>Volum</dt><dd>{{ page.volume }}</dd>{% endif %}
     {% if page.sku %}<dt>SKU</dt><dd>{{ page.sku | escape }}</dd>{% endif %}
     {% if page.production_method_storage %}<dt>Produksjonsmetode / lagring</dt><dd>{{ page.production_method_storage | escape }}</dd>{% endif %}
   </dl>
+  {% endif %}
 </article>
