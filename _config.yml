@@ -16,6 +16,19 @@ url: "https://felm-as.github.io"
 # their own <html lang> from their Contentful locale code automatically.
 lang: nb
 
+# Plan.md's Analytics section: GoatCounter (goatcounter.com), a free,
+# cookie-less analytics service -- no consent banner needed, unlike
+# Google Analytics. Unset until a GoatCounter account/site exists;
+# _layouts/default.html only emits the tracking snippet when this is
+# set, so leaving it unset keeps every page (including 404.html) free
+# of any analytics request, same as today. Set to the site code (the
+# <mysite> in https://<mysite>.goatcounter.com) once an account exists.
+# Quote the value if it could otherwise read as a YAML boolean (a bare
+# yes/no/on/off, same trap contentful_locales' `prefix` documents below) --
+# unlikely for a GoatCounter site code, but `{% if site.goatcounter_code %}`
+# would silently treat a YAML `false` the same as unset either way.
+# goatcounter_code: mysite
+
 # Contentful content types this site pulls entries from. Each entry
 # becomes a generated page at /<dir>/<slug>/ (dir: "" = site root).
 # home: true groups it into a homepage section (see index.html), headed

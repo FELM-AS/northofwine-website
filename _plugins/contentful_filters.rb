@@ -16,6 +16,9 @@
 #
 # `country_lang`: see its own comment below.
 # `nb_number`: see its own comment below.
+# `unescape_html`: see its own comment below.
+require "cgi"
+
 module ContentfulJekyll
   module TemplateFilters
     def dir_href(dir)
@@ -55,6 +58,36 @@ module ContentfulJekyll
     # sync with a single lookup.
     def country_lang(country)
       @context.registers[:site].data["countries"][country]
+    end
+
+    # _includes/seo.html's meta-description fallback runs `strip_html` on
+    # a page's already-*rendered* `content` -- `strip_html` removes tags
+    # but leaves HTML entities like `&quot;`/`&amp;` as literal text,
+    # which then get escaped a *second* time when interpolated into the
+    # meta tag (`&quot;` -> `&amp;quot;`). Live today via a product's own
+    # Rich Text body: an embedded entry renders as
+    # `CGI.escapeHTML(title)` (contentful_rich_text.rb), so a product
+    # whose Rich Text embeds another entry with a `&`/`"` in its title
+    # hits this exact double-escape. (Listing pages -- the case this was
+    # first written against -- no longer can: contentful_listing_pages.rb
+    # now always sets an explicit page.description, so `default: content`
+    # never reaches their card markup. Kept general rather than
+    # listing-page-specific, since this is still a real, live path.)
+    # Unescaping once here, between `strip_html` and the final `| escape`,
+    # undoes exactly that one extra round of escaping.
+    #
+    # This filter also runs before seo.html's `normalize_whitespace`,
+    # so a decoded `&nbsp;` (-> a literal U+00A0 non-breaking space)
+    # needs handling here too: Ruby's `\s` (what normalize_whitespace
+    # matches on) doesn't treat U+00A0 as whitespace, so left as-is it
+    # would survive as a visually-blank but non-collapsing character --
+    # e.g. a copy-pasted "word&nbsp;&nbsp;word" would decode to two
+    # non-breaking spaces that normalize_whitespace can't collapse to
+    # one, unlike two literal spaces. Converted to a plain space here
+    # instead, so normalize_whitespace still sees only ordinary
+    # whitespace.
+    def unescape_html(value)
+      CGI.unescapeHTML(value.to_s).tr(" ", " ")
     end
   end
 end
