@@ -1,11 +1,15 @@
 {% comment %}
   Product card (Plan.md): metadata (productTypeName + webProductTypeName
   when set; country, region), image, name, and price + arrow icon (only
-  when both product_id and sales_price exist -- sales_price_horeca is
-  never shown, it's trade pricing given by request). Entire card links
-  to the product detail page -- so the price/arrow bit is plain content
-  here, not the Button include: nesting an <a> inside the card's own
-  wrapping <a> would be invalid HTML.
+  when product_id exists and sales_price is a real, positive price --
+  a bare truthy check would also pass a salesPrice of 0, e.g. an
+  editor-created entry still awaiting pricing, and render a
+  fully-formatted "0,00 kr" that reads as a deliberate free price.
+  sales_price_horeca is never shown, it's trade pricing given by
+  request. Entire card links to the product detail page -- so the
+  price/arrow bit is plain content here, not the Button include:
+  nesting an <a> inside the card's own wrapping <a> would be invalid
+  HTML.
 
   Price is formatted per Norwegian convention (Plan.md's Formatting
   section) via the `nb_number` filter in _plugins/contentful_filters.rb --
@@ -39,7 +43,7 @@
       {% endif %}
     </p>
     <h2{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ product.title | escape }}</h2>
-    {% if product.product_id and product.sales_price %}
+    {% if product.product_id and product.sales_price and product.sales_price > 0 %}
     <p>{{ product.sales_price | nb_number: 2 }} kr →</p>
     {% endif %}
   </article>

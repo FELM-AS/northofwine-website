@@ -14,6 +14,19 @@
   ContentfulJekyll.dir_for, not looked up independently here -- see its
   class comment for why.
 
+  Also filtered by `include.product.locale` -- contentful_listing_pages.rb
+  builds one type_page per locale (productTypeName/webProductTypeName
+  aren't Localized Contentful fields, so the same title can appear on
+  more than one locale's filter page), and without this, `first` would
+  always resolve to whichever locale's page happened to be built first
+  (the primary locale's), linking a non-primary-locale product's
+  breadcrumb to the wrong locale's filter page. Same
+  `where: "locale", <a page's own locale>` idiom index.html uses to
+  scope itself to one locale at a time (see
+  _plugins/contentful_locales.rb's Locales section in CLAUDE.md) -- a
+  no-op today since every page's `locale` is nil (only nb-NO is
+  configured, see _config.yml).
+
   Params: product (required) -- a product's page data, e.g. `page` on a
   product detail page.
 {% endcomment %}
@@ -21,13 +34,13 @@
 <nav aria-label="Brødsmulesti">
   <a href="{{ utvalg_dir | relative_url }}">Utvalg</a>
   {% if include.product.product_type_name %}
-  {% assign type_page = site.pages | where: "item_type", "product" | where: "title", include.product.product_type_name | first %}
+  {% assign type_page = site.pages | where: "item_type", "product" | where: "title", include.product.product_type_name | where: "locale", include.product.locale | first %}
   {% if type_page %}
   / <a href="{{ type_page.url | relative_url }}">{{ include.product.product_type_name | escape }}</a>
   {% endif %}
   {% endif %}
   {% if include.product.web_product_type_name %}
-  {% assign web_type_page = site.pages | where: "item_type", "product" | where: "title", include.product.web_product_type_name | first %}
+  {% assign web_type_page = site.pages | where: "item_type", "product" | where: "title", include.product.web_product_type_name | where: "locale", include.product.locale | first %}
   {% if web_type_page %}
   / <a href="{{ web_type_page.url | relative_url }}">{{ include.product.web_product_type_name | escape }}</a>
   {% endif %}

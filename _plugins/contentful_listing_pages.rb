@@ -102,16 +102,21 @@ module ContentfulJekyll
         site.pages.concat(utvalg_pages)
       end
 
+      # A plain method return, not a return from `generate` itself (this
+      # runs inside generate_for_locale, called once per locale) -- skips
+      # only this locale's Produsenter section, letting each_locale's
+      # loop continue to the next locale normally.
       return unless manufacturer_collection && manufacturer_collection["dir"]
 
       dir = ContentfulJekyll.dir_for(manufacturer_collection, locale)
       site.config["produsenter_dir"] = dir if locale.primary?
-      # Mirrors fetch_data_collection's own site.data key naming
-      # (contentful_entries_generator.rb) -- "manufacturers" for the
-      # primary locale, "manufacturers_<prefix>" for any other, so this
-      # reads exactly the locale-scoped list that generator fetched.
-      manufacturers_key = ["manufacturers", locale.data_suffix].compact.join("_")
-      manufacturers = site.data[manufacturers_key] || []
+      # locale.data_key_for is the same helper fetch_data_collection
+      # (contentful_entries_generator.rb) uses to build the key it writes
+      # this collection's entries under -- reading manufacturer_collection
+      # ["name"] here (not a hardcoded "manufacturers" literal) is what
+      # keeps this in sync if that collection's configured `name` ever
+      # changes.
+      manufacturers = site.data[locale.data_key_for(manufacturer_collection["name"])] || []
 
       produsenter_pages = [build_page(site, locale, dir, nil, manufacturers, "the root listing", "manufacturer", products_by_manufacturer)]
       # Country is a fixed 13-value enum (planning/Contentful-Content-Model.md,
