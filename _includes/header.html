@@ -5,11 +5,11 @@
   modal behavior, not hand-rolled. Closing is a <form method="dialog">
   submit button, needing no JS at all.
 
-  aria-label on the dialog gives it an accessible name (Plan.md's
-  Accessibility section: the menu overlay must be fully
-  keyboard-operable) -- with only a plain nav list inside and no
-  heading of its own, a <dialog> would otherwise announce to screen
-  readers as an unnamed dialog.
+  aria-label gives the dialog an accessible name -- with only a plain
+  nav list inside and no heading of its own, it would otherwise
+  announce to screen readers as an unnamed dialog, undermining Plan.md's
+  Accessibility section (the menu overlay must be fully usable, which
+  includes being properly identified, not just operable).
 
   Reserved spot for a future language switcher (Plan.md's
   Internationalization section) -- deliberately no markup yet: with

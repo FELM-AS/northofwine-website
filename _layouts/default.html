@@ -14,7 +14,16 @@
   {% include seo.html %}
   <link rel="stylesheet" href="{{ "/assets/css/main.css" | relative_url }}">
   <script src="{{ "/assets/js/menu.js" | relative_url }}" defer></script>
-  <script src="{{ "/assets/js/image-fallback.js" | relative_url }}" defer></script>
+  {% comment %}
+    Not deferred, unlike menu.js: this has to register its listener
+    before the browser's preload scanner can start fetching (and
+    potentially failing) <img> tags further down the page -- a
+    deferred script runs only after the whole document is parsed,
+    which would be too late for an image that already failed by then.
+    Safe to run this early since it only calls document.addEventListener,
+    with no dependency on the DOM being ready.
+  {% endcomment %}
+  <script src="{{ "/assets/js/image-fallback.js" | relative_url }}"></script>
 </head>
 <body>
   {% comment %}

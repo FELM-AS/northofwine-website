@@ -23,15 +23,14 @@
   from Contentful fields editors control, same convention as
   _includes/button.html's href/text.
 
-  data-original/data-placeholder wire up assets/js/image-fallback.js's
-  two-stage fallback (Plan.md's Error Handling section): if the resized
-  `?w=` request itself fails (e.g. the Images API can't resize this
-  particular asset), fall back to the original, unresized image; if
-  that also fails (the asset is genuinely missing/broken), fall back to
-  a site-wide placeholder graphic. Both are plain data attributes, not
-  inline `onerror`, so every <img> this include renders is covered by
-  one shared listener instead of repeating the fallback logic per call
-  site.
+  data-original feeds assets/js/image-fallback.js's two-stage fallback
+  (Plan.md's Error Handling section) -- see that file's own comment for
+  the full behavior. A plain data attribute, not inline `onerror`, so
+  every <img> this include renders is covered by one shared listener
+  instead of repeating the fallback logic per call site. The
+  placeholder path itself isn't repeated here -- it's one site-wide
+  constant, baked directly into image-fallback.js rather than restated
+  on every single image.
 
   Params:
     asset        - required, a serialized Contentful asset (.url,
@@ -53,10 +52,19 @@
 {% else %}
 {% assign alt = include.fallback_alt %}
 {% endif %}
-{% assign placeholder = "/assets/images/placeholder.svg" | relative_url %}
+{% assign asset_url = include.asset.url | escape %}
+{% comment %}
+  Explicitly reset on every call (not just assigned inside the `if`
+  above): {% include %} doesn't give assigns their own scope in Jekyll's
+  Liquid, so a stale value from a *previous* call to this same include
+  earlier on the page (e.g. a manufacturer-card.html image with a
+  known width, followed by one still processing under
+  CONTENTFUL_PREVIEW) would otherwise leak onto this one.
+{% endcomment %}
+{% assign size_attrs = "" %}
 {% if include.asset.width > 0 %}
-<img src="{{ include.asset.url | escape }}?w={{ include.width }}" alt="{{ alt | escape }}" width="{{ include.width }}" height="{{ include.width | times: include.asset.height | divided_by: include.asset.width }}" data-original="{{ include.asset.url | escape }}" data-placeholder="{{ placeholder | escape }}">
-{% else %}
-<img src="{{ include.asset.url | escape }}?w={{ include.width }}" alt="{{ alt | escape }}" data-original="{{ include.asset.url | escape }}" data-placeholder="{{ placeholder | escape }}">
+{% assign img_height = include.width | times: include.asset.height | divided_by: include.asset.width %}
+{% assign size_attrs = ' width="' | append: include.width | append: '" height="' | append: img_height | append: '"' %}
 {% endif %}
+<img src="{{ asset_url }}?w={{ include.width }}" alt="{{ alt | escape }}"{{ size_attrs }} data-original="{{ asset_url }}">
 {% endif %}
