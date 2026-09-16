@@ -21,7 +21,7 @@ Originally scaffolded from the `github-pages-contentful` template's Contentful �
 - Product/Manufacturer/Person entries are fetched straight from Contentful at build time (see [`planning/Contentful-Content-Model.md`](planning/Contentful-Content-Model.md) for the field reference) — there's no local copy to keep in sync.
 - Prices, alcohol %, volume, and sensory scores follow Norwegian numeric convention (comma decimals, `kr` suffix on prices).
 - Product/manufacturer names get a `lang` attribute derived from the manufacturer's own country (via `_data/countries.yml`), for correct hyphenation and screen-reader pronunciation.
-- Internationalization groundwork is in place (locale-aware URLs, `site.data` keys, and generators) even though only Norwegian (`nb-NO`) is configured today — adding a second locale is a one-line `_config.yml` change, not a rebuild.
+- Internationalization groundwork is in place (locale-aware URLs, `site.data` keys, and generators) even though only Norwegian (`nb-NO`) is configured today — adding a second locale is a one-line `_config.yml` change, not a rebuild, once that locale exists in Contentful's own Settings → Locales (the CDA hard-fails with "Unknown locale" otherwise).
 
 **Resilience & accessibility**
 
