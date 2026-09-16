@@ -1,10 +1,41 @@
 # northofwine.no
 
-The website for [North of Wine AS](https://northofwine.no), a Norwegian wine importer based in Trondheim, hosted under the FELM-AS GitHub organization. Content (products, manufacturers, people) is authored and edited in Contentful, fetched at build time, and rendered by Jekyll into a static site deployed to GitHub Pages via GitHub Actions.
+The website for [North of Wine AS](https://northofwine.no), a Norwegian wine importer based in Trondheim. Content (products, manufacturers, people) is authored and edited in Contentful, fetched at build time, and rendered by Jekyll into a static site deployed to GitHub Pages via GitHub Actions.
 
-Built on the `github-pages-contentful` template's Contentful → Jekyll → GitHub Pages architecture. See [`planning/Plan.md`](planning/Plan.md) for the site's pages, components, and content model, [`planning/Plan-Issues.md`](planning/Plan-Issues.md) for the implementation breakdown, and [`planning/Contentful-Content-Model.md`](planning/Contentful-Content-Model.md) for the actual Contentful field reference.
+**Status:** pre-launch. The real domain, `northofwine.no`, is still serving the old site; this repo currently deploys to a temporary GitHub Pages URL (`https://felm-as.github.io/northofwine-website/`) until DNS is cut over (tracked in the issue tracker).
 
-Native GitHub Pages builds run Jekyll in "safe mode," which disables custom plugins and network access — so this site can't rely on GitHub's built-in Jekyll build. Instead, a GitHub Actions workflow ([.github/workflows/deploy.yml](.github/workflows/deploy.yml)) runs `jekyll build` with full plugin support and deploys the resulting `_site/` to Pages.
+Originally scaffolded from the `github-pages-contentful` template's Contentful → Jekyll → GitHub Pages architecture, but this repo is no longer a template — it's the concrete site for one company. See [`planning/Plan.md`](planning/Plan.md) for the full design/requirements spec this was built against, [`planning/Plan-Issues.md`](planning/Plan-Issues.md) for the implementation breakdown, [`planning/Contentful-Content-Model.md`](planning/Contentful-Content-Model.md) for the exact Contentful fields, and [`CLAUDE.md`](CLAUDE.md) for how the underlying Contentful→Jekyll build pipeline works internally.
+
+## Features
+
+**Pages**, all built from Contentful content except Hjem/Om oss (hand-authored) and 404:
+
+- **Hjem** (`/`) — home page; sidebar doubles as the site nav here instead of a header.
+- **Utvalg** (`/utvalg/`) — the product catalog: an unfiltered listing plus one page per wine type (`productTypeName`/`webProductTypeName`, e.g. `/utvalg/rodvin/`) and one page per product (grape composition, sensory ratings as native `<meter>` gauges, food pairing, alcohol/volume/SKU).
+- **Produsenter** (`/produsenter/`) — the manufacturer listing plus one page per country of origin (all 13 enum values get a page even with zero current manufacturers, so a filter link never 404s).
+- **Om oss** (`/omoss/`) — company text plus the People roster.
+- **404** — a custom not-found page instead of GitHub's own default.
+
+**Content & formatting**
+
+- Product/Manufacturer/Person entries are fetched straight from Contentful at build time (see [`planning/Contentful-Content-Model.md`](planning/Contentful-Content-Model.md) for the field reference) — there's no local copy to keep in sync.
+- Prices, alcohol %, volume, and sensory scores follow Norwegian numeric convention (comma decimals, `kr` suffix on prices).
+- Product/manufacturer names get a `lang` attribute derived from the manufacturer's own country (via `_data/countries.yml`), for correct hyphenation and screen-reader pronunciation.
+- Internationalization groundwork is in place (locale-aware URLs, `site.data` keys, and generators) even though only Norwegian (`nb-NO`) is configured today — adding a second locale is a one-line `_config.yml` change, not a rebuild.
+
+**Resilience & accessibility**
+
+- Every image goes through a two-stage client-side fallback: a failed resize retries the original asset, and a fully broken/missing asset falls back to a generic placeholder — see `assets/js/image-fallback.js`.
+- Alt text is required and set from Contentful where available; the header's menu overlay is a native `<dialog>` (full keyboard support — focus trapping, Escape-to-close — for free).
+- An entry missing a field a template depends on is skipped with a build warning, not a failed build.
+
+**Fonts** — DM Sans and DM Mono are self-hosted (`assets/fonts/`, `_sass/_fonts.scss`) rather than loaded from Google's CDN at request time, avoiding an unnecessary third-party request/IP transfer. DM Mono is currently unused, reserved for a later design decision.
+
+**SEO** — every page gets a canonical link, a meta description, and Open Graph/Twitter Card tags automatically (`_includes/seo.html`), plus a hand-rolled `sitemap.xml`/`robots.txt` that stay correct as content is added or removed, with no extra config.
+
+**Analytics** — [GoatCounter](https://www.goatcounter.com/) (free, cookie-less, no consent banner needed) is wired in but inactive until `_config.yml`'s `goatcounter_code` is set to a real account's site code.
+
+**CI** — every push runs `html-proofer` against the built site (`.github/workflows/deploy.yml`) to catch broken internal/external links before they ship, gating the deploy.
 
 ## Setup
 
@@ -15,116 +46,39 @@ Native GitHub Pages builds run Jekyll in "safe mode," which disables custom plug
    CONTENTFUL_ACCESS_TOKEN=
    CONTENTFUL_ENVIRONMENT=master
    ```
-3. In the GitHub repo settings, add the same three values as Actions secrets (`CONTENTFUL_SPACE_ID`, `CONTENTFUL_ACCESS_TOKEN`, `CONTENTFUL_ENVIRONMENT`), and set Pages source to "GitHub Actions".
+3. `bundle exec jekyll serve` — local dev server at `http://localhost:4000`.
 
-Without a `.env` (or those secrets in CI), the build still succeeds — it just generates zero Contentful-backed pages, logging a warning instead of failing.
+Without a `.env` (or without the same three values as Actions secrets in CI), the build still succeeds — it just generates zero Contentful-backed pages, logging a warning instead of failing.
 
 ### Previewing draft content
 
-To build against draft (unpublished) content instead of only published entries, set `CONTENTFUL_PREVIEW=true` and `CONTENTFUL_PREVIEW_ACCESS_TOKEN` (a separate token from your CDA `CONTENTFUL_ACCESS_TOKEN`, issued in Contentful under the same space). **Don't** set these in the production deploy workflow's secrets — doing so publishes draft/unpublished content to the live public site.
+Set `CONTENTFUL_PREVIEW=true` and `CONTENTFUL_PREVIEW_ACCESS_TOKEN` (a separate token from your CDA `CONTENTFUL_ACCESS_TOKEN`, issued in Contentful under the same space) to build against draft/unpublished content instead of only published entries. **Don't** set these in the production deploy workflow's secrets — doing so publishes draft content to the live public site.
 
-## Content model
+## Editing content
 
-The build reads the `contentful_collections` list in [_config.yml](_config.yml) and generates one page per Contentful entry per collection — this is the extension point for adapting the generator to a content type. `_config.yml` currently still has the template's placeholder `post`/`page` collections; see [`planning/Contentful-Content-Model.md`](planning/Contentful-Content-Model.md) for this site's real `product`/`manufacturer`/`person` content types and [`planning/Plan.md`](planning/Plan.md) for how they map onto pages.
+Products, manufacturers, and people are all edited directly in Contentful — there are no content files in this repo to touch. Publishing an entry doesn't update the live site by itself yet; see "Deploying" below.
 
-```yaml
-contentful_collections:
-  - content_type: post
-    layout: single
-    dir: posts
-    home: true
-    order: "-fields.publishDate"
-  - content_type: page
-    layout: single
-    dir: ""
+- **Adding/editing a product**: fill in the `product` content type's fields (see [`planning/Contentful-Content-Model.md`](planning/Contentful-Content-Model.md)) and publish. It appears at `/utvalg/<slug>/`, and on the Utvalg root plus its `productTypeName`/`webProductTypeName` filter pages, automatically.
+- **Adding/editing a manufacturer or person**: same idea — manufacturers appear on `/produsenter/` and their own country's filter page; people appear on `/omoss/`.
+- **Country enum**: the 13-value country enum used for hyphenation and the Produsenter country filters is mirrored in `_data/countries.yml` — adding a genuinely new country to the Contentful schema needs a matching entry there too, or that manufacturer gets no filter page (a build warning names it if this happens).
+
+## Deploying
+
+- **Push to `main`** always builds and deploys (`.github/workflows/deploy.yml`).
+- **Contentful publish** can also trigger a build+deploy automatically, once a webhook is configured in Contentful's own settings — see CLAUDE.md's "Contentful publish trigger" section for the exact setup (a GitHub PAT, the webhook URL/payload). To pause this during a bulk content edit, set the `CONTENTFUL_AUTOBUILD_DISABLED` repo variable to `true` (`gh variable set CONTENTFUL_AUTOBUILD_DISABLED --body true`); unset it to resume.
+- A manual run is always available too: **Actions → Deploy to GitHub Pages → Run workflow**.
+
+Every build also runs the link checker used in CI; run it locally after `bundle exec jekyll build` if you've touched anything link-related:
+
+```
+bundle exec htmlproofer ./_site --checks Links,Scripts --swap-urls "^/northofwine-website/:/" --ignore-urls "/^https:\/\/felm-as\.github\.io\/northofwine-website/" --no-enforce-https --only-4xx --ignore-status-codes 429
 ```
 
-| Key | Required | Meaning |
-| --- | --- | --- |
-| `content_type` | yes | The Contentful content type id to fetch. |
-| `layout` | yes | Which layout in [_layouts/](_layouts/) renders the page. |
-| `dir` | yes | URL path prefix; `posts` builds `/posts/<slug>/`, `""` builds pages at the site root (`/<slug>/`). With `contentful_locales` configured, `dir` can be a Hash keyed by locale code (`{en-US: products, nb-NO: produkter}`) instead of one string, if the path segment itself should be translated too, not just prefixed with the locale — see Locales below. |
-| `home` | no | `true` groups this collection's pages into a section on the homepage (see `index.html`). |
-| `label` | no | Homepage section heading for this collection, if `home` is set. A plain string, or a Hash keyed by locale code (mirroring `dir`) for a translated heading per locale. Defaults to a humanized `content_type` (e.g. `newsArticle` → "News Article") for any locale without one. |
-| `order` | no | A [Contentful CDA order value](https://www.contentful.com/developers/docs/references/content-delivery-api/#/reference/search-parameters/order) (e.g. `fields.publishDate` or `-fields.publishDate`) controlling fetch/display order; defaults to `-sys.updatedAt`. |
-| `body_field` | no | The field to render as page content, if not `body`. A field literally named `content` collides with Jekyll's own reserved `page.content`/`{{ content }}` and is otherwise unreachable, so this is the only way to use such a field as the page body. |
-| `image_field` | no | The field to use as `page.social_image` (the Open Graph/Twitter Card image — see SEO below), if not `image`. |
+(The `--swap-urls`/`--ignore-urls` flags exist only because of the temporary GitHub Pages project-site path mentioned above — see the matching comment in `deploy.yml` for what to change once the custom domain lands.)
 
-`post` and `page` both use `_layouts/single.html`, a small shared layout (`layout: default` + `{% include article.html %}`) — give a collection its own layout file only once it needs different markup.
+## Further reading
 
-A top-level `contentful_entry_depth` setting (default `2`) controls how many levels of linked entries get fully resolved before degrading to a stub — raise it if your content model has deep reference chains (e.g. a menu linking pages that each link their own sub-pages).
-
-Every content type needs a `slug` field and a body field (`body` by default — see `body_field` above); `post` additionally uses `publishDate` for ordering. `title` is never a literal field requirement: it always comes from that content type's Contentful-configured "Entry title" field (set per content type in Contentful's UI), whatever it's actually named — so a content type titled by, say, `headline` or `eventName` works without any template changes.
-
-An entry's `slug` field is sanitized into a URL-safe form (lowercased, spaces/punctuation replaced) if it isn't one already, with a build warning logged when this happens — so messy slugs in Contentful stay visible without breaking the build.
-
-To add a new content type (e.g. a "product" or "event"), add an entry to `contentful_collections` and a matching layout — no changes to the generator plugin are needed.
-
-### Available data in layouts
-
-Every field on an entry (other than its body field, which becomes `content`/`{{ content }}`) is available on `page` by its snake_cased field ID — a Contentful field `coverImage` becomes `page.cover_image`, with no config or Ruby changes needed to reference a new field. A few field types need a bit more than `{{ page.some_field }}`:
-
-- **`page.title`** — always available, regardless of what the title field is actually called in Contentful (see above).
-- **Asset fields** (an image, file, etc.) become `{ "url", "content_type", "title", "description", "width", "height" }` (`width`/`height` are only set for images, `nil` otherwise): `<img src="{{ page.cover_image.url }}" alt="{{ page.cover_image.title }}" width="{{ page.cover_image.width }}" height="{{ page.cover_image.height }}">` — including dimensions avoids layout shift while the image loads.
-- **Reference fields** (a link to another entry) become that entry's own fields, flattened the same way — `{{ page.author.title }}`, `{{ page.author.email }}`, etc. work directly, one level deep by default (see `contentful_entry_depth` above for content models with deeper reference chains).
-- **Array fields** (multiple values, or multiple references) become a Liquid array — loop with `{% for tag in page.tags %}{{ tag }}{% endfor %}`, or `{% for related in page.related_posts %}{{ related.title }}{% endfor %}` for an array of references.
-- A reference field whose linked entry has its own Rich Text field does **not** get that field pre-rendered to HTML (only a page's own top-level body field is) — it arrives as a raw Rich Text document, not usable directly in a layout without extra work.
-
-`_layouts/single.html` + `_includes/article.html` is the simplest example: a title, an optional date (only shown when the entry actually has one), and the rendered body. Copy that pattern for a new content type's layout, or write something entirely different — Jekyll layouts are plain Liquid/HTML.
-
-### Data-only collections
-
-Some content types are only ever referenced from other entries and never need a page/URL of their own (e.g. an "author" or "manufacturer" linked from posts/products). List those under `contentful_data_collections` instead, and they're fetched into `site.data.<name>` rather than generating pages:
-
-```yaml
-contentful_data_collections:
-  - content_type: author
-    name: authors
-```
-
-### Locales
-
-For a single-locale site, do nothing — there's no locale-related config at all by default. To build a translated site, list the Contentful locale codes to build (Contentful: Settings → Locales) under `contentful_locales`, first = primary:
-
-```yaml
-contentful_locales:
-  - en-US
-  - nb-NO
-```
-
-By default a non-primary locale's URL/`site.data` prefix is its full Contentful code (`/nb-NO/...`). For a shorter or different prefix, use the Hash form instead of a bare code:
-
-```yaml
-contentful_locales:
-  - en-US
-  - code: nb-NO
-    prefix: "no"
-```
-
-**Quote a `prefix` if it could look like a YAML boolean** — `no`, `yes`, `on`, `off` (any case) parse as `true`/`false`, not the string you meant, if left bare. Unquoted `prefix: no` silently becomes `prefix: false`; the build catches this specific case and fails with a clear message rather than silently falling back to the full locale code.
-
-The primary locale's URLs and `site.data` keys are unprefixed, exactly as if `contentful_locales` weren't set at all — adding a second locale to an existing single-locale site never changes its existing URLs (as long as the locale you're already using stays first in the list). This includes a single-entry list too: `contentful_locales: [nb-NO]` always fetches `nb-NO` explicitly, even if your Contentful space's own default locale is something else — only omitting `contentful_locales` entirely skips sending a `locale` param and relies on the space's default. Every other locale gets its own `/<locale>/...` URL prefix (`/nb-NO/products/vin/`) and its own suffixed `site.data.<name>_<locale>` key (`site.data.authors_nb_no`), fetched and rendered entirely separately — a linked entry resolves to that locale's own translated fields, not the primary locale's. The homepage (`index.html`) only ever shows the primary locale's content; a fully localized homepage needs its own `index.html` per locale (e.g. `nb-NO/index.html`), following the same pattern — including `locale: nb-NO` in that file's own front matter, so it's scoped correctly instead of silently behaving like a primary-locale page.
-
-The locale prefix only affects the URL segment `each_locale` adds — the `dir` segment itself (e.g. "products") stays whatever you configured, in every locale, unless you make it a per-locale Hash (see the `dir` row above): `dir: products` gives `/products/vin/` (primary) and `/nb-NO/products/vin/` (secondary) — same word, just prefixed. `dir: {en-US: products, nb-NO: produkter}` gives `/products/vin/` and `/nb-NO/produkter/vin/` — a genuinely translated path, not just a translated prefix.
-
-A locale code has to already exist in your Contentful space (Settings → Locales) before you can build against it — the CDA rejects an unrecognized code outright ("Unknown locale") rather than falling back to anything, so add the locale in Contentful first, then add it to `contentful_locales`.
-
-Set the top-level `lang` in `_config.yml` (defaults to `en`) to your primary locale's language, for `<html lang>` on primary-locale pages — every other configured locale's pages get their own correct `<html lang>` automatically from their Contentful locale code.
-
-## SEO, sitemap, robots.txt, and 404
-
-Every page automatically gets a canonical link, a meta description, and Open Graph/Twitter Card tags (via `_includes/seo.html`, included from `_layouts/default.html`) — no per-page setup needed:
-
-- The description falls back to the page's own rendered content (stripped and truncated) if the content type has no `description` field.
-- The social preview image comes from `page.social_image`, which defaults to a field literally named `image` on each collection — set `image_field` on a `contentful_collections` entry (see above) if the real field is named something else (e.g. `coverImage`).
-- `og:locale` is derived from the page's locale (or the top-level `lang` setting for the primary locale).
-
-`sitemap.xml` and `robots.txt` are generated at the site root from every page's `.url`, so they stay correct automatically as content is added or removed — no extra config. A custom `404.html` is included too (required by GitHub Pages to show something other than GitHub's own default 404 page).
-
-**All of this needs `url` set correctly in `_config.yml`** (see the next section) — without a real absolute URL, canonical links, Open Graph tags, and the sitemap all render broken/relative links.
-
-## Commands
-
-- `bundle exec jekyll serve` — run the local dev server at `http://localhost:4000` (reads `.env` via the `dotenv` gem)
-- `bundle exec jekyll build` — build the static site into `_site/`
-- `bundle exec jekyll build --trace` — build with full backtraces on plugin errors
+- [`planning/Plan.md`](planning/Plan.md) — the full design spec (pages, components, formatting, i18n, accessibility, SEO, analytics) this site was built against.
+- [`planning/Plan-Issues.md`](planning/Plan-Issues.md) — that plan broken into individual issues, for historical/implementation-order reference (check the repo's actual issue tracker for current status, not this document).
+- [`planning/Contentful-Content-Model.md`](planning/Contentful-Content-Model.md) — field-by-field reference for the `product`, `manufacturer`, and `person` content types.
+- [`CLAUDE.md`](CLAUDE.md) — how the Contentful → Jekyll build pipeline itself works (the generator plugins, locale handling, field serialization, SEO internals) — the deeper "how" behind the features described above.
