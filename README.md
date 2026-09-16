@@ -27,7 +27,7 @@ Originally scaffolded from the `github-pages-contentful` template's Contentful �
 
 - Every image goes through a two-stage client-side fallback: a failed resize retries the original asset, and a fully broken/missing asset falls back to a generic placeholder — see `assets/js/image-fallback.js`.
 - Alt text is required and set from Contentful where available; the header's menu overlay is a native `<dialog>` (full keyboard support — focus trapping, Escape-to-close — for free).
-- An entry missing a field a template depends on is skipped with a build warning, not a failed build.
+- The build never fails on missing content fields — Liquid just renders an absent field as empty. An entry missing its `slug` specifically is skipped with a build warning instead of being built at a broken URL.
 
 **Fonts** — DM Sans and DM Mono are self-hosted (`assets/fonts/`, `_sass/_fonts.scss`) rather than loaded from Google's CDN at request time, avoiding an unnecessary third-party request/IP transfer. DM Mono is currently unused, reserved for a later design decision.
 
