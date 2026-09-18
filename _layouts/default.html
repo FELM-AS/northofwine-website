@@ -46,11 +46,11 @@
   {% include header.html %}
   {% endunless %}
   {% if page.home_hero %}
-  <aside>{% include menu.html %}</aside>
+  <aside>{% include navigation/hero.html %}</aside>
   {% elsif page.layout == "product" %}
   <aside>{% include product-sidebar.html %}</aside>
   {% elsif page.layout == "listing" %}
-  <aside>{% include filter-nav.html %}</aside>
+  <aside><h1>{{ page.title }}</h1>{% include navigation/filter.html %}</aside>
   {% else %}
   <aside></aside>
   {% endif %}

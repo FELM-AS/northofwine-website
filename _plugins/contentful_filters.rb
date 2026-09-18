@@ -6,7 +6,7 @@
 # site.utvalg_dir/site.produsenter_dir (site.config values resolved once
 # by _plugins/contentful_listing_pages.rb), previously repeated as its
 # own `prepend: "/" | append: "/"` pair at every call site (breadcrumb.html,
-# menu.html, filter-nav.html, product.html, 404.html).
+# menu.html, filter.html, product.html, 404.html).
 #
 # A nil/blank `dir` (e.g. contentful_data_collections' manufacturer entry
 # missing its optional `dir`, so site.produsenter_dir is never set) would

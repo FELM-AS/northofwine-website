@@ -8,7 +8,6 @@ layout: default
   product Page and a manufacturer Hash aren't otherwise distinguishable
   here.
 {% endcomment %}
-<h1>{{ page.title | escape }}</h1>
 {% if page.item_type == "product" %}
 {% for item in page.items %}
 {% include product-card.html product=item %}

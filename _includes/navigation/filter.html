@@ -11,10 +11,16 @@
   that scan ran on every render and depended on a URL-prefix convention
   that could silently drift from what the generator actually builds.
 {% endcomment %}
-<nav aria-label="Filter">
+<nav class="filter" aria-label="Filter">
   <ul>
     {% for sibling in page.siblings %}
-    <li><a href="{{ sibling.url | relative_url }}"{% if sibling.url == page.url %} aria-current="page"{% endif %}>{{ sibling.title | escape }}</a></li>
+    <li>
+      {% if sibling.url == page.url %}
+        {% include button.html class='selected' href=sibling.url text=sibling.title %}
+      {% else %}
+        {% include button.html href=sibling.url text=sibling.title %}
+      {% endif %}
+    </li>
     {% endfor %}
   </ul>
 </nav>
