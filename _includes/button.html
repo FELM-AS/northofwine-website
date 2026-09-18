@@ -6,6 +6,7 @@
 
   Params:
     href          - required. Escaped -- pass a plain URL string.
+    class         - optional, any additional classes.
     text          - required, link text. Escaped -- pass plain text.
     icon          - optional, raw HTML for the icon (e.g. an inline SVG
                     or entity) -- intentionally NOT escaped, unlike
@@ -16,7 +17,7 @@
 {% endcomment %}
 {% assign icon_position = include.icon_position | default: "right" | downcase | strip %}
 {% assign has_icon = include.icon.size > 0 %}
-<a class="button" href="{{ include.href | relative_url | escape }}">
+<a class="button {{ include.class | escape }}" href="{{ include.href | relative_url | escape }}">
   {% if has_icon and icon_position == "left" %}
     {% include icons/now-symbol.svg %}
   {% endif %}
