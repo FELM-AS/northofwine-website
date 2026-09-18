@@ -1,0 +1,139 @@
+:root{
+    --size-padding-container: 12px;
+    --size-padding-element: 12px;
+
+    --size-font-size-small: 12px;
+    --size-font-size-regular: 16px;
+    --size-line-height-small: 16px;
+    --size-line-height-regular: 24px;
+
+    --size-border-width-regular: 1px;
+    --size-border-width-medium: 2px;
+
+    --palette-neutral-0: 0 0 0;
+    --palette-neutral-90: 0 0 90;
+    --palette-neutral-95: 0 0 95;
+    --palette-neutral-100: 0 0 100;
+
+    --color-background-neutral-base: hsla(var(--palette-neutral-100) / 1);
+
+    --color-surface-neutral-base: none;
+    --color-surface-neutral-base-highlight:  hsla(var(--palette-neutral-0) / .05);
+    --color-surface-neutral-strong:  hsla(var(--palette-neutral-0) / .9);
+    --color-surface-neutral-strong-highlight:  hsla(var(--palette-neutral-0) / 1);
+
+    --color-border-neutral-subtle:  hsla(var(--palette-neutral-0) / .5);
+    --color-border-neutral-strong:  hsla(var(--palette-neutral-0) / .9);
+
+    --color-text-normal: hsla(var(--palette-neutral-0) / .9);
+    --color-text-highlight: hsla(var(--palette-neutral-0) / 1);
+    --color-text-onStrong-normal: hsla(var(--palette-neutral-100) / .9);
+    --color-text-onStrong-highlight: hsla(var(--palette-neutral-100) / 1);
+}
+
+header{
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: var(--size-padding-container);
+    background-color: var(--color-background-neutral-base);
+    border-bottom: var(--size-border-width-medium) solid var(--color-border-neutral-strong);
+}
+
+footer{
+    padding: var(--size-padding-container);
+    gap: var(--size-padding-container);
+    background-color: var(--color-background-neutral-base);
+    border-top: var(--size-border-width-medium) solid var(--color-border-neutral-strong);
+
+    div{
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--size-padding-container);
+        justify-content: space-between;
+    }
+
+    address{
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--size-padding-container);
+    }
+
+    ul{
+        display: flex;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+
+    dl{
+        padding: var(--size-padding-element);
+        margin: 0;
+        gap: var(--size-padding-container);
+
+        dt{
+            margin: 0;
+            font-size: var(--size-font-size-small);
+            line-height: var(--size-line-height-small);
+            font-style: normal;
+            font-weight: 700;
+        }
+        dd{
+            margin: 0;
+            font-size: var(--size-font-size-regular);
+            line-height: var(--size-line-height-regular);
+            font-style: normal;
+        }
+    }
+}
+
+.button{
+    display: inline-flex;
+    padding: var(--size-padding-element);
+    gap: var(--size-padding-element);
+    background-color: var(--color-surface-neutral-base);
+    font-family: "DM Mono", monospace;
+    font-size: var(--size-font-size-regular);
+    line-height: var(--size-line-height-regular);
+    text-decoration: none;
+    color: var(--color-text-normal);
+    border: none; // Needed for button element
+
+    svg{
+        height: var(--size-line-height-regular);
+        width: var(--size-line-height-regular);
+        fill: var(--color-text-normal);
+    }
+
+    &:hover{
+        background-color: var(--color-surface-neutral-base-highlight);
+        color: var(--color-text-normal-highlight);
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    &.strong{
+        background-color: var(--color-surface-neutral-strong);
+        color: var(--color-text-onStrong-normal);
+        svg{fill: var(--color-text-onStrong-normal);}
+
+        &:hover{
+            background-color: var(--color-surface-neutral-strong-highlight);
+            color: var(--color-text-onStrong-highlight);
+            svg{fill: var(--color-text-onStrong-highlight);}
+        }
+    }
+}
+
+p{
+    padding: var(--size-padding-element);
+    margin: 0;
+}
+
+p.small{
+    font-size: var(--size-font-size-small);
+    line-height: var(--size-line-height-small);
+    font-style: normal;
+    font-weight: 400;
+}

@@ -30,11 +30,6 @@
 @include dm-face("DM Sans", "../fonts/dm-sans-400.woff2", 400);
 @include dm-face("DM Sans", "../fonts/dm-sans-400-italic.woff2", 400, italic);
 @include dm-face("DM Sans", "../fonts/dm-sans-700.woff2", 700);
-
-// Self-hosted and declared here, but not yet applied to any element --
-// reserved for a specific future use (e.g. prices/numeric values) once
-// that's decided, same "reserved, not built" precedent as the header/
-// footer's language-switcher spot.
 @include dm-face("DM Mono", "../fonts/dm-mono-400.woff2", 400);
 
 body {

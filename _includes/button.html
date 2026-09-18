@@ -16,4 +16,12 @@
 {% endcomment %}
 {% assign icon_position = include.icon_position | default: "right" | downcase | strip %}
 {% assign has_icon = include.icon.size > 0 %}
-<a href="{{ include.href | escape }}">{% if has_icon and icon_position == "left" %}{{ include.icon }} {% endif %}{{ include.text | escape }}{% if has_icon and icon_position != "left" %} {{ include.icon }}{% endif %}</a>
+<a class="button" href="{{ include.href | relative_url | escape }}">
+  {% if has_icon and icon_position == "left" %}
+    {% include icons/now-symbol.svg %}
+  {% endif %}
+  {{ include.text | escape }}
+  {% if has_icon and icon_position != "left" %}
+    {% include icons/{{ include.icon }}.svg %}
+  {% endif %}
+</a>
