@@ -1,0 +1,31 @@
+:root{
+    --size-font-size-small: 12px;
+    --size-font-size-regular: 16px;
+    --size-font-size-medium: 24px;
+    --size-font-size-large: 30px;
+    --size-font-size-huge: 40px;
+    --size-line-height-small: 16px;
+    --size-line-height-regular: 24px;
+    --size-line-height-medium: 32px;
+    --size-line-height-large: 36px;
+    --size-line-height-huge: 48px;
+    
+    --size-font-weight-regular: 400;
+    --size-font-weight-bold: 700;
+}
+
+p, h1, h2, h3, h4, h5, h6{
+    padding: var(--size-padding-element);
+    margin: 0;
+}
+
+h1{
+
+}
+
+p.small{
+    font-size: var(--size-font-size-small);
+    line-height: var(--size-line-height-small);
+    font-style: normal;
+    font-weight: var(--size-font-weight-regular);
+}

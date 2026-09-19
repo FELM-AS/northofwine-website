@@ -3,11 +3,6 @@
     --size-padding-container: 12px;
     --size-padding-element: 12px;
 
-    --size-font-size-small: 12px;
-    --size-font-size-regular: 16px;
-    --size-line-height-small: 16px;
-    --size-line-height-regular: 24px;
-
     --size-border-width-regular: 1px;
     --size-border-width-medium: 2px;
 
@@ -78,7 +73,7 @@ footer{
             font-size: var(--size-font-size-small);
             line-height: var(--size-line-height-small);
             font-style: normal;
-            font-weight: 700;
+            font-weight: var(--size-font-weight-bold);
         }
         dd{
             margin: 0;
@@ -135,6 +130,10 @@ aside{
             var(--size-padding-container)
         );
     }
+}
+
+section{
+    padding: var(--size-padding-container);
 }
 
 .inverted{
@@ -198,16 +197,4 @@ aside{
             width: 96px;
         }
     }
-}
-
-p{
-    padding: var(--size-padding-element);
-    margin: 0;
-}
-
-p.small{
-    font-size: var(--size-font-size-small);
-    line-height: var(--size-line-height-small);
-    font-style: normal;
-    font-weight: 400;
 }
