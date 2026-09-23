@@ -96,6 +96,8 @@ contentful_data_collections:
     menu_label: Produsenter
   - content_type: person
     name: people
+    dir: omoss
+    menu_label: Om oss
 
 exclude:
   - README.md
