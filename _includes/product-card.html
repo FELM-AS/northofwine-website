@@ -33,18 +33,30 @@
 {% endcomment %}
 {% assign product = include.product %}
 {% assign product_lang = product.manufacturer.country | country_lang %}
-<a href="{{ product.url | relative_url }}">
-  <article>
-    {% include contentful-image.html asset=product.image width=600 fallback_alt=product.title %}
-    <p>
-      {{ product.product_type_name | escape }}{% if product.web_product_type_name %} · {{ product.web_product_type_name | escape }}{% endif %}
-      {% if product.country.size > 0 or product.region.size > 0 %}
-      — {% if product.country.size > 0 %}{{ product.country | escape }}{% endif %}{% if product.country.size > 0 and product.region.size > 0 %}, {% endif %}{% if product.region.size > 0 %}{{ product.region | escape }}{% endif %}
-      {% endif %}
-    </p>
-    <h2{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ product.title | escape }}</h2>
-    {% if product.product_id and product.sales_price > 0 %}
-    <p>{{ product.sales_price | nb_number: 2 }} kr →</p>
-    {% endif %}
+
+<!-- <a href="{{ product.url | relative_url }}"> -->
+  <article class="card product">
+    {% include contentful-image.html asset=product.image width=240 fallback_alt=product.title %}
+    <div class="content">
+      <p class="metadata">
+          {{ product.product_type_name | escape }}
+          {% if product.country.size > 0 and product.region.size > 0 %}
+            {{ product.country | escape }}, {{ product.region | escape }}
+          {% else if product.country.size > 0 %}
+            {{ product.country | escape }}
+          {% endif %}
+      </p>
+          {{ meta | join "," }}
+      <h2{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ product.title | escape }}</h2>
+      <div class="button-group">
+        {% if product.product_id and product.sales_price > 0 %}
+          {% capture vmp_url %}https://vinmonopolet.no/p/{{ product.product_id | escape }} {% endcapture %}
+          {% capture price %}{{ product.sales_price | nb_number: 2}} {% endcapture %}
+          {% include button.html href=vmp_url text=price class='vmp' icon='brands/vinmonopolet'%}
+        {% endif %}
+        {% include button.html href=product.url class='more' icon='ui/arrow-right'%}
+      </div>
+    </div>
+    
   </article>
-</a>
+<!-- </a> -->
