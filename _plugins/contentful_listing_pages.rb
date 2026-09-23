@@ -160,18 +160,22 @@ module ContentfulJekyll
       # About page (Om oss) — company profile + team members, root page only (no filters)
       if person_collection && person_collection["dir"]
         dir = ContentfulJekyll.dir_for(person_collection, locale)
+        about_menu_label = label_for(person_collection, "menu_label", locale, "Om oss")
         site.config["about_dir"] = dir if locale.primary?
-        site.config["about_menu_label"] = label_for(person_collection, "menu_label", locale, "Om oss") if locale.primary?
+        site.config["about_menu_label"] = about_menu_label if locale.primary?
 
         people = site.data[locale.data_key_for(person_collection["name"])] || []
-        about_entry = people.find { |p| p["company_profile"] }
+        company_profile_people = people.select { |p| p["company_profile"] }
+        about_entry = company_profile_people.first
         team_members = people.reject { |p| p["company_profile"] }
 
         if about_entry.nil?
           Jekyll.logger.warn LOG_TAG, "About (Om oss) page: no person entry with companyProfile=true found. The About page's intro text will be blank."
+        elsif company_profile_people.size > 1
+          entry_ids = company_profile_people.map { |p| p["id"] }.join(", ")
+          Jekyll.logger.warn LOG_TAG, "About (Om oss) page: #{company_profile_people.size} person entries have companyProfile=true (entries: #{entry_ids}) -- only the first is used as the intro, and all of them are excluded from the team list."
         end
 
-        about_menu_label = label_for(person_collection, "menu_label", locale, "Om oss")
         about_section_heading = label_for(person_collection, "section_heading", locale, "Om oss")
 
         about_page = build_page(site, locale, dir, nil, team_members, "the root listing", "person", {}, section_heading: about_section_heading, root_label: about_menu_label)

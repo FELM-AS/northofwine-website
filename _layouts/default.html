@@ -36,19 +36,14 @@
   {% endif %}
 </head>
 <body>
-  
-   {% if page.url == '/' %}
-
+  {% if page.home_hero %}
     <aside>
       {% include navigation/hero.html %}
     </aside>
     <main>
       {{ content }}
     </main>
-    {% include footer.html %}
-
   {% elsif page.layout == "product" %}
-
     {% include header.html %}
     <aside>
       {% include product-sidebar.html %}
@@ -56,10 +51,7 @@
     <main>
       {{ content }}
     </main>
-    {% include footer.html %}
-
   {% elsif page.layout == "listing" %}
-
     {% include header.html %}
     <aside>
       <h1>{{ page.section_heading }}</h1>
@@ -68,9 +60,9 @@
     <main class="list">
       {{ content }}
     </main>
-    {% include footer.html %}
-
+  {% else %}
+    {{ content }}
   {% endif %}
-  
+  {% include footer.html %}
 </body>
 </html>
