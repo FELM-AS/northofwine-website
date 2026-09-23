@@ -13,7 +13,7 @@
 
     --color-background-neutral-base: hsla(var(--palette-neutral-100) / 1);
 
-    --color-surface-neutral-base: none;
+    --color-surface-neutral-base: transparent;
     --color-surface-neutral-base-highlight:  hsla(var(--palette-neutral-0) / .05);
     --color-surface-neutral-strong:  hsla(var(--palette-neutral-0) / .9);
     --color-surface-neutral-strong-highlight:  hsla(var(--palette-neutral-0) / 1);
@@ -23,8 +23,26 @@
 
     --color-text-normal: hsla(var(--palette-neutral-0) / .9);
     --color-text-highlight: hsla(var(--palette-neutral-0) / 1);
-    --color-text-onStrong-normal: hsla(var(--palette-neutral-100) / .9);
-    --color-text-onStrong-highlight: hsla(var(--palette-neutral-100) / 1);
+    --color-text-on-strong-normal: hsla(var(--palette-neutral-100) / .9);
+    --color-text-on-strong-highlight: hsla(var(--palette-neutral-100) / 1);
+}
+
+// Rule groups repeated (verbatim or near-verbatim) more than once in this
+// file. Kept local here rather than shared with another partial's @use
+// module (main.scss's _typography.scss/_components.scss are separate
+// Sass modules) -- not worth that coupling for the one remaining
+// cross-file duplicate (p.small / footer dl dt).
+%unstyled-list{
+    display: flex;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+%wrap-row{
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--size-padding-container);
 }
 
 header{
@@ -45,23 +63,16 @@ footer{
     border-top: var(--size-border-width-medium) solid var(--color-border-neutral-strong);
 
     div{
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--size-padding-container);
+        @extend %wrap-row;
         justify-content: space-between;
     }
 
     address{
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--size-padding-container);
+        @extend %wrap-row;
     }
 
     ul{
-        display: flex;
-        padding: 0;
-        margin: 0;
-        list-style: none;
+        @extend %unstyled-list;
     }
 
     dl{
@@ -90,7 +101,6 @@ dialog#menu-dialog{
     top: var(--size-padding-layout);
     right: var(--size-padding-layout);
     left: auto;
-    //width: calc(100% - (var(--size-padding-layout) * 2));
     padding: 0;
     margin: 0;
     box-sizing: border-box;
@@ -110,10 +120,7 @@ nav{
     padding: var(--size-padding-container);
 
     ul{
-        display: flex;
-        padding: 0;
-        margin: 0;
-        list-style: none;
+        @extend %unstyled-list;
         flex-direction: column;
     }
 }
@@ -138,16 +145,16 @@ section{
 }
 
 .inverted{
-    color: var(--color-text-onStrong-normal);
+    color: var(--color-text-on-strong-normal);
     background-color: var(--color-surface-neutral-strong);
 
     .button{
-        color: var(--color-text-onStrong-normal);
-        svg{fill: var(--color-text-onStrong-normal);}
+        color: var(--color-text-on-strong-normal);
+        svg{fill: var(--color-text-on-strong-normal);}
 
         &:hover{
-            color: var(--color-text-onStrong-highlight);
-            svg{fill: var(--color-text-onStrong-highlight);}
+            color: var(--color-text-on-strong-highlight);
+            svg{fill: var(--color-text-on-strong-highlight);}
         }
     }
 }
@@ -173,20 +180,20 @@ section{
 
     &:hover{
         background-color: var(--color-surface-neutral-base-highlight);
-        color: var(--color-text-normal-highlight);
+        color: var(--color-text-highlight);
         text-decoration: underline;
         cursor: pointer;
     }
 
     &.strong{
         background-color: var(--color-surface-neutral-strong);
-        color: var(--color-text-onStrong-normal);
-        svg{fill: var(--color-text-onStrong-normal);}
+        color: var(--color-text-on-strong-normal);
+        svg{fill: var(--color-text-on-strong-normal);}
 
         &:hover{
             background-color: var(--color-surface-neutral-strong-highlight);
-            color: var(--color-text-onStrong-highlight);
-            svg{fill: var(--color-text-onStrong-highlight);}
+            color: var(--color-text-on-strong-highlight);
+            svg{fill: var(--color-text-on-strong-highlight);}
         }
     }
 

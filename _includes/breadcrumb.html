@@ -32,8 +32,9 @@
   a future change to that scoping can't be applied to one and missed on
   the other.
 
-  Params: product (required) -- a product's page data, e.g. `page` on a
-  product detail page.
+  Params:
+    product - required, a product's page data, e.g. `page` on a
+              product detail page.
 {% endcomment %}
 {% assign product_dir = site.product_dir | dir_href %}
 {% assign product_filter_pages = site.pages | where: "item_type", "product" | where: "locale", include.product.locale %}

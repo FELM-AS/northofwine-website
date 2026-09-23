@@ -1,22 +1,14 @@
 {% comment %}
-  Menu component (Plan.md): the 4 top-level nav links. Shared between
-  the header's overlay (_includes/header.html) and Hjem's inline sidebar
-  use (#19/M5) -- same content, different container.
-
-  URLs: Hjem is always "/". Utvalg/Produsenter read site.product_dir /
-  site.manufacturer_dir, resolved once by contentful_listing_pages.rb
-  via ContentfulJekyll.dir_for (not looked up independently here) --
-  see that file's class comment for why. Om oss has no config value to
-  read (it's not a Contentful collection).
+  Header overlay menu (Plan.md): the dialog's close button, a Hjem link
+  (hero.html's own logo link isn't shown inside this overlay), followed
+  by the shared Utvalg/Produsenter/Om oss links in
+  navigation/menu-items.html (also used by Hjem's inline sidebar,
+  navigation/hero.html -- see that file for what's different there).
 {% endcomment %}
 <nav class="menu inverted">
   <ul>
-    <button class="button" type="submit">
-      {% include icons/ui/x.svg %}
-    </button>
+    {% include icon-button.html type='submit' aria_label='Lukk meny' icon='ui/x' %}
     <li><a class="button" href="{{ '/' | relative_url }}">{{ site.title }}</a></li>
-    <li><a class="button" href="{{ site.product_dir | dir_href | relative_url }}">{{ site.product_menu_label }}</a></li>
-    <li><a class="button" href="{{ site.manufacturer_dir | dir_href | relative_url }}">{{ site.manufacturer_menu_label }}</a></li>
-    <li><a class="button" href="{{ site.about_dir | dir_href | relative_url }}">{{ site.about_menu_label }}</a></li>
+    {% include navigation/menu-items.html %}
   </ul>
 </nav>

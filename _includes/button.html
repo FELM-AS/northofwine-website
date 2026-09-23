@@ -7,34 +7,26 @@
   Params:
     href          - required. Escaped -- pass a plain URL string.
     class         - optional, any additional classes.
-    text          - required, link text. Escaped -- pass plain text.
+    text          - link text, escaped. Required unless aria_label is
+                    given for an icon-only button.
     icon          - optional, raw HTML for the icon (e.g. an inline SVG
                     or entity) -- intentionally NOT escaped, unlike
                     href/text, since it's meant to carry markup.
     icon_position - "left" or "right" (default "right"). Normalized
                     (case/whitespace-insensitive); anything other than
                     "left" renders on the right, matching the default.
+    aria_label    - optional, escaped. Accessible name for an icon-only
+                    button (no visible text) -- without it, the link
+                    renders with no accessible name at all.
 {% endcomment %}
 {% assign icon_position = include.icon_position | default: "right" | downcase | strip %}
 {% assign has_icon = include.icon.size > 0 %}
-{% if include.pseudo == 'True' %}
-  <span class="button {{ include.class | escape }}">
-    {% if has_icon and icon_position == "left" %}
-      {% include icons/{{ include.icon }}.svg %}
-    {% endif %}
-    {{ include.text | escape }}
-    {% if has_icon and icon_position != "left" %}
-      {% include icons/{{ include.icon }}.svg %}
-    {% endif %}
-  </span>
-{% else %}
-  <a class="button {{ include.class | escape }}" href="{{ include.href | relative_url | escape }}" {% if include.href == page.url %} aria-current="page" {% endif %}>
-    {% if has_icon and icon_position == "left" %}
-      {% include icons/{{ include.icon }}.svg %}
-    {% endif %}
-    {{ include.text | escape }}
-    {% if has_icon and icon_position != "left" %}
-      {% include icons/{{ include.icon }}.svg %}
-    {% endif %}
-  </a>
-{% endif %}
+<a class="button {{ include.class | escape }}" href="{{ include.href | relative_url | escape }}" {% if include.aria_label %}aria-label="{{ include.aria_label | escape }}"{% endif %} {% if include.href == page.url %} aria-current="page" {% endif %}>
+  {% if has_icon and icon_position == "left" %}
+    {% include icons/{{ include.icon }}.svg %}
+  {% endif %}
+  {{ include.text | escape }}
+  {% if has_icon and icon_position != "left" %}
+    {% include icons/{{ include.icon }}.svg %}
+  {% endif %}
+</a>

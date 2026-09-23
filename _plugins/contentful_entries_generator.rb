@@ -13,8 +13,6 @@ module ContentfulJekyll
     safe true
     priority :high
 
-    LOG_TAG = "Contentful:"
-
     # CDA hard limits: 1000 entries per request, up to 10 levels of linked
     # entries resolvable via `include`.
     MAX_PAGE_SIZE = 1000
@@ -109,10 +107,8 @@ module ContentfulJekyll
     # (e.g. "newsArticle" -> "News Article"). Unlike dir_for, falls back
     # instead of raising -- an untranslated heading isn't a broken URL.
     def home_label_for(collection, locale)
-      label = collection["label"]
-      label = label[locale.code] if label.is_a?(Hash)
-
-      label || Contentful::Support.snakify(collection["content_type"]).split("_").map(&:capitalize).join(" ")
+      default = Contentful::Support.snakify(collection["content_type"]).split("_").map(&:capitalize).join(" ")
+      ContentfulJekyll.label_for(collection, "label", locale, default)
     end
 
     # Fetches a content type into site.data.<name> instead of generating a
@@ -153,14 +149,16 @@ module ContentfulJekyll
     end
 
     # Returns nil (skipping the entry, with a warning) if the entry has no
-    # slug -- a blank/missing slug must never fall through to build_page,
-    # since [nil, ...].reject(&:empty?) would silently land it on the bare
+    # usable slug -- both a missing slug field (sanitized_slug returns nil)
+    # and a whitespace/punctuation-only one (Jekyll::Utils.slugify returns
+    # "") must never fall through to build_page, since
+    # [nil, ...].reject(&:empty?) would silently land either on the bare
     # collection dir (e.g. "/utvalg/"), colliding with that collection's
     # own root listing page (see contentful_listing_pages.rb).
     def build_page(site, entry, context)
       slug = sanitized_slug(entry)
 
-      if slug.nil?
+      if slug.nil? || slug.empty?
         Jekyll.logger.warn LOG_TAG, "entry #{entry.sys[:id]} (content_type: #{context.collection["content_type"]}) has no slug -- skipping, no page built for it"
         return nil
       end

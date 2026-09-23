@@ -17,7 +17,7 @@
     </p>
     <ul>
       {% for s in site.data.company.social %}
-      <li>{% include button.html href=s.url icon=s.icon %}</li>
+      <li>{% include button.html href=s.url icon=s.icon aria_label=s.name %}</li>
       {% endfor %}
     </ul>
   </div>
