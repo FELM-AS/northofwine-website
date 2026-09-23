@@ -14,11 +14,12 @@
 <nav class="filter" aria-label="Filter">
   <ul>
     {% for sibling in page.siblings %}
+    {% assign sibling_label = sibling.root_nav_label | default: sibling.title %}
     <li>
       {% if sibling.url == page.url %}
-        {% include button.html class='selected' href=sibling.url text=sibling.title %}
+        {% include button.html class='selected' href=sibling.url text=sibling_label %}
       {% else %}
-        {% include button.html href=sibling.url text=sibling.title %}
+        {% include button.html href=sibling.url text=sibling_label %}
       {% endif %}
     </li>
     {% endfor %}

@@ -50,6 +50,9 @@ contentful_collections:
     layout: product
     dir: utvalg
     body_field: description
+    section_heading: Vårt utvalg
+    root_label: Alle viner
+    menu_label: Utvalg
 
 # Optional: how deep a linked entry's own fields get flattened before
 # falling back to an {id, link_type} stub. Defaults to 2 if unset.
@@ -88,6 +91,9 @@ contentful_data_collections:
   - content_type: manufacturer
     name: manufacturers
     dir: produsenter
+    section_heading: Våre vinhus
+    root_label: Alle vinhus
+    menu_label: Produsenter
   - content_type: person
     name: people
 

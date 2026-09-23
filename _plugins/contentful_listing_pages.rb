@@ -13,7 +13,7 @@ module ContentfulJekyll
   # collection's `dir` is ever renamed).
   #
   # Also stashes each collection's resolved `dir` onto site.config
-  # ("utvalg_dir"/"produsenter_dir", see #generate) so _includes/menu.html
+  # ("product_dir"/"manufacturer_dir", see #generate) so _includes/menu.html
   # and _includes/breadcrumb.html can read a plain, already-locale-resolved
   # string instead of each independently re-deriving it in Liquid -- a
   # `dir` configured as a per-locale Hash (see dir_for below) would
@@ -42,7 +42,7 @@ module ContentfulJekyll
   # locale and every url_prefix/data_suffix below is nil -- byte-identical
   # output to a single-locale build.
   #
-  # site.config["utvalg_dir"]/["produsenter_dir"] are set from the
+  # site.config["product_dir"]/["manufacturer_dir"] are set from the
   # *primary* locale only -- _includes/menu.html and breadcrumb.html read
   # them directly and aren't themselves locale-parametrized yet (Plan.md's
   # "reserve a spot for a future language switcher", not "translate the
@@ -71,6 +71,14 @@ module ContentfulJekyll
 
     private
 
+    # Resolve a label from collection config (plain string or per-locale Hash)
+    # with a default fallback, mirroring home_label_for's approach.
+    def label_for(collection, key, locale, default)
+      label = collection[key]
+      label = label[locale.code] if label.is_a?(Hash)
+      label || default
+    end
+
     # One locale pass: builds that locale's own Utvalg/Produsenter
     # root/filter pages, scoped to that locale's own product pages and
     # manufacturers so nothing in a multi-locale build ever mixes one
@@ -85,7 +93,8 @@ module ContentfulJekyll
 
       if product_collection
         dir = ContentfulJekyll.dir_for(product_collection, locale)
-        site.config["utvalg_dir"] = dir if locale.primary?
+        site.config["product_dir"] = dir if locale.primary?
+        site.config["product_menu_label"] = label_for(product_collection, "menu_label", locale, "Utvalg") if locale.primary?
         # locale.path_for is the same helper EntriesGenerator's build_page
         # (contentful_entries_generator.rb) uses to prefix a non-primary
         # locale's own generated pages -- using it here too, rather than
@@ -96,9 +105,12 @@ module ContentfulJekyll
         product_pages = site.pages.select { |page| page.url.start_with?("/#{url_dir}/") }
         products_by_manufacturer = product_pages.group_by { |page| page.data.dig("manufacturer", "id") }
 
-        utvalg_pages = [build_page(site, locale, dir, nil, product_pages, "the root listing", "product")]
-        utvalg_pages.concat(build_grouped_pages(site, locale, dir, product_pages, "product_type_name", "product"))
-        utvalg_pages.concat(build_grouped_pages(site, locale, dir, product_pages, "web_product_type_name", "product"))
+        product_section_heading = label_for(product_collection, "section_heading", locale, "Vårt utvalg")
+        product_root_label = label_for(product_collection, "root_label", locale, "Alle viner")
+
+        utvalg_pages = [build_page(site, locale, dir, nil, product_pages, "the root listing", "product", section_heading: product_section_heading, root_label: product_root_label)]
+        utvalg_pages.concat(build_grouped_pages(site, locale, dir, product_pages, "product_type_name", "product", section_heading: product_section_heading))
+        utvalg_pages.concat(build_grouped_pages(site, locale, dir, product_pages, "web_product_type_name", "product", section_heading: product_section_heading))
         link_siblings(utvalg_pages)
         site.pages.concat(utvalg_pages)
       end
@@ -110,7 +122,8 @@ module ContentfulJekyll
       return unless manufacturer_collection && manufacturer_collection["dir"]
 
       dir = ContentfulJekyll.dir_for(manufacturer_collection, locale)
-      site.config["produsenter_dir"] = dir if locale.primary?
+      site.config["manufacturer_dir"] = dir if locale.primary?
+      site.config["manufacturer_menu_label"] = label_for(manufacturer_collection, "menu_label", locale, "Produsenter") if locale.primary?
       # locale.data_key_for is the same helper fetch_data_collection
       # (contentful_entries_generator.rb) uses to build the key it writes
       # this collection's entries under -- reading manufacturer_collection
@@ -119,7 +132,10 @@ module ContentfulJekyll
       # changes.
       manufacturers = site.data[locale.data_key_for(manufacturer_collection["name"])] || []
 
-      produsenter_pages = [build_page(site, locale, dir, nil, manufacturers, "the root listing", "manufacturer", products_by_manufacturer)]
+      manufacturer_section_heading = label_for(manufacturer_collection, "section_heading", locale, "Våre vinhus")
+      manufacturer_root_label = label_for(manufacturer_collection, "root_label", locale, "Alle vinhus")
+
+      produsenter_pages = [build_page(site, locale, dir, nil, manufacturers, "the root listing", "manufacturer", products_by_manufacturer, section_heading: manufacturer_section_heading, root_label: manufacturer_root_label)]
       # Country is a fixed 13-value enum (planning/Contentful-Content-Model.md,
       # Plan-Issues.md #14: "Each of the 13 country values has its own
       # static URL") -- unlike product_type_name/web_product_type_name
@@ -137,7 +153,8 @@ module ContentfulJekyll
       produsenter_pages.concat(
         build_grouped_pages(site, locale, dir, manufacturers, "country", "manufacturer",
                              enum_values: (site.data["countries"] || {}).keys,
-                             products_by_manufacturer: products_by_manufacturer)
+                             products_by_manufacturer: products_by_manufacturer,
+                             section_heading: manufacturer_section_heading)
       )
       link_siblings(produsenter_pages)
       site.pages.concat(produsenter_pages)
@@ -169,7 +186,7 @@ module ContentfulJekyll
     # why. Warning here, naming the specific unmatched entries, is the
     # cheapest way to surface that drift without actually querying
     # Contentful's content-type validations.
-    def build_grouped_pages(site, locale, dir, items, field, item_type, enum_values: nil, products_by_manufacturer: {})
+    def build_grouped_pages(site, locale, dir, items, field, item_type, enum_values: nil, products_by_manufacturer: {}, section_heading: nil)
       grouped = items.group_by { |item| item_field(item, field) }
       grouped.delete(nil)
 
@@ -182,7 +199,7 @@ module ContentfulJekyll
       end
 
       (enum_values || grouped.keys).map do |value|
-        build_page(site, locale, dir, value, grouped[value] || [], "the #{field} filter", item_type, products_by_manufacturer)
+        build_page(site, locale, dir, value, grouped[value] || [], "the #{field} filter", item_type, products_by_manufacturer, section_heading: section_heading)
       end
     end
 
@@ -220,7 +237,7 @@ module ContentfulJekyll
     # products_by_manufacturer: only meaningful for item_type
     # "manufacturer" -- see the class comment. Harmless ({}) for a product
     # listing page, which never reads it.
-    def build_page(site, locale, dir, value, items, label, item_type, products_by_manufacturer = {})
+    def build_page(site, locale, dir, value, items, label, item_type, products_by_manufacturer = {}, section_heading: nil, root_label: nil)
       slug = Jekyll::Utils.slugify(value, mode: "latin") if value
       page_dir = locale.path_for(dir, slug)
       page = Jekyll::PageWithoutAFile.new(site, site.source, page_dir, "index.html")
@@ -237,6 +254,8 @@ module ContentfulJekyll
       page.data["items"] = items
       page.data["item_type"] = item_type
       page.data["products_by_manufacturer"] = products_by_manufacturer
+      page.data["section_heading"] = section_heading if section_heading
+      page.data["root_nav_label"] = root_label if value.nil? && root_label
       # Matches EntriesGenerator's own convention: only set (to a real
       # value) for a non-primary locale, so a primary-locale listing page
       # falls back to site.lang for <html lang> exactly like today.

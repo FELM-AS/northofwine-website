@@ -10,7 +10,7 @@
   value itself via Liquid's `slugify: "latin"`, which only stayed correct
   by coincidentally matching the generator's own Ruby-side
   Jekyll::Utils.slugify(value, mode: "latin") call).
-  site.utvalg_dir is resolved once by that same plugin via
+  site.product_dir is resolved once by that same plugin via
   ContentfulJekyll.dir_for, not looked up independently here -- see its
   class comment for why.
 
@@ -35,10 +35,10 @@
   Params: product (required) -- a product's page data, e.g. `page` on a
   product detail page.
 {% endcomment %}
-{% assign utvalg_dir = site.utvalg_dir | dir_href %}
+{% assign product_dir = site.product_dir | dir_href %}
 {% assign product_filter_pages = site.pages | where: "item_type", "product" | where: "locale", include.product.locale %}
 <nav aria-label="Brødsmulesti">
-  <a href="{{ utvalg_dir | relative_url }}">Utvalg</a>
+  <a href="{{ product_dir | relative_url }}">{{ site.product_menu_label }}</a>
   {% if include.product.product_type_name %}
   {% assign type_page = product_filter_pages | where: "title", include.product.product_type_name | first %}
   {% if type_page %}
