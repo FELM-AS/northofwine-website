@@ -15,8 +15,10 @@ emails:
 social:
   - name: Facebook
     url: https://www.facebook.com/northofwine/
+    icon: brands/facebook
   - name: Instagram
     url: https://www.instagram.com/northofwine/
+    icon: brands/instagram
 helsenorge_url: https://helsenorge.no/rus-og-avhengighet/alkohol/alkohol-og-helse
 # Plan.md's SEO section: "Site-wide fallback image for pages without
 # one" -- read by _includes/seo.html for any page with no social_image

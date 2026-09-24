@@ -6,12 +6,16 @@
 // semantic HTML with no classes and no decorative CSS.
 
 body {
+  position: relative;
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-areas:
     "header header"
     "aside  main"
     "footer footer";
+  padding: var(--size-padding-layout);
+  gap: var(--size-padding-layout);
+  margin: 0;
 }
 
 header {

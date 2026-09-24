@@ -36,27 +36,33 @@
   {% endif %}
 </head>
 <body>
-  {% comment %}
-    Header/sidebar content varies per page, driven by data set on the
-    page itself (page.layout, or the home_hero flag) -- never by
-    inspecting page.url, matching this codebase's established
-    convention (see CLAUDE.md's Homepage & navigation section).
-  {% endcomment %}
-  {% unless page.home_hero %}
-  {% include header.html %}
-  {% endunless %}
   {% if page.home_hero %}
-  <aside>{% include menu.html %}</aside>
+    <aside>
+      {% include navigation/hero.html %}
+    </aside>
+    <main>
+      {{ content }}
+    </main>
   {% elsif page.layout == "product" %}
-  <aside>{% include product-sidebar.html %}</aside>
+    {% include header.html %}
+    <aside>
+      {% include product-sidebar.html %}
+    </aside>
+    <main>
+      {{ content }}
+    </main>
   {% elsif page.layout == "listing" %}
-  <aside>{% include filter-nav.html %}</aside>
+    {% include header.html %}
+    <aside>
+      <h1>{{ page.title }}</h1>
+      {% include navigation/filter.html %}
+    </aside>
+    <main class="list">
+      {{ content }}
+    </main>
   {% else %}
-  <aside></aside>
-  {% endif %}
-  <main>
     {{ content }}
-  </main>
+  {% endif %}
   {% include footer.html %}
 </body>
 </html>

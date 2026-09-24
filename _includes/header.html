@@ -22,12 +22,13 @@
   X" only needs each_locale's list, not a new mechanism.
 {% endcomment %}
 <header>
-  <a href="{{ '/' | relative_url }}">{{ site.title }}</a>
-  <button type="button" id="menu-open" aria-controls="menu-dialog">Meny</button>
+  {% include button.html href='/' icon='brands/now-symbol' text=site.title icon_position='left' %}
+  <button class="button" type="button" id="menu-open" aria-controls="menu-dialog">
+    {% include icons/ui/menu.svg %}
+  </button>
 </header>
 <dialog id="menu-dialog" aria-label="Meny">
-  {% include menu.html %}
   <form method="dialog">
-    <button type="submit">Lukk</button>
+    {% include navigation/menu.html %}
   </form>
 </dialog>

@@ -6,6 +6,7 @@
 
   Params:
     href          - required. Escaped -- pass a plain URL string.
+    class         - optional, any additional classes.
     text          - required, link text. Escaped -- pass plain text.
     icon          - optional, raw HTML for the icon (e.g. an inline SVG
                     or entity) -- intentionally NOT escaped, unlike
@@ -16,4 +17,24 @@
 {% endcomment %}
 {% assign icon_position = include.icon_position | default: "right" | downcase | strip %}
 {% assign has_icon = include.icon.size > 0 %}
-<a href="{{ include.href | escape }}">{% if has_icon and icon_position == "left" %}{{ include.icon }} {% endif %}{{ include.text | escape }}{% if has_icon and icon_position != "left" %} {{ include.icon }}{% endif %}</a>
+{% if include.pseudo == 'True' %}
+  <span class="button {{ include.class | escape }}">
+    {% if has_icon and icon_position == "left" %}
+      {% include icons/{{ include.icon }}.svg %}
+    {% endif %}
+    {{ include.text | escape }}
+    {% if has_icon and icon_position != "left" %}
+      {% include icons/{{ include.icon }}.svg %}
+    {% endif %}
+  </span>
+{% else %}
+  <a class="button {{ include.class | escape }}" href="{{ include.href | relative_url | escape }}" {% if include.href == page.url %} aria-current="page" {% endif %}>
+    {% if has_icon and icon_position == "left" %}
+      {% include icons/{{ include.icon }}.svg %}
+    {% endif %}
+    {{ include.text | escape }}
+    {% if has_icon and icon_position != "left" %}
+      {% include icons/{{ include.icon }}.svg %}
+    {% endif %}
+  </a>
+{% endif %}

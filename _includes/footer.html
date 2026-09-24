@@ -10,20 +10,35 @@
   markup here yet.
 {% endcomment %}
 <footer>
+  <div>
+    <p class="small">
+      Bruk av alkohol kan gi ulike skadevirkninger. Nærmere informasjon finner du hos
+      <a href="{{ site.data.company.helsenorge_url }}">Helsenorge</a>.
+    </p>
+    <ul>
+      {% for s in site.data.company.social %}
+      <li>{% include button.html href=s.url icon=s.icon %}</li>
+      {% endfor %}
+    </ul>
+  </div>
   <address>
-    {{ site.data.company.name }}<br>
-    {% for line in site.data.company.address %}{{ line }}<br>{% endfor %}
-    Org.nr. {{ site.data.company.org_number }}<br>
-    <a href="mailto:{{ site.data.company.emails.post }}">{{ site.data.company.emails.post }}</a><br>
-    <a href="mailto:{{ site.data.company.emails.faktura }}">{{ site.data.company.emails.faktura }}</a>
+    <dl>
+      <dt>E-post</dt>
+      <dd>
+        <a href="mailto:{{ site.data.company.emails.post }}">{{ site.data.company.emails.post }}</a>
+      </dd>
+      <dd>
+        <a href="mailto:{{ site.data.company.emails.faktura }}">{{ site.data.company.emails.faktura }}</a>
+      </dd>
+    </dl>
+    <dl>
+      <dt>{{ site.data.company.name }}</dt>
+      <dd>
+        {% for line in site.data.company.address %}{{ line }}{% endfor %}
+      </dd>
+      <dd>
+        Org.nr. {{ site.data.company.org_number }}
+      </dd>
+    </dl>
   </address>
-  <ul>
-    {% for s in site.data.company.social %}
-    <li>{% include button.html href=s.url text=s.name %}</li>
-    {% endfor %}
-  </ul>
-  <p>
-    Bruk av alkohol kan gi ulike skadevirkninger. Nærmere informasjon finner du hos
-    <a href="{{ site.data.company.helsenorge_url }}">Helsenorge</a>.
-  </p>
 </footer>
