@@ -1,4 +1,9 @@
 module ContentfulJekyll
+  # Shared Jekyll.logger progname for every contentful_* plugin -- was
+  # previously defined identically in both contentful_entries_generator.rb
+  # and contentful_listing_pages.rb.
+  LOG_TAG = "Contentful:"
+
   # code: locale to query, nil = no `locale` param (space's default).
   # url_prefix: nil for the primary locale, else its URL prefix. code and
   # url_prefix are both nil in different cases (no locales configured vs.
@@ -86,11 +91,38 @@ module ContentfulJekyll
     [code, prefix]
   end
 
+  # Resolves a label from collection config: `collection[key]` as a plain
+  # string, or a Hash keyed by locale code (same per-locale-override
+  # convention as `dir`, see dir_for below) -- falling back to `default`
+  # instead of raising, since an untranslated heading isn't a broken URL
+  # the way a missing/misconfigured dir is. Shared by
+  # contentful_entries_generator.rb's home_label_for and
+  # contentful_listing_pages.rb's own label resolution, which previously
+  # each reimplemented this identically.
+  def self.label_for(collection, key, locale, default)
+    label = collection[key]
+    label = label[locale.code] if label.is_a?(Hash)
+    label || default
+  end
+
   # `dir` is usually one string used for every locale; set it to a Hash
   # keyed by locale code when the path segment itself needs translating
   # (e.g. "produkter" vs "products"), not just prefixing.
+  #
+  # `dir` itself is required -- a nil value (key omitted from _config.yml
+  # entirely, or present with no value) raises immediately, the same way
+  # a per-locale Hash missing the current locale raises below, rather
+  # than silently generating pages at the site root. `dir: ""` (the
+  # site-root collection) is a distinct, valid, explicit value -- only a
+  # nil dir is an error.
   def self.dir_for(collection, locale)
     dir = collection["dir"]
+
+    if dir.nil?
+      raise "contentful_collections: \"dir\" is missing (content_type: #{collection["content_type"].inspect}) -- " \
+            "use dir: \"\" for the site root, not an omitted/blank key"
+    end
+
     return dir unless dir.is_a?(Hash)
 
     return dir[locale.code] if dir.key?(locale.code)

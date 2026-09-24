@@ -21,17 +21,20 @@
   are plain alphanumeric strings, valid HTML id values as-is.
 
   Params:
-    manufacturer (required) -- a manufacturer Hash, e.g. an item off
-      site.data.manufacturers or a listing page's page.items.
-    products -- that manufacturer's own product pages, precomputed once
-      per build by _plugins/contentful_listing_pages.rb (matched by
-      manufacturer id, not name -- names aren't guaranteed unique, ids
-      are) and passed in via _layouts/listing.html's
-      page.products_by_manufacturer[item.id], rather than this card
-      rediscovering them itself by scanning site.pages on every render.
-      Scoped per locale by that generator itself (each locale pass
-      groups only its own locale's product pages), so this card never
-      needs to filter by locale independently.
+    manufacturer - required, a manufacturer Hash, e.g. an item off
+                    site.data.manufacturers or a listing page's
+                    page.items.
+    products     - that manufacturer's own product pages, precomputed
+                    once per build by _plugins/contentful_listing_pages.rb
+                    (matched by manufacturer id, not name -- names
+                    aren't guaranteed unique, ids are) and passed in via
+                    _layouts/listing.html's
+                    page.products_by_manufacturer[item.id], rather than
+                    this card rediscovering them itself by scanning
+                    site.pages on every render. Scoped per locale by
+                    that generator itself (each locale pass groups only
+                    its own locale's product pages), so this card never
+                    needs to filter by locale independently.
 {% endcomment %}
 {% assign manufacturer = include.manufacturer %}
 {% assign manufacturer_lang = manufacturer.country | country_lang %}

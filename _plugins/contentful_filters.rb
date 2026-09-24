@@ -3,13 +3,13 @@
 # site:
 #
 # `dir_href`: "/<dir>/" -- the URL-prefixing convention for
-# site.utvalg_dir/site.produsenter_dir (site.config values resolved once
+# site.product_dir/site.manufacturer_dir (site.config values resolved once
 # by _plugins/contentful_listing_pages.rb), previously repeated as its
 # own `prepend: "/" | append: "/"` pair at every call site (breadcrumb.html,
 # menu.html, filter.html, product.html, 404.html).
 #
 # A nil/blank `dir` (e.g. contentful_data_collections' manufacturer entry
-# missing its optional `dir`, so site.produsenter_dir is never set) would
+# missing its optional `dir`, so site.manufacturer_dir is never set) would
 # otherwise silently build "//" -- a broken link with no build warning,
 # since every call site trusts this filter rather than guarding itself.
 # Raising here, the one shared place, catches it loudly instead.
@@ -22,7 +22,7 @@ require "cgi"
 module ContentfulJekyll
   module TemplateFilters
     def dir_href(dir)
-      raise "dir_href: no dir given -- a site.config value like site.utvalg_dir/site.produsenter_dir is nil or blank. Is the corresponding collection's `dir` set in _config.yml?" if dir.to_s.empty?
+      raise "dir_href: no dir given -- a site.config value like site.product_dir/site.manufacturer_dir is nil or blank. Is the corresponding collection's `dir` set in _config.yml?" if dir.to_s.empty?
 
       "/#{dir}/"
     end

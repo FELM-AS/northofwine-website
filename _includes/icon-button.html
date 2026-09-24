@@ -1,0 +1,21 @@
+{% comment %}
+  Icon-only <button> -- not <a>, which button.html already covers.
+  Shared shape for header.html's menu-open trigger and
+  navigation/menu.html's dialog-close button, both of which need a real
+  <button> for native <dialog> show()/close() semantics rather than
+  button.html's <a>.
+
+  Params:
+    type          - required, "button" or "submit".
+    id            - optional, element id (e.g. for another element's
+                    aria-controls to reference).
+    aria_controls - optional, id of the element this button controls.
+    aria_label    - required, escaped. This button has no visible text,
+                    so it has no accessible name without one.
+    icon          - required, icon path under _includes/icons/ (e.g.
+                    "ui/menu").
+    class         - optional, any additional classes.
+{% endcomment %}
+<button class="button{% if include.class %} {{ include.class | escape }}{% endif %}" type="{{ include.type }}"{% if include.id %} id="{{ include.id | escape }}"{% endif %}{% if include.aria_controls %} aria-controls="{{ include.aria_controls | escape }}"{% endif %} aria-label="{{ include.aria_label | escape }}">
+  {% include icons/{{ include.icon }}.svg %}
+</button>

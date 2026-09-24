@@ -37,10 +37,10 @@ module ContentfulJekyll
     # always comes from the content type's displayField, read straight
     # from entry.fields so it's correct even if displayField == skip.
     def flatten_fields(entry, depth, skip: [])
-      data = entry.fields.each_with_object({}) do |(name, value), data|
+      data = entry.fields.each_with_object({}) do |(name, value), result|
         next if skip.include?(name)
 
-        data[name.to_s] = serialize_field(value, depth)
+        result[name.to_s] = serialize_field(value, depth)
       end
 
       display_field = @display_fields[entry.sys[:content_type]&.id]

@@ -1,20 +1,28 @@
 ---
 layout: default
 ---
-{% comment %}
-  Listing pages built by _plugins/contentful_listing_pages.rb -- both
-  Utvalg (product) and Produsenter (manufacturer) root/filter pages
-  share this one layout, distinguished by page.item_type since a
-  product Page and a manufacturer Hash aren't otherwise distinguishable
-  here.
-{% endcomment %}
+
 {% if page.item_type == "product" %}
-{% for item in page.items %}
-{% include product-card.html product=item %}
-{% endfor %}
+
+  {% for item in page.items %}
+    {% include product-card.html product=item %}
+  {% endfor %}
+
 {% elsif page.item_type == "manufacturer" %}
-{% for item in page.items %}
-{% assign item_products = page.products_by_manufacturer[item.id] %}
-{% include manufacturer-card.html manufacturer=item products=item_products %}
-{% endfor %}
+
+  {% for item in page.items %}
+    {% assign item_products = page.products_by_manufacturer[item.id] %}
+    {% include manufacturer-card.html manufacturer=item products=item_products %}
+  {% endfor %}
+
+{% elsif page.item_type == "person" %}
+
+  <section>
+    <h2>{{ page.about_entry.title }}</h2>
+    {{ page.about_entry.description | markdownify }}
+  </section>
+
+  {% for item in page.items %}
+    {% include person-card.html person=item %}
+  {% endfor %}
 {% endif %}

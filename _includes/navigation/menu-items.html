@@ -1,0 +1,17 @@
+{% comment %}
+  Shared nav-links block: the 3 top-level Contentful-collection links
+  (Utvalg/Produsenter/Om oss), common to both navigation/hero.html
+  (Hjem's inline sidebar) and navigation/menu.html (the header's
+  overlay) -- included from both rather than duplicated, so a future
+  change to these 3 links (a new item, an added attribute, a
+  label-lookup tweak) only has to happen once.
+
+  URLs: site.product_dir / site.manufacturer_dir / site.about_dir,
+  resolved once by contentful_listing_pages.rb via
+  ContentfulJekyll.dir_for (not looked up independently here) -- see
+  that file's class comment for why. Om oss has no config value to
+  read (it's not a Contentful collection).
+{% endcomment %}
+<li><a class="button" href="{{ site.product_dir | dir_href | relative_url }}">{{ site.product_menu_label }}</a></li>
+<li><a class="button" href="{{ site.manufacturer_dir | dir_href | relative_url }}">{{ site.manufacturer_menu_label }}</a></li>
+<li><a class="button" href="{{ site.about_dir | dir_href | relative_url }}">{{ site.about_menu_label }}</a></li>

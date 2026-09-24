@@ -57,7 +57,7 @@ layout: default
 
   {% if page.manufacturer.id and page.manufacturer.title %}
   <p>
-    <a href="{{ site.produsenter_dir | dir_href | relative_url }}#{{ page.manufacturer.id }}"{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ page.manufacturer.title | escape }}</a>
+    <a href="{{ site.manufacturer_dir | dir_href | relative_url }}#{{ page.manufacturer.id }}"{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ page.manufacturer.title | escape }}</a>
   </p>
   {% endif %}
 

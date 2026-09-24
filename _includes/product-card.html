@@ -6,10 +6,13 @@
   editor-created entry still awaiting pricing, and render a
   fully-formatted "0,00 kr" that reads as a deliberate free price.
   sales_price_horeca is never shown, it's trade pricing given by
-  request. Entire card links to the product detail page -- so the
-  price/arrow bit is plain content here, not the Button include:
-  nesting an <a> inside the card's own wrapping <a> would be invalid
-  HTML.
+  request. The entire card is clickable via a "stretched link": the
+  `.more` arrow button's ::after pseudo-element (_sass/_components.scss)
+  is absolutely positioned to cover the whole card, positioned relative
+  to .card's own `position: relative` -- not a real wrapping <a>, which
+  would have nested an <a> inside the card's own price/arrow buttons.
+  `.more`'s aria_label carries the accessible name for that whole-card
+  link, not just "view arrow".
 
   Price is formatted per Norwegian convention (Plan.md's Formatting
   section) via the `nb_number` filter in _plugins/contentful_filters.rb --
@@ -28,35 +31,33 @@
   country/region/productShortName), same convention as
   _includes/button.html's href/text.
 
-  Params: product (required) -- a product page, e.g. `page` on a
-  product detail page, or an item off a listing page's `page.items`.
+  Params:
+    product - required, a product page, e.g. `page` on a product
+              detail page, or an item off a listing page's `page.items`.
 {% endcomment %}
 {% assign product = include.product %}
 {% assign product_lang = product.manufacturer.country | country_lang %}
+{% capture more_label %}Se {{ product.title }}{% endcapture %}
 
-<!-- <a href="{{ product.url | relative_url }}"> -->
-  <article class="card product">
-    {% include contentful-image.html asset=product.image width=240 fallback_alt=product.title %}
-    <div class="content">
-      <p class="metadata">
-          {{ product.product_type_name | escape }}
-          {% if product.country.size > 0 and product.region.size > 0 %}
-            {{ product.country | escape }}, {{ product.region | escape }}
-          {% else if product.country.size > 0 %}
-            {{ product.country | escape }}
-          {% endif %}
-      </p>
-          {{ meta | join "," }}
-      <h2{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ product.title | escape }}</h2>
-      <div class="button-group">
-        {% if product.product_id and product.sales_price > 0 %}
-          {% capture vmp_url %}https://vinmonopolet.no/p/{{ product.product_id | escape }} {% endcapture %}
-          {% capture price %}{{ product.sales_price | nb_number: 2}} {% endcapture %}
-          {% include button.html href=vmp_url text=price class='vmp' icon='brands/vinmonopolet'%}
+<article class="card product">
+  {% include contentful-image.html asset=product.image width=240 fallback_alt=product.title %}
+  <div class="content">
+    <p class="metadata">
+        {{ product.product_type_name | escape }}
+        {% if product.country.size > 0 and product.region.size > 0 %}
+          {{ product.country | escape }}, {{ product.region | escape }}
+        {% elsif product.country.size > 0 %}
+          {{ product.country | escape }}
         {% endif %}
-        {% include button.html href=product.url class='more' icon='ui/arrow-right'%}
-      </div>
+    </p>
+    <h2{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ product.title | escape }}</h2>
+    <div class="button-group">
+      {% if product.product_id and product.sales_price > 0 %}
+        {% capture vmp_url %}https://vinmonopolet.no/p/{{ product.product_id | escape }} {% endcapture %}
+        {% capture price %}{{ product.sales_price | nb_number: 2}} {% endcapture %}
+        {% include button.html href=vmp_url text=price class='vmp' icon='brands/vinmonopolet'%}
+      {% endif %}
+      {% include button.html href=product.url class='more' icon='ui/arrow-right' aria_label=more_label %}
     </div>
-    
-  </article>
-<!-- </a> -->
+  </div>
+</article>
