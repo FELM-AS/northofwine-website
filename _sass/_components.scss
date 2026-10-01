@@ -123,10 +123,16 @@ nav{
         @extend %unstyled-list;
         flex-direction: column;
     }
+
+    &.menu{
+        aspect-ratio: 1 / 1;
+        min-width: 288px;
+    }
 }
 
 aside{
     position: relative;
+    min-width: 240px;
 
     nav{
         position: sticky;
@@ -213,10 +219,20 @@ section{
     padding: var(--size-padding-container);
     min-width: 320px;
     border: var(--size-border-width-regular) solid var(--color-border-neutral-subtle);
+    flex: 1 1 30%;
+
+    &.spacer{
+        border: none;
+    }
 
     &.product{
-        flex: 1 1 30%;
         flex-direction: row;
+
+        h2{
+            flex: 1 1 auto;
+            hyphens: auto;
+            text-wrap: balance;
+        }
 
         img{
             width: 96px;
@@ -225,11 +241,72 @@ section{
             object-position: bottom left;
             flex: 0 0 auto;
         }
+    }
+
+    &.manufacturer{
+        flex-direction: column;
 
         h2{
-            flex: 1 1 auto;
-            hyphens: auto;
-            text-wrap: balance;
+            flex: 0 0 auto;
+        }
+
+        img{
+            width: 100%;
+            height: auto;
+            aspect-ratio: 2 / 1;
+            object-fit: cover;
+            object-position: center;
+            padding: var(--size-padding-element);
+            box-sizing: border-box;
+        }
+
+        .logo{
+            width: auto;
+            height: 120px;
+            object-fit: contain;
+            object-position: top left;
+            padding: calc(var(--size-padding-element) + var(--size-padding-container) + var(--size-padding-element));
+            position: absolute;
+        }
+
+        .url{
+            font-family: "DM Mono", monospace;
+        }
+    }
+
+    &.person{
+        flex-direction: column;
+
+        h2{
+            flex: 0 0 auto;
+        }
+
+        img{
+            width: 100%;
+            height: auto;
+            aspect-ratio: 3 / 2;
+            object-fit: cover;
+            object-position: center;
+            padding: var(--size-padding-element);
+            box-sizing: border-box;
+        }
+    }
+
+    ul{
+        padding: var(--size-padding-element);
+        margin: 0;
+        list-style: none;
+
+        li{
+            margin: 0 0 var(--size-padding-element) 0;
+        }
+    }
+
+    a{
+        color: var(--color-text-normal);
+        &:hover{
+            color: var(--color-text-highlight);
+            text-decoration: none;
         }
     }
     
