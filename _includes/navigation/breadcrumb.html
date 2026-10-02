@@ -38,18 +38,29 @@
 {% endcomment %}
 {% assign product_dir = site.product_dir | dir_href %}
 {% assign product_filter_pages = site.pages | where: "item_type", "product" | where: "locale", include.product.locale %}
-<nav aria-label="Brødsmulesti">
-  <a href="{{ product_dir | relative_url }}">{{ site.product_menu_label }}</a>
+<nav class="breadcrumb" aria-label="Brødsmulesti">
+  <ul>
+    <li>
+      {% include button.html href=product_dir text=site.product_menu_label %}
+    </li>
+  
   {% if include.product.product_type_name %}
   {% assign type_page = product_filter_pages | where: "title", include.product.product_type_name | first %}
   {% if type_page %}
-  / <a href="{{ type_page.url | relative_url }}">{{ include.product.product_type_name | escape }}</a>
+  <li>
+    {% include button.html href=type_page.url text=include.product.product_type_name %}
+  </li>
   {% endif %}
   {% endif %}
   {% if include.product.web_product_type_name %}
   {% assign web_type_page = product_filter_pages | where: "title", include.product.web_product_type_name | first %}
   {% if web_type_page %}
-  / <a href="{{ web_type_page.url | relative_url }}">{{ include.product.web_product_type_name | escape }}</a>
+    <li>
+      {% include button.html href=web_type_page.url text=include.product.web_product_type_name %}
+    </li>
   {% endif %}
   {% endif %}
+  </ul>
+
+  {% include contentful-image.html asset=include.product.image width=400 fallback_alt=include.product.title %}
 </nav>

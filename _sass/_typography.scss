@@ -12,16 +12,109 @@
     
     --size-font-weight-regular: 400;
     --size-font-weight-bold: 700;
+
+    --font-family-mono: "DM Mono", monospace;
 }
 
-p, h1, h2, h3, h4, h5, h6{
+h1, h2, h3, h4, h5, h6{
     padding: var(--size-padding-element);
     margin: 0;
+    max-width: var(--size-content-maxwidth);
+    hyphens: auto;
+    text-wrap: balance;
 }
 
-p.small{
-    font-size: var(--size-font-size-small);
-    line-height: var(--size-line-height-small);
-    font-style: normal;
+h1{
+    font-size: var(--size-font-size-huge);
+    line-height: var(--size-line-height-huge);
+    margin-bottom: var(--size-line-height-regular);
+}
+
+h2{
+    font-size: var(--size-font-size-large);
+    line-height: var(--size-line-height-large);
+    margin-bottom: var(--size-line-height-regular);
+}
+
+h3{
+    font-size: var(--size-font-size-medium);
+    line-height: var(--size-line-height-medium);
+    margin-bottom: var(--size-line-height-regular);
+}
+
+p{
+    font-size: var(--size-font-size-regular);
+    line-height: var(--size-line-height-regular);
     font-weight: var(--size-font-weight-regular);
+    font-style: normal;
+    padding: var(--size-padding-element);
+    margin: 0;
+    max-width: var(--size-content-maxwidth);
+
+    &:has(+ :not(p)){
+        margin-bottom: var(--size-line-height-regular);
+    }
+
+    &.metadata{
+        margin-bottom: 0;
+    }
+
+    &.small{
+        font-size: var(--size-font-size-small);
+        line-height: var(--size-line-height-small);
+    }
+}
+
+a{
+    color: var(--color-text-normal);
+    &:hover{
+        color: var(--color-text-highlight);
+        text-decoration: none;
+    }
+
+    &.url{
+        font-family: var(--font-family-mono);
+    }
+}
+
+dl{
+    padding: var(--size-padding-element);
+    margin: 0;
+    gap: var(--size-padding-container);
+    max-width: var(--size-content-maxwidth);
+
+    dt{
+        margin-bottom: var(--size-padding-element);
+        font-size: var(--size-font-size-small);
+        line-height: var(--size-line-height-small);
+        font-style: normal;
+        font-weight: var(--size-font-weight-bold);
+        font-family: var(--font-family-mono);
+    }
+    dd{
+        margin: 0;
+        font-size: var(--size-font-size-regular);
+        line-height: var(--size-line-height-regular);
+        font-style: normal;
+
+        &:has(+ dt){
+            margin-bottom: var(--size-line-height-regular);
+        }
+    }
+}
+
+.button{
+    font-family: var(--font-family-mono);
+    font-size: var(--size-font-size-regular);
+    line-height: var(--size-line-height-regular);
+    text-decoration: none;
+
+    svg{
+        height: var(--size-line-height-regular);
+        width: var(--size-line-height-regular);
+    }
+
+    &:hover{
+        text-decoration: underline;
+    }
 }

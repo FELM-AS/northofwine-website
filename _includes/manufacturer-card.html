@@ -39,13 +39,13 @@
 {% assign manufacturer = include.manufacturer %}
 {% assign manufacturer_lang = manufacturer.country | country_lang %}
 {% assign manufacturer_products = include.products %}
-<article{% if manufacturer.id %} id="{{ manufacturer.id }}"{% endif %}>
+<article{% if manufacturer.id %} id="{{ manufacturer.id }}"{% endif %} class="card manufacturer">
   {% include contentful-image.html asset=manufacturer.image width=600 fallback_alt=manufacturer.title %}
   {% assign logo_alt = manufacturer.title | append: " logo" %}
-  {% include contentful-image.html asset=manufacturer.logo width=200 fallback_alt=logo_alt %}
+  {% include contentful-image.html asset=manufacturer.logo width=200 class='logo' fallback_alt=logo_alt %}
   <h2{% if manufacturer_lang %} lang="{{ manufacturer_lang }}"{% endif %}>{{ manufacturer.title | escape }}</h2>
   {% if manufacturer.link.size > 0 %}
-  <p><a href="{{ manufacturer.link | escape }}" target="_blank" rel="noopener">Nettside</a></p>
+  <p><a class="url" href="{{ manufacturer.link | escape }}" target="_blank" rel="noopener">{{ manufacturer.link | strip_protocol | split:'/' | first | escape }}</a></p>
   {% endif %}
   <p>{{ manufacturer.description | escape | newline_to_br }}</p>
   {% if manufacturer_products.size > 0 %}

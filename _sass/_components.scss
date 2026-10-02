@@ -1,7 +1,9 @@
 :root{
-    --size-padding-layout: 24px;
+    --size-padding-layout: clamp(1.5rem, 0.75rem + 2.5vi, 3rem); //48px;
     --size-padding-container: 12px;
     --size-padding-element: 12px;
+
+    --size-content-maxwidth: 720px;
 
     --size-border-width-regular: 1px;
     --size-border-width-medium: 2px;
@@ -47,7 +49,9 @@
 
 header{
     position: sticky;
+    width: 100%;
     top: 0;
+    box-sizing: border-box;
     z-index: 1000;
     display: flex;
     justify-content: space-between;
@@ -73,26 +77,6 @@ footer{
 
     ul{
         @extend %unstyled-list;
-    }
-
-    dl{
-        padding: var(--size-padding-element);
-        margin: 0;
-        gap: var(--size-padding-container);
-
-        dt{
-            margin: 0;
-            font-size: var(--size-font-size-small);
-            line-height: var(--size-line-height-small);
-            font-style: normal;
-            font-weight: var(--size-font-weight-bold);
-        }
-        dd{
-            margin: 0;
-            font-size: var(--size-font-size-regular);
-            line-height: var(--size-line-height-regular);
-            font-style: normal;
-        }
     }
 }
 
@@ -123,6 +107,11 @@ nav{
         @extend %unstyled-list;
         flex-direction: column;
     }
+
+    &.menu{
+        aspect-ratio: 1 / 1;
+        min-width: 288px;
+    }
 }
 
 aside{
@@ -137,6 +126,31 @@ aside{
             var(--size-padding-element) +
             var(--size-padding-container)
         );
+    }
+
+    .breadcrumb{
+        overflow: hidden;
+        ul{
+            position: absolute;
+            top: var(--size-padding-container);
+            right: var(--size-padding-container);
+            background-color: hsla(var(--palette-neutral-100) / .5);
+
+            li{
+                text-align: right;
+            }
+        }
+    }
+
+    img{
+        width: 100%;
+        max-height: 480px;
+        object-fit: contain;
+        object-position: left;
+        box-sizing: border-box;
+        float: left;
+        height: auto;
+        padding: var(--size-padding-element);
     }
 }
 
@@ -165,23 +179,16 @@ section{
     padding: var(--size-padding-element);
     gap: var(--size-padding-element);
     background-color: var(--color-surface-neutral-base);
-    font-family: "DM Mono", monospace;
-    font-size: var(--size-font-size-regular);
-    line-height: var(--size-line-height-regular);
-    text-decoration: none;
     color: var(--color-text-normal);
     border: none; // Needed for button element
 
     svg{
-        height: var(--size-line-height-regular);
-        width: var(--size-line-height-regular);
         fill: var(--color-text-normal);
     }
 
     &:hover{
         background-color: var(--color-surface-neutral-base-highlight);
         color: var(--color-text-highlight);
-        text-decoration: underline;
         cursor: pointer;
     }
 
@@ -213,10 +220,18 @@ section{
     padding: var(--size-padding-container);
     min-width: 320px;
     border: var(--size-border-width-regular) solid var(--color-border-neutral-subtle);
+    flex: 1 1 30%;
+
+    &.spacer{
+        border: none;
+    }
 
     &.product{
-        flex: 1 1 30%;
         flex-direction: row;
+
+        h2{
+            flex: 1 1 auto;
+        }
 
         img{
             width: 96px;
@@ -225,11 +240,60 @@ section{
             object-position: bottom left;
             flex: 0 0 auto;
         }
+    }
+
+    &.manufacturer{
+        flex-direction: column;
 
         h2{
-            flex: 1 1 auto;
-            hyphens: auto;
-            text-wrap: balance;
+            flex: 0 0 auto;
+        }
+
+        img{
+            width: 100%;
+            height: auto;
+            aspect-ratio: 2 / 1;
+            object-fit: cover;
+            object-position: center;
+            padding: var(--size-padding-element);
+            box-sizing: border-box;
+        }
+
+        .logo{
+            width: auto;
+            height: 120px;
+            object-fit: contain;
+            object-position: top left;
+            padding: calc(var(--size-padding-element) + var(--size-padding-container) + var(--size-padding-element));
+            position: absolute;
+        }
+    }
+
+    &.person{
+        flex-direction: column;
+
+        h2{
+            flex: 0 0 auto;
+        }
+
+        img{
+            width: 100%;
+            height: auto;
+            aspect-ratio: 3 / 2;
+            object-fit: cover;
+            object-position: center;
+            padding: var(--size-padding-element);
+            box-sizing: border-box;
+        }
+    }
+
+    ul{
+        padding: var(--size-padding-element);
+        margin: 0;
+        list-style: none;
+
+        li{
+            margin: 0 0 var(--size-padding-element) 0;
         }
     }
     
@@ -267,11 +331,15 @@ section{
 }
 
 main.list{
-    display: flex;
-    flex-wrap: wrap;
+    // display: flex;
+    // flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
     gap: var(--size-padding-layout);
 }
 
-a article{
-    text-decoration: none;
+hr{
+    border: var(--size-border-width-regular) solid var(--color-border-neutral-subtle);
+    margin: calc(var(--size-padding-container) + var(--size-padding-element));
+    max-width: 720px;
 }

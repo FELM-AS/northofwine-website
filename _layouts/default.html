@@ -9,7 +9,7 @@
 <html lang="{{ page_lang }}">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{{ page_title }}</title>
   {% include seo.html %}
   <link rel="stylesheet" href="{{ "/assets/css/main.css" | relative_url }}">
@@ -46,7 +46,7 @@
   {% elsif page.layout == "product" %}
     {% include header.html %}
     <aside>
-      {% include product-sidebar.html %}
+      {% include navigation/breadcrumb.html product=page %}
     </aside>
     <main>
       {{ content }}
@@ -54,7 +54,6 @@
   {% elsif page.layout == "listing" %}
     {% include header.html %}
     <aside>
-      <h1>{{ page.section_heading }}</h1>
       {% include navigation/filter.html %}
     </aside>
     <main class="list">
