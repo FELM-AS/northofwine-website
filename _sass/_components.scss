@@ -132,7 +132,6 @@ nav{
 
 aside{
     position: relative;
-    min-width: 240px;
 
     nav{
         position: sticky;
@@ -143,6 +142,31 @@ aside{
             var(--size-padding-element) +
             var(--size-padding-container)
         );
+    }
+
+    .breadcrumb{
+        overflow: hidden;
+        ul{
+            position: absolute;
+            top: var(--size-padding-container);
+            right: var(--size-padding-container);
+            background-color: hsla(var(--palette-neutral-100) / .5);
+
+            li{
+                text-align: right;
+            }
+        }
+    }
+
+    img{
+        width: 100%;
+        max-height: 480px;
+        object-fit: contain;
+        object-position: left;
+        box-sizing: border-box;
+        float: left;
+        height: auto;
+        padding: var(--size-padding-element);
     }
 }
 
@@ -349,6 +373,8 @@ main.list{
     gap: var(--size-padding-layout);
 }
 
-a article{
-    text-decoration: none;
+hr{
+    border: var(--size-border-width-regular) solid var(--color-border-neutral-subtle);
+    margin: calc(var(--size-padding-container) + var(--size-padding-element));
+    max-width: 720px;
 }

@@ -24,6 +24,7 @@ header {
 
 aside {
   grid-area: aside;
+  min-width: 240px;
 }
 
 main {
@@ -42,5 +43,8 @@ footer {
       "aside"
       "main"
       "footer";
+  }
+  aside{
+    width: auto !important;
   }
 }

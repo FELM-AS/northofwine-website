@@ -46,7 +46,7 @@
   {% elsif page.layout == "product" %}
     {% include header.html %}
     <aside>
-      {% include product-sidebar.html %}
+      {% include navigation/breadcrumb.html product=page %}
     </aside>
     <main>
       {{ content }}

@@ -51,71 +51,109 @@ layout: default
 {% assign third_axis_value = page.sweetness %}
 {% endif %}
 <article>
-  <h1{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ page.title | escape }}</h1>
+  <section>
+    <h1{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ page.title | escape }}</h1>
 
-  {{ content }}
+    {{ content }}
 
-  {% if page.manufacturer.id and page.manufacturer.title %}
-  <p>
-    <a href="{{ site.manufacturer_dir | dir_href | relative_url }}#{{ page.manufacturer.id }}"{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ page.manufacturer.title | escape }}</a>
-  </p>
-  {% endif %}
-
-  {% if page.grape_desc.size > 0 %}
-  <h2>Druetyper</h2>
-  <dl>
-    {% comment %}
-      grapeDesc/grapePct are two independent Contentful list fields, paired
-      positionally -- nothing in Contentful ties their lengths together, so
-      an editor can add/remove one side without the other. Only pairing up
-      to the shorter list's length (rather than looping page.grape_desc and
-      indexing into a possibly-shorter page.grape_pct) avoids ever showing a
-      grape name next to a blank/missing percentage.
-    {% endcomment %}
-    {% assign grape_pair_count = page.grape_desc.size %}
-    {% if page.grape_pct.size < grape_pair_count %}{% assign grape_pair_count = page.grape_pct.size %}{% endif %}
-    {% for grape in page.grape_desc limit: grape_pair_count %}
-    <dt>{{ grape | escape }}</dt>
-    <dd>{{ page.grape_pct[forloop.index0] | escape }}</dd>
-    {% endfor %}
-  </dl>
-  {% endif %}
-
-  {% if page.colour.size > 0 or page.odour.size > 0 or page.taste.size > 0 or page.fullness or page.freshness or third_axis_value %}
-  <h2>Sensorikk</h2>
-  {% if page.colour.size > 0 %}<p>Farge: {{ page.colour | escape }}</p>{% endif %}
-  {% if page.odour.size > 0 %}<p>Lukt: {{ page.odour | escape }}</p>{% endif %}
-  {% if page.taste.size > 0 %}<p>Smak: {{ page.taste | escape }}</p>{% endif %}
-  {% if page.fullness or page.freshness or third_axis_value %}
-  <ul>
-    {% if page.fullness %}
-    <li>Fylde: <meter min="1" max="12" value="{{ page.fullness }}">{{ page.fullness | nb_number }} av 12</meter></li>
+    {% if page.production_method_storage %}
+    <dl>
+      <dt>Metode</dt>
+      <dd>{{ page.production_method_storage | escape | newline_to_br }}</dd>
+    </dl>
     {% endif %}
-    {% if page.freshness %}
-    <li>Friskhet: <meter min="1" max="12" value="{{ page.freshness }}">{{ page.freshness | nb_number }} av 12</meter></li>
-    {% endif %}
-    {% if third_axis_value %}
-    <li>{{ third_axis_label }}: <meter min="1" max="12" value="{{ third_axis_value }}">{{ third_axis_value | nb_number }} av 12</meter></li>
-    {% endif %}
-  </ul>
-  {% endif %}
-  {% endif %}
 
-  {% if page.recommended_food.size > 0 %}
-  <h2>Passer til</h2>
-  <ul>
-    {% for food in page.recommended_food %}
-    <li>{{ food | escape }}</li>
-    {% endfor %}
-  </ul>
-  {% endif %}
+    {% if page.manufacturer.id and page.manufacturer.title %}
+    <dl>
+      <dt>Produsent</dt>
+      <dd>
+        <a href="{{ site.manufacturer_dir | dir_href | relative_url }}#{{ page.manufacturer.id }}"{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ page.manufacturer.title | escape }}</a>
+      </dd>
+    </dl>
+    {% endif %}
+  </section>
+  <hr>
+  <section>
+    {% if page.fullness or page.freshness or third_axis_value %}
+    <dl>
+      {% if page.fullness %}
+        <dt>Fylde</dt>
+        <dd><meter min="1" max="12" value="{{ page.fullness }}">{{ page.fullness | nb_number }} av 12</meter></dd>
+      {% endif %}
+      {% if page.freshness %}
+        <dt>Friskhet</dt>
+        <dd>
+          <meter min="1" max="12" value="{{ page.freshness }}">{{ page.freshness | nb_number }} av 12</meter>
+        </dd>
+      {% endif %}
+      {% if third_axis_value %}
+        <dt>{{ third_axis_label }}</dt>
+        <dd>
+          <meter min="1" max="12" value="{{ third_axis_value }}">{{ third_axis_value | nb_number }} av 12</meter>
+        </dd>
+      {% endif %}
+    </dl>
+    {% endif %}
 
-  {% if page.alcohol_content or page.volume > 0 or page.sku.size > 0 or page.production_method_storage.size > 0 %}
-  <dl>
-    {% if page.alcohol_content %}<dt>Alkohol</dt><dd>{{ page.alcohol_content | nb_number }}%</dd>{% endif %}
-    {% if page.volume > 0 %}<dt>Volum</dt><dd>{{ page.volume | nb_number }}</dd>{% endif %}
-    {% if page.sku.size > 0 %}<dt>SKU</dt><dd>{{ page.sku | escape }}</dd>{% endif %}
-    {% if page.production_method_storage.size > 0 %}<dt>Produksjonsmetode / lagring</dt><dd>{{ page.production_method_storage | escape | newline_to_br }}</dd>{% endif %}
-  </dl>
-  {% endif %}
+    <dl>
+      {% if page.recommended_food.size > 0 %}
+        <dt>Passer til</dt>
+        <dd>{{ page.recommended_food | join: ", " | capitalize | escape }}</dd>
+      {% endif %}
+      {% if page.colour.size > 0 %}
+        <dt>Farge</dt>
+        <dd>{{ page.colour | escape }}</dd>
+      {% endif %}
+      {% if page.odour.size > 0 %}
+        <dt>Lukt</dt>
+        <dd>{{ page.odour | escape }}</dd>
+      {% endif %}
+      {% if page.taste.size > 0 %}
+        <dt>Smak</dt>
+        <dd>{{ page.taste | escape }}</dd>
+      {% endif %}
+    </dl>
+
+  </section>
+  <hr>
+  <section>
+    <dl>
+      {% if page.sku.size > 0 %}
+        <dt>Vårt varenummer</dt>
+        <dd>{{ page.sku | escape }}</dd>
+      {% endif %}
+      {% if page.product_id %}
+        <dt>Vinmonopolets varenummer</dt>
+        <dd>{{ page.product_id }}</dd>
+      {% endif %}
+      {% if page.grape_desc.size > 0 %}
+        <dt>Druer</dt>
+        {% assign grape_pair_count = page.grape_desc.size %}
+        {% if page.grape_pct.size < grape_pair_count %}{% assign grape_pair_count = page.grape_pct.size %}{% endif %}
+        {% for grape in page.grape_desc limit: grape_pair_count %}
+          <dd>{{ grape | escape }} {{ page.grape_pct[forloop.index0] | escape }}</dd>
+        {% endfor %}
+      {% endif %}
+      {% if page.storage_potential %}
+        <dt>Lagring</dt>
+        <dd>{{ page.storage_potential }}</dd>
+      {% endif %}
+      {% if page.alcohol_content %}
+        <dt>Alkohol</dt>
+        <dd>{{ page.alcohol_content | nb_number }}%</dd>
+      {% endif %}
+      {% if page.volume %}
+        <dt>Volum</dt>
+        <dd>{{ page.volume | divided_by: 100.0 | nb_number }} liter</dd>
+      {% endif %}
+      {% if page.packaging_material %}
+        <dt>Emballasje</dt>
+        <dd>{{ page.packaging_material }}</dd>
+      {% endif %}
+      {% if page.cork_type %}
+        <dt>Kork</dt>
+        <dd>{{ page.cork_type }}</dd>
+      {% endif %}
+    </dl>
+  </section>
 </article>
