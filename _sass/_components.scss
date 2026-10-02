@@ -74,26 +74,6 @@ footer{
     ul{
         @extend %unstyled-list;
     }
-
-    dl{
-        padding: var(--size-padding-element);
-        margin: 0;
-        gap: var(--size-padding-container);
-
-        dt{
-            margin: 0;
-            font-size: var(--size-font-size-small);
-            line-height: var(--size-line-height-small);
-            font-style: normal;
-            font-weight: var(--size-font-weight-bold);
-        }
-        dd{
-            margin: 0;
-            font-size: var(--size-font-size-regular);
-            line-height: var(--size-line-height-regular);
-            font-style: normal;
-        }
-    }
 }
 
 dialog#menu-dialog{
@@ -195,23 +175,16 @@ section{
     padding: var(--size-padding-element);
     gap: var(--size-padding-element);
     background-color: var(--color-surface-neutral-base);
-    font-family: "DM Mono", monospace;
-    font-size: var(--size-font-size-regular);
-    line-height: var(--size-line-height-regular);
-    text-decoration: none;
     color: var(--color-text-normal);
     border: none; // Needed for button element
 
     svg{
-        height: var(--size-line-height-regular);
-        width: var(--size-line-height-regular);
         fill: var(--color-text-normal);
     }
 
     &:hover{
         background-color: var(--color-surface-neutral-base-highlight);
         color: var(--color-text-highlight);
-        text-decoration: underline;
         cursor: pointer;
     }
 
@@ -254,8 +227,6 @@ section{
 
         h2{
             flex: 1 1 auto;
-            hyphens: auto;
-            text-wrap: balance;
         }
 
         img{
@@ -292,10 +263,6 @@ section{
             padding: calc(var(--size-padding-element) + var(--size-padding-container) + var(--size-padding-element));
             position: absolute;
         }
-
-        .url{
-            font-family: "DM Mono", monospace;
-        }
     }
 
     &.person{
@@ -323,14 +290,6 @@ section{
 
         li{
             margin: 0 0 var(--size-padding-element) 0;
-        }
-    }
-
-    a{
-        color: var(--color-text-normal);
-        &:hover{
-            color: var(--color-text-highlight);
-            text-decoration: none;
         }
     }
     

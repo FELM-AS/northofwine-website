@@ -14,14 +14,104 @@
     --size-font-weight-bold: 700;
 }
 
-p, h1, h2, h3, h4, h5, h6{
+h1, h2, h3, h4, h5, h6{
     padding: var(--size-padding-element);
     margin: 0;
+    max-width: 720px;
+    hyphens: auto;
+    text-wrap: balance;
 }
 
-p.small{
-    font-size: var(--size-font-size-small);
-    line-height: var(--size-line-height-small);
-    font-style: normal;
+h1{
+    font-size: var(--size-font-size-huge);
+    line-height: var(--size-line-height-huge);
+    margin-bottom: var(--size-line-height-regular);
+}
+
+h2{
+    font-size: var(--size-font-size-large);
+    line-height: var(--size-line-height-large);
+    margin-bottom: var(--size-line-height-regular);
+}
+
+h3{
+    font-size: var(--size-font-size-medium);
+    line-height: var(--size-line-height-medium);
+    margin-bottom: var(--size-line-height-regular);
+}
+
+p{
+    font-size: var(--size-font-size-regular);
+    line-height: var(--size-line-height-regular);
     font-weight: var(--size-font-weight-regular);
+    font-style: normal;
+    padding: var(--size-padding-element);
+    margin: 0;
+    max-width: 720px;
+
+    &:has(+ :not(p)){
+        margin-bottom: var(--size-line-height-regular);
+    }
+
+    &.metadata{
+        margin-bottom: 0;
+    }
+
+    &.small{
+        font-size: var(--size-font-size-small);
+        line-height: var(--size-line-height-small);
+    }
+}
+
+a{
+    color: var(--color-text-normal);
+    &:hover{
+        color: var(--color-text-highlight);
+        text-decoration: none;
+    }
+
+    &.url{
+        font-family: "DM Mono", monospace;
+    }
+}
+
+dl{
+    padding: var(--size-padding-element);
+    margin: 0;
+    gap: var(--size-padding-container);
+
+    dt{
+        margin-bottom: var(--size-padding-element);
+        font-size: var(--size-font-size-small);
+        line-height: var(--size-line-height-small);
+        font-style: normal;
+        font-weight: var(--size-font-weight-bold);
+        font-family: "DM Mono", monospace;
+    }
+    dd{
+        margin: 0;
+        font-size: var(--size-font-size-regular);
+        line-height: var(--size-line-height-regular);
+        font-style: normal;
+
+        &:has(+ dt){
+            margin-bottom: var(--size-line-height-regular);
+        }
+    }
+}
+
+.button{
+    font-family: "DM Mono", monospace;
+    font-size: var(--size-font-size-regular);
+    line-height: var(--size-line-height-regular);
+    text-decoration: none;
+
+    svg{
+        height: var(--size-line-height-regular);
+        width: var(--size-line-height-regular);
+    }
+
+    &:hover{
+        text-decoration: underline;
+    }
 }
