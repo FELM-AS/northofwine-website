@@ -17,6 +17,7 @@
 # `country_lang`: see its own comment below.
 # `nb_number`: see its own comment below.
 # `unescape_html`: see its own comment below.
+# `strip_protocol`: see its own comment below.
 require "cgi"
 
 module ContentfulJekyll
@@ -88,6 +89,19 @@ module ContentfulJekyll
     # whitespace.
     def unescape_html(value)
       CGI.unescapeHTML(value.to_s).tr(" ", " ")
+    end
+
+    # manufacturer-card.html shows a manufacturer's `link` field with its
+    # protocol stripped (domain only). Liquid's `remove` filter is a
+    # literal, case-sensitive substring match, so a capitalized protocol
+    # (e.g. an unpublished draft that hasn't yet hit the field's
+    # lowercase-only validation pattern, viewed under
+    # CONTENTFUL_PREVIEW) would survive a chain of
+    # `remove:'http://' | remove:'https://'` untouched. Matches the same
+    # ftp/http/https protocols that field's Contentful validation
+    # pattern allows, case-insensitively.
+    def strip_protocol(value)
+      value.to_s.sub(/\A(ftp|https?):\/\//i, "")
     end
   end
 end

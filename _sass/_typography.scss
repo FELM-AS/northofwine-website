@@ -12,12 +12,14 @@
     
     --size-font-weight-regular: 400;
     --size-font-weight-bold: 700;
+
+    --font-family-mono: "DM Mono", monospace;
 }
 
 h1, h2, h3, h4, h5, h6{
     padding: var(--size-padding-element);
     margin: 0;
-    max-width: 720px;
+    max-width: var(--size-content-maxwidth);
     hyphens: auto;
     text-wrap: balance;
 }
@@ -47,7 +49,7 @@ p{
     font-style: normal;
     padding: var(--size-padding-element);
     margin: 0;
-    max-width: 720px;
+    max-width: var(--size-content-maxwidth);
 
     &:has(+ :not(p)){
         margin-bottom: var(--size-line-height-regular);
@@ -71,7 +73,7 @@ a{
     }
 
     &.url{
-        font-family: "DM Mono", monospace;
+        font-family: var(--font-family-mono);
     }
 }
 
@@ -79,6 +81,7 @@ dl{
     padding: var(--size-padding-element);
     margin: 0;
     gap: var(--size-padding-container);
+    max-width: var(--size-content-maxwidth);
 
     dt{
         margin-bottom: var(--size-padding-element);
@@ -86,7 +89,7 @@ dl{
         line-height: var(--size-line-height-small);
         font-style: normal;
         font-weight: var(--size-font-weight-bold);
-        font-family: "DM Mono", monospace;
+        font-family: var(--font-family-mono);
     }
     dd{
         margin: 0;
@@ -101,7 +104,7 @@ dl{
 }
 
 .button{
-    font-family: "DM Mono", monospace;
+    font-family: var(--font-family-mono);
     font-size: var(--size-font-size-regular);
     line-height: var(--size-line-height-regular);
     text-decoration: none;

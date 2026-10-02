@@ -43,7 +43,7 @@
   {% include contentful-image.html asset=product.image width=240 fallback_alt=product.title %}
   <div class="content">
     <p class="metadata">
-        {{ product.product_type_name | escape }}
+        {{ product.product_type_name | escape }}<br>
         {% if product.country.size > 0 and product.region.size > 0 %}
           {{ product.country | escape }}, {{ product.region | escape }}
         {% elsif product.country.size > 0 %}

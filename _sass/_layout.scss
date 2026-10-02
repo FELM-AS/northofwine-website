@@ -13,7 +13,7 @@ body {
     "header header"
     "aside  main"
     "footer footer";
-  padding: var(--size-padding-layout);
+  padding: 0 var(--size-padding-layout) var(--size-padding-layout) var(--size-padding-layout);
   gap: var(--size-padding-layout);
   margin: 0;
 }
@@ -35,7 +35,7 @@ footer {
   grid-area: footer;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 720px) {
   body {
     grid-template-columns: 1fr;
     grid-template-areas:
@@ -46,5 +46,11 @@ footer {
   }
   aside{
     width: auto !important;
+  }
+  main.list{
+    grid-template-columns: 1fr !important;
+  }
+  .card{
+    min-width: 0 !important;
   }
 }

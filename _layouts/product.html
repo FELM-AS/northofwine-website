@@ -6,7 +6,7 @@ layout: default
   page body -- product's body_field is `description`, see _config.yml
   -- {{ content }} below), grape composition, sensory profile text +
   graphical ratings, food pairing, link back to the manufacturer's
-  card. Sidebar (breadcrumb + image) is _includes/product-sidebar.html,
+  card. Sidebar (breadcrumb + image) is _includes/navigation/breadcrumb.html,
   wired in by _layouts/default.html's page.layout == "product" check.
 
   Sensory ratings use native <meter> (a scalar measurement within a
@@ -56,7 +56,7 @@ layout: default
 
     {{ content }}
 
-    {% if page.production_method_storage %}
+    {% if page.production_method_storage.size > 0 %}
     <dl>
       <dt>Metode</dt>
       <dd>{{ page.production_method_storage | escape | newline_to_br }}</dd>
@@ -95,6 +95,7 @@ layout: default
     </dl>
     {% endif %}
 
+    {% if page.recommended_food.size > 0 or page.colour.size > 0 or page.odour.size > 0 or page.taste.size > 0 %}
     <dl>
       {% if page.recommended_food.size > 0 %}
         <dt>Passer til</dt>
@@ -113,10 +114,12 @@ layout: default
         <dd>{{ page.taste | escape }}</dd>
       {% endif %}
     </dl>
+    {% endif %}
 
   </section>
   <hr>
   <section>
+    {% if page.sku.size > 0 or page.product_id or page.grape_desc.size > 0 or page.storage_potential or page.alcohol_content or page.volume > 0 or page.packaging_material or page.cork_type %}
     <dl>
       {% if page.sku.size > 0 %}
         <dt>Vårt varenummer</dt>
@@ -124,7 +127,7 @@ layout: default
       {% endif %}
       {% if page.product_id %}
         <dt>Vinmonopolets varenummer</dt>
-        <dd>{{ page.product_id }}</dd>
+        <dd>{{ page.product_id | escape }}</dd>
       {% endif %}
       {% if page.grape_desc.size > 0 %}
         <dt>Druer</dt>
@@ -136,24 +139,25 @@ layout: default
       {% endif %}
       {% if page.storage_potential %}
         <dt>Lagring</dt>
-        <dd>{{ page.storage_potential }}</dd>
+        <dd>{{ page.storage_potential | escape }}</dd>
       {% endif %}
       {% if page.alcohol_content %}
         <dt>Alkohol</dt>
         <dd>{{ page.alcohol_content | nb_number }}%</dd>
       {% endif %}
-      {% if page.volume %}
+      {% if page.volume > 0 %}
         <dt>Volum</dt>
-        <dd>{{ page.volume | divided_by: 100.0 | nb_number }} liter</dd>
+        <dd>{{ page.volume | divided_by: 1000.0 | nb_number }} liter</dd>
       {% endif %}
       {% if page.packaging_material %}
         <dt>Emballasje</dt>
-        <dd>{{ page.packaging_material }}</dd>
+        <dd>{{ page.packaging_material | escape }}</dd>
       {% endif %}
       {% if page.cork_type %}
         <dt>Kork</dt>
-        <dd>{{ page.cork_type }}</dd>
+        <dd>{{ page.cork_type | escape }}</dd>
       {% endif %}
     </dl>
+    {% endif %}
   </section>
 </article>

@@ -64,5 +64,5 @@
 {% if include.asset.width > 0 %}
 {% assign img_height = include.width | times: include.asset.height | divided_by: include.asset.width %}
 {% endif %}
-<img class="{% if include.class %}{{ include.class }}{% endif %}" src="{{ asset_url }}?w={{ include.width }}" alt="{{ alt | escape }}"{% if include.asset.width > 0 %} width="{{ include.width }}" height="{{ img_height }}"{% endif %} data-original="{{ asset_url }}">
+<img{% if include.class %} class="{{ include.class }}"{% endif %} src="{{ asset_url }}?w={{ include.width }}" alt="{{ alt | escape }}"{% if include.asset.width > 0 %} width="{{ include.width }}" height="{{ img_height }}"{% endif %} data-original="{{ asset_url }}">
 {% endif %}

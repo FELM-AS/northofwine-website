@@ -1,7 +1,9 @@
 :root{
-    --size-padding-layout: 24px;
+    --size-padding-layout: clamp(1.5rem, 0.75rem + 2.5vi, 3rem); //48px;
     --size-padding-container: 12px;
     --size-padding-element: 12px;
+
+    --size-content-maxwidth: 720px;
 
     --size-border-width-regular: 1px;
     --size-border-width-medium: 2px;
@@ -47,7 +49,9 @@
 
 header{
     position: sticky;
+    width: 100%;
     top: 0;
+    box-sizing: border-box;
     z-index: 1000;
     display: flex;
     justify-content: space-between;
@@ -327,8 +331,10 @@ section{
 }
 
 main.list{
-    display: flex;
-    flex-wrap: wrap;
+    // display: flex;
+    // flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
     gap: var(--size-padding-layout);
 }
 
