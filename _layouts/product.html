@@ -100,7 +100,9 @@ layout: default
     <dl>
       {% if page.recommended_food.size > 0 %}
         <dt>Passer til</dt>
-        <dd>{{ page.recommended_food | join: ", " | capitalize | escape }}</dd>
+        {% assign food_items = page.recommended_food | join: "|" | downcase | replace: " og ", "|" | replace: ", ", "|" | split: "|" %}
+        {% capture food_sentence %}{% for food in food_items %}{% unless forloop.first %}{% if forloop.last %} og {% else %}, {% endif %}{% endunless %}{{ food }}{% endfor %}{% endcapture %}
+        <dd>{{ food_sentence | capitalize | escape }}</dd>
       {% endif %}
       {% if page.colour.size > 0 %}
         <dt>Farge</dt>
@@ -149,7 +151,13 @@ layout: default
       {% endif %}
       {% if page.volume > 0 %}
         <dt>Volum</dt>
-        <dd>{{ page.volume | divided_by: 1000.0 | nb_number }} liter</dd>
+        {% comment %} volume is in millilitres; drop the ",0" from whole litres. {% endcomment %}
+        {% assign volume_ml = page.volume | modulo: 1000 %}
+        {% if volume_ml == 0 %}
+          <dd>{{ page.volume | divided_by: 1000 }} liter</dd>
+        {% else %}
+          <dd>{{ page.volume | divided_by: 1000.0 | nb_number }} liter</dd>
+        {% endif %}
       {% endif %}
       {% if page.packaging_material %}
         <dt>Emballasje</dt>

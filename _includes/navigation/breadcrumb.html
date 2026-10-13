@@ -43,13 +43,13 @@
   {% if include.product.product_type_name %}
     {% assign type_page = product_filter_pages | where: "title", include.product.product_type_name | first %}
     {% if type_page %}
-      / <a class="url" href="{{ type_page.url | relative_url | escape }}">{{ include.product.product_type_name }}</a>
+      / <a class="url" href="{{ type_page.url | relative_url | escape }}">{{ include.product.product_type_name | escape }}</a>
     {% endif %}
   {% endif %}
   {% if include.product.web_product_type_name %}
     {% assign web_type_page = product_filter_pages | where: "title", include.product.web_product_type_name | first %}
     {% if web_type_page %}
-      / <a class="url" href="{{ web_type_page.url | relative_url | escape }}">{{ include.product.web_product_type_name }}</a>
+      / <a class="url" href="{{ web_type_page.url | relative_url | escape }}">{{ include.product.web_product_type_name | escape }}</a>
     {% endif %}
   {% endif %}
 </nav>
