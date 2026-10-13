@@ -51,6 +51,7 @@ contentful_collections:
     layout: product
     dir: utvalg
     body_field: description
+    order: fields.productShortName
     section_heading: Vårt utvalg
     root_label: Alle viner
     menu_label: Utvalg
@@ -111,6 +112,7 @@ contentful_data_collections:
     root_label: Alle vinhus
     menu_label: Produsenter
     body_field: description
+    order: fields.name
   - content_type: person
     name: people
     dir: omoss
