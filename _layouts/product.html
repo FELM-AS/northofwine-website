@@ -135,7 +135,8 @@ layout: default
         {% assign grape_pair_count = page.grape_desc.size %}
         {% if page.grape_pct.size < grape_pair_count %}{% assign grape_pair_count = page.grape_pct.size %}{% endif %}
         {% for grape in page.grape_desc limit: grape_pair_count %}
-          <dd>{{ grape | escape }} {{ page.grape_pct[forloop.index0] | escape }}</dd>
+          {% assign grape_pct = page.grape_pct[forloop.index0] %}
+          <dd>{% if grape_pct.size > 0 %}{{ grape_pct | nb_number | escape }}% {% endif %}{{ grape | escape }}</dd>
         {% endfor %}
       {% endif %}
       {% if page.storage_potential %}
