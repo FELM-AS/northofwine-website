@@ -52,6 +52,7 @@ layout: default
 {% endif %}
 <article>
   <section>
+    {% include navigation/breadcrumb.html product=page %}
     <h1{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ page.title | escape }}</h1>
 
     {{ content }}

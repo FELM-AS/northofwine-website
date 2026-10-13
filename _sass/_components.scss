@@ -117,7 +117,7 @@ nav{
 aside{
     position: relative;
 
-    nav{
+    nav, img{
         position: sticky;
         top: calc(
             var(--size-padding-container) +
@@ -126,20 +126,6 @@ aside{
             var(--size-padding-element) +
             var(--size-padding-container)
         );
-    }
-
-    .breadcrumb{
-        overflow: hidden;
-        ul{
-            position: absolute;
-            top: var(--size-padding-container);
-            right: var(--size-padding-container);
-            background-color: hsla(var(--palette-neutral-100) / .5);
-
-            li{
-                text-align: right;
-            }
-        }
     }
 
     img{

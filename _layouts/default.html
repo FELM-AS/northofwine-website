@@ -46,7 +46,7 @@
   {% elsif page.layout == "product" %}
     {% include header.html %}
     <aside>
-      {% include navigation/breadcrumb.html product=page %}
+      {% include contentful-image.html asset=page.image width=400 fallback_alt=page.title %}
     </aside>
     <main>
       {{ content }}
