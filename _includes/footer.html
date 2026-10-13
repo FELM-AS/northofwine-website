@@ -34,7 +34,7 @@
     <dl>
       <dt>{{ site.data.company.name }}</dt>
       <dd>
-        {% for line in site.data.company.address %}{{ line }}{% endfor %}
+        {{ site.data.company.address | join: ", " }}
       </dd>
       <dd>
         Org.nr. {{ site.data.company.org_number }}

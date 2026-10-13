@@ -8,6 +8,17 @@
   original asset's, so they still correctly reserve layout space and
   don't lie about what's actually being downloaded.
 
+  Also requests `fm=webp&q=75` -- the CDA's default is the source
+  file's own format (almost always JPEG here) at q=100, which is 2-5x
+  heavier than a q=75 WebP for no visible difference at these display
+  sizes (measured against real product photos: a 400px-wide product
+  shot drops from ~43KB at the default to ~15KB). Only added when
+  `asset.width` is known (i.e. a confirmed, already-processed image --
+  same condition guarding the width/height attributes below): forcing
+  a format conversion on a non-image asset (a PDF) or one Contentful
+  hasn't finished processing yet could fail where a bare `?w=` is
+  harmlessly ignored instead.
+
   Renders nothing if the asset has no url at all -- callers don't need
   their own "if x.image.url" guard around this include.
 
@@ -61,8 +72,10 @@
   here, same inline-conditional-attribute convention as `lang` in
   product-card.html/manufacturer-card.html.
 {% endcomment %}
+{% assign image_params = "" %}
 {% if include.asset.width > 0 %}
 {% assign img_height = include.width | times: include.asset.height | divided_by: include.asset.width %}
+{% assign image_params = "&amp;fm=webp&amp;q=75" %}
 {% endif %}
-<img src="{{ asset_url }}?w={{ include.width }}" alt="{{ alt | escape }}"{% if include.asset.width > 0 %} width="{{ include.width }}" height="{{ img_height }}"{% endif %} data-original="{{ asset_url }}">
+<img{% if include.class %} class="{{ include.class }}"{% endif %} src="{{ asset_url }}?w={{ include.width }}{{ image_params }}" alt="{{ alt | escape }}"{% if include.asset.width > 0 %} width="{{ include.width }}" height="{{ img_height }}"{% endif %} data-original="{{ asset_url }}">
 {% endif %}

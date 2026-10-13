@@ -22,8 +22,10 @@
   X" only needs each_locale's list, not a new mechanism.
 {% endcomment %}
 <header>
-  {% include button.html href='/' icon='brands/now-symbol' text=site.title icon_position='left' %}
-  {% include icon-button.html type='button' id='menu-open' aria_controls='menu-dialog' aria_label='Åpne meny' icon='ui/menu' %}
+  <div>
+    {% include button.html href='/' icon='brands/now-symbol' text=site.title icon_position='left' %}
+    {% include icon-button.html type='button' id='menu-open' aria_controls='menu-dialog' aria_label='Åpne meny' icon='ui/menu' %}
+  </div>
 </header>
 <dialog id="menu-dialog" aria-label="Meny">
   <form method="dialog">

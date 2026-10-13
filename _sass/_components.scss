@@ -1,7 +1,9 @@
 :root{
-    --size-padding-layout: 24px;
+    --size-padding-layout: clamp(1.5rem, 0.75rem + 2.5vi, 3rem); //48px;
     --size-padding-container: 12px;
     --size-padding-element: 12px;
+
+    --size-content-maxwidth: 720px;
 
     --size-border-width-regular: 1px;
     --size-border-width-medium: 2px;
@@ -12,6 +14,7 @@
     --palette-neutral-100: 0 0 100;
 
     --color-background-neutral-base: hsla(var(--palette-neutral-100) / 1);
+    --color-background-backdrop: hsla(var(--palette-neutral-100) / .75);
 
     --color-surface-neutral-base: transparent;
     --color-surface-neutral-base-highlight:  hsla(var(--palette-neutral-0) / .05);
@@ -39,21 +42,29 @@
     list-style: none;
 }
 
-%wrap-row{
+%flex-row{
     display: flex;
-    flex-wrap: wrap;
+    justify-content: space-between;
     gap: var(--size-padding-container);
 }
 
 header{
+    // Fix to keep header at full width to keep content from bleeding on iOS Safari
+    width: calc(100% + var(--size-padding-layout) * 2);
+    margin-left: calc(var(--size-padding-layout) * -1);
+    //
     position: sticky;
     top: 0;
+    box-sizing: border-box;
     z-index: 1000;
-    display: flex;
-    justify-content: space-between;
-    padding: var(--size-padding-container);
+    padding: 0 var(--size-padding-layout);
     background-color: var(--color-background-neutral-base);
-    border-bottom: var(--size-border-width-medium) solid var(--color-border-neutral-strong);
+
+    div{
+        @extend %flex-row;
+        padding: var(--size-padding-container);
+        border-bottom: var(--size-border-width-medium) solid var(--color-border-neutral-strong);
+    }
 }
 
 footer{
@@ -63,48 +74,31 @@ footer{
     border-top: var(--size-border-width-medium) solid var(--color-border-neutral-strong);
 
     div{
-        @extend %wrap-row;
-        justify-content: space-between;
+        @extend %flex-row;
+        flex-wrap: wrap;
     }
 
     address{
-        @extend %wrap-row;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--size-padding-container);
     }
 
     ul{
         @extend %unstyled-list;
     }
-
-    dl{
-        padding: var(--size-padding-element);
-        margin: 0;
-        gap: var(--size-padding-container);
-
-        dt{
-            margin: 0;
-            font-size: var(--size-font-size-small);
-            line-height: var(--size-line-height-small);
-            font-style: normal;
-            font-weight: var(--size-font-weight-bold);
-        }
-        dd{
-            margin: 0;
-            font-size: var(--size-font-size-regular);
-            line-height: var(--size-line-height-regular);
-            font-style: normal;
-        }
-    }
 }
 
 dialog#menu-dialog{
     position: fixed;
-    top: var(--size-padding-layout);
+    top: 0;
     right: var(--size-padding-layout);
     left: auto;
     padding: 0;
     margin: 0;
     box-sizing: border-box;
     border: none;
+    width: 100%;
 
     form{
         display: flex;
@@ -112,6 +106,15 @@ dialog#menu-dialog{
     }
     nav ul{
         place-items: flex-end;
+    }
+
+    &:modal{
+        width: calc(100% - var(--size-padding-layout) * 2);
+        max-width: 480px;
+    }
+
+    &::backdrop{
+        background-color: var(--color-background-backdrop);
     }
 }
 
@@ -123,12 +126,18 @@ nav{
         @extend %unstyled-list;
         flex-direction: column;
     }
+
+    &.menu{
+        aspect-ratio: 1 / 1;
+        width: 100%;
+        box-sizing: border-box;
+    }
 }
 
 aside{
     position: relative;
 
-    nav{
+    nav, img{
         position: sticky;
         top: calc(
             var(--size-padding-container) +
@@ -137,6 +146,17 @@ aside{
             var(--size-padding-element) +
             var(--size-padding-container)
         );
+    }
+
+    img{
+        width: 100%;
+        max-height: 480px;
+        object-fit: contain;
+        object-position: left;
+        box-sizing: border-box;
+        float: left;
+        height: auto;
+        padding: var(--size-padding-element);
     }
 }
 
@@ -165,23 +185,16 @@ section{
     padding: var(--size-padding-element);
     gap: var(--size-padding-element);
     background-color: var(--color-surface-neutral-base);
-    font-family: "DM Mono", monospace;
-    font-size: var(--size-font-size-regular);
-    line-height: var(--size-line-height-regular);
-    text-decoration: none;
     color: var(--color-text-normal);
     border: none; // Needed for button element
 
     svg{
-        height: var(--size-line-height-regular);
-        width: var(--size-line-height-regular);
         fill: var(--color-text-normal);
     }
 
     &:hover{
         background-color: var(--color-surface-neutral-base-highlight);
         color: var(--color-text-highlight);
-        text-decoration: underline;
         cursor: pointer;
     }
 
@@ -213,10 +226,18 @@ section{
     padding: var(--size-padding-container);
     min-width: 320px;
     border: var(--size-border-width-regular) solid var(--color-border-neutral-subtle);
+    flex: 1 1 30%;
+
+    &.spacer{
+        border: none;
+    }
 
     &.product{
-        flex: 1 1 30%;
         flex-direction: row;
+
+        h2{
+            flex: 1 1 auto;
+        }
 
         img{
             width: 96px;
@@ -225,11 +246,60 @@ section{
             object-position: bottom left;
             flex: 0 0 auto;
         }
+    }
+
+    &.manufacturer{
+        flex-direction: column;
 
         h2{
-            flex: 1 1 auto;
-            hyphens: auto;
-            text-wrap: balance;
+            flex: 0 0 auto;
+        }
+
+        img{
+            width: 100%;
+            height: auto;
+            aspect-ratio: 2 / 1;
+            object-fit: cover;
+            object-position: center;
+            padding: var(--size-padding-element);
+            box-sizing: border-box;
+        }
+
+        .logo{
+            width: auto;
+            height: 120px;
+            object-fit: contain;
+            object-position: top left;
+            padding: calc(var(--size-padding-element) + var(--size-padding-container) + var(--size-padding-element));
+            position: absolute;
+        }
+    }
+
+    &.person{
+        flex-direction: column;
+
+        h2{
+            flex: 0 0 auto;
+        }
+
+        img{
+            width: 100%;
+            height: auto;
+            aspect-ratio: 3 / 2;
+            object-fit: cover;
+            object-position: center;
+            padding: var(--size-padding-element);
+            box-sizing: border-box;
+        }
+    }
+
+    ul{
+        padding: var(--size-padding-element);
+        margin: 0;
+        list-style: none;
+
+        li{
+            margin: 0 0 var(--size-padding-element) 0;
         }
     }
     
@@ -267,11 +337,14 @@ section{
 }
 
 main.list{
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    align-content: start;
     gap: var(--size-padding-layout);
 }
 
-a article{
-    text-decoration: none;
+hr{
+    border: var(--size-border-width-regular) solid var(--color-border-neutral-subtle);
+    margin: calc(var(--size-padding-container) + var(--size-padding-element));
+    max-width: 720px;
 }
