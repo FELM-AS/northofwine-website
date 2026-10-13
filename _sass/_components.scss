@@ -337,10 +337,9 @@ section{
 }
 
 main.list{
-    // display: flex;
-    // flex-wrap: wrap;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    align-content: start;
     gap: var(--size-padding-layout);
 }
 
