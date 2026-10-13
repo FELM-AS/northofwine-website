@@ -47,11 +47,12 @@ module ContentfulJekyll
 
       collections = site.config["contentful_collections"] || []
       data_collections = site.config["contentful_data_collections"] || []
+      body_fields = body_fields_for(collections + data_collections)
 
       ContentfulJekyll.each_locale(site.config["contentful_locales"]) do |locale|
         # Fresh EntrySerializer per locale, so its memoization cache never
         # mixes translations across locales.
-        @serializer = EntrySerializer.new(site, display_fields, entry_depth)
+        @serializer = EntrySerializer.new(site, display_fields, entry_depth, body_fields)
 
         collections.each { |collection| fetch_collection(site, client, collection, locale) }
         data_collections.each { |collection| fetch_data_collection(site, client, collection, locale) }
@@ -73,6 +74,23 @@ module ContentfulJekyll
       end
 
       fields
+    end
+
+    # Maps content_type id -> body-like field symbol, from whichever
+    # collections (page-generating or data-only) configure a `body_field`.
+    # Threaded into EntrySerializer so #flatten_fields renders that one
+    # field via #render_body (Markdown for a plain Text field, full Rich
+    # Text otherwise) no matter how the entry is reached -- a data
+    # collection fetch (fetch_data_collection) or a linked-entry reference
+    # (EntrySerializer#serialize_field's Contentful::Entry case) -- not
+    # just a page's own body (build_page already handles that case
+    # separately via its own explicit render_body call).
+    def body_fields_for(collections)
+      collections.each_with_object({}) do |collection, result|
+        next unless collection["body_field"]
+
+        result[collection["content_type"]] = collection["body_field"].to_sym
+      end
     end
 
     def entries_query(collection, locale)

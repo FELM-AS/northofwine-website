@@ -59,6 +59,16 @@ contentful_collections:
 # falling back to an {id, link_type} stub. Defaults to 2 if unset.
 # contentful_entry_depth: 2
 
+# hard_wrap: true makes a single line break in a body_field's Markdown
+# source (Product/Manufacturer description, see contentful_collections/
+# contentful_data_collections above) turn into a <br> -- matching the
+# old newline_to_br convention those plain Contentful Text fields rely
+# on. Jekyll's own default (false) only breaks paragraphs on a blank
+# line, which collapses a single-line-break description into one
+# run-on paragraph.
+kramdown:
+  hard_wrap: true
+
 # Build every collection/data collection once per locale (from Contentful
 # Settings > Locales). With 2+ locales, the first is primary (unprefixed
 # URLs/site.data keys); every other locale gets its own /<prefix>/... URL
@@ -90,12 +100,17 @@ contentful_locales:
 # -- it's a single source of truth for the Produsenter root/country
 # listing pages that _plugins/contentful_listing_pages.rb builds.
 contentful_data_collections:
+  # body_field: description routes Manufacturer's description through the
+  # same render_body pipeline as Product's own body_field (see
+  # contentful_collections above) -- lets editors use Markdown syntax
+  # (blank-line paragraphs, *emphasis*) in that otherwise-plain Text field.
   - content_type: manufacturer
     name: manufacturers
     dir: produsenter
     section_heading: Våre vinhus
     root_label: Alle vinhus
     menu_label: Produsenter
+    body_field: description
   - content_type: person
     name: people
     dir: omoss

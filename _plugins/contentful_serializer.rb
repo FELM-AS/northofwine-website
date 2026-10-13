@@ -1,3 +1,4 @@
+require "cgi"
 require "contentful"
 require_relative "contentful_rich_text"
 
@@ -11,17 +12,31 @@ module ContentfulJekyll
     DEFAULT_ENTRY_DEPTH = 2
 
     # display_fields: content_type id -> snake_cased displayField name
-    # (see #flatten_fields).
-    def initialize(site, display_fields, max_entry_depth = DEFAULT_ENTRY_DEPTH)
+    # (see #flatten_fields). body_fields: content_type id -> body-like
+    # field symbol (see EntriesGenerator#body_fields_for), rendered via
+    # #render_body instead of plain-stringified like every other field.
+    def initialize(site, display_fields, max_entry_depth = DEFAULT_ENTRY_DEPTH, body_fields = {})
       @site = site
       @display_fields = display_fields
       @max_entry_depth = max_entry_depth
+      @body_fields = body_fields
       @entry_cache = {}
     end
 
     # value: a Rich Text document (Hash), a plain/Markdown string, or nil.
     # Generated pages are named "index.html", which Jekyll's markdown_ext
     # never auto-converts, so both cases are rendered explicitly here.
+    #
+    # The plain-string branch escapes its input before handing it to
+    # Kramdown: Kramdown treats any text that looks like an HTML tag as
+    # raw HTML and emits it unescaped (standard Markdown behavior, not a
+    # Kramdown bug), so an editor's stray "&"/"<" in a plain Text field
+    # could otherwise render mangled or, worse, inject real markup.
+    # Escaping first makes every "&"/"<"/">" render literally and
+    # guarantees Kramdown only ever sees the Markdown syntax (*emphasis*,
+    # [links](...), blank-line paragraphs) this field is documented to
+    # support -- same CGI.escapeHTML convention contentful_rich_text.rb
+    # already uses for embedded-entry titles.
     def render_body(value)
       case value
       when Hash
@@ -29,21 +44,26 @@ module ContentfulJekyll
       when nil
         ""
       else
-        markdown_converter.convert(value.to_s)
+        markdown_converter.convert(CGI.escapeHTML(value.to_s))
       end
     end
 
     # Flattens entry fields (except `skip`) to a snake_cased Hash. "title"
     # always comes from the content type's displayField, read straight
     # from entry.fields so it's correct even if displayField == skip.
+    # This content type's configured body_field (if any) is rendered via
+    # #render_body rather than plain-stringified, same as a page's own body.
     def flatten_fields(entry, depth, skip: [])
+      content_type = entry.sys[:content_type]&.id
+      body_field = @body_fields[content_type]
+
       data = entry.fields.each_with_object({}) do |(name, value), result|
         next if skip.include?(name)
 
-        result[name.to_s] = serialize_field(value, depth)
+        result[name.to_s] = name == body_field ? render_body(value) : serialize_field(value, depth)
       end
 
-      display_field = @display_fields[entry.sys[:content_type]&.id]
+      display_field = @display_fields[content_type]
       data["title"] = serialize_field(entry.fields[display_field.to_sym], depth) if display_field
 
       data
