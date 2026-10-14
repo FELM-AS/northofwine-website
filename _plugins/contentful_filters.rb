@@ -58,7 +58,7 @@ module ContentfulJekyll
     # each indexing site.data.countries independently, so both stay in
     # sync with a single lookup.
     def country_lang(country)
-      @context.registers[:site].data["countries"][country]
+      @context.registers[:site].data.dig("countries", country)
     end
 
     # _includes/seo.html's meta-description fallback runs `strip_html` on
@@ -88,7 +88,7 @@ module ContentfulJekyll
     # instead, so normalize_whitespace still sees only ordinary
     # whitespace.
     def unescape_html(value)
-      CGI.unescapeHTML(value.to_s).tr(" ", " ")
+      CGI.unescapeHTML(value.to_s).tr("\u00A0", " ")
     end
 
     # manufacturer-card.html shows a manufacturer's `link` field with its

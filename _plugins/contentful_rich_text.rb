@@ -14,10 +14,10 @@ module ContentfulJekyll
       entry = node["data"]["target"]
       return "" unless entry.respond_to?(:fields)
 
-      title = title_for(entry)
-      return "" if title.nil?
+      title = title_for(entry).to_s.strip
+      return "" if title.empty?
 
-      "<#{tag} class=\"embedded-entry\">#{CGI.escapeHTML(title.to_s)}</#{tag}>"
+      "<#{tag} class=\"embedded-entry\">#{CGI.escapeHTML(title)}</#{tag}>"
     end
 
     # displayField-driven title, threaded in via mappings[:display_fields]
