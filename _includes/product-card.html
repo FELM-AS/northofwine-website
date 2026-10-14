@@ -53,8 +53,8 @@
     <h2{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ product.title | escape }}</h2>
     <div class="button-group">
       {% if product.product_id and product.sales_price > 0 %}
-        {% capture vmp_url %}https://vinmonopolet.no/p/{{ product.product_id | escape }} {% endcapture %}
-        {% capture price %}{{ product.sales_price | nb_number: 2}} {% endcapture %}
+        {% assign vmp_url = "https://vinmonopolet.no/p/" | append: product.product_id %}
+        {% assign price = product.sales_price | nb_number: 2 | append: " kr" %}
         {% include button.html href=vmp_url text=price class='vmp' icon='brands/vinmonopolet'%}
       {% endif %}
       {% include button.html href=product.url class='more' icon='ui/arrow-right' aria_label=more_label %}
