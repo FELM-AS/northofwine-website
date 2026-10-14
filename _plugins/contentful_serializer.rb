@@ -69,16 +69,27 @@ module ContentfulJekyll
       data
     end
 
+    # A fetched (top-level) entry: a generated page's data or one
+    # site.data item. Same shape and link depth either way, so templates
+    # can treat both alike. Not memoized or frozen -- a page merges it
+    # into its own mutable page.data.
+    def serialize_root(entry, skip: [])
+      entry_header(entry).merge(flatten_fields(entry, 0, skip: skip))
+    end
+
     # Flattens a linked entry like #flatten_fields, so `page.author.title`
     # works directly. Memoized per (entry id, depth), since Contentful's
     # `includes` is already deduplicated. Frozen: the Hash is shared by
     # reference across occurrences and nothing downstream should mutate it.
     def serialize_entry(entry, depth)
-      @entry_cache[[entry.sys[:id], depth]] ||= { "id" => entry.sys[:id], "content_type" => entry.sys[:content_type]&.id }
-        .merge(flatten_fields(entry, depth + 1)).freeze
+      @entry_cache[[entry.sys[:id], depth]] ||= entry_header(entry).merge(flatten_fields(entry, depth + 1)).freeze
     end
 
     private
+
+    def entry_header(entry)
+      { "id" => entry.sys[:id], "content_type" => entry.sys[:content_type]&.id }
+    end
 
     # Recursively converts SDK objects into plain Hashes/Strings Liquid can
     # render (Liquid can't call `.file.url`/`.fields[...]` on raw

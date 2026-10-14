@@ -20,7 +20,7 @@ module ContentfulJekyll
 
     # Per-collection/locale constants, computed once in fetch_collection
     # and passed as one object to build_page instead of growing its param list.
-    CollectionContext = Struct.new(:collection, :locale, :body_field, :home_label, :dir, :image_field, keyword_init: true)
+    CollectionContext = Struct.new(:collection, :locale, :serializer, :body_field, :home_label, :dir, :image_field, keyword_init: true)
 
     def generate(site)
       client = ContentfulClient.build
@@ -52,10 +52,10 @@ module ContentfulJekyll
       ContentfulJekyll.each_locale(site.config["contentful_locales"]) do |locale|
         # Fresh EntrySerializer per locale, so its memoization cache never
         # mixes translations across locales.
-        @serializer = EntrySerializer.new(site, display_fields, entry_depth, body_fields)
+        serializer = EntrySerializer.new(site, display_fields, entry_depth, body_fields)
 
-        collections.each { |collection| fetch_collection(site, client, collection, locale) }
-        data_collections.each { |collection| fetch_data_collection(site, client, collection, locale) }
+        collections.each { |collection| fetch_collection(site, client, collection, locale, serializer) }
+        data_collections.each { |collection| fetch_data_collection(site, client, collection, locale, serializer) }
       end
     end
 
@@ -104,10 +104,11 @@ module ContentfulJekyll
       query
     end
 
-    def fetch_collection(site, client, collection, locale)
+    def fetch_collection(site, client, collection, locale, serializer)
       context = CollectionContext.new(
         collection: collection,
         locale: locale,
+        serializer: serializer,
         body_field: (collection["body_field"] || "body").to_sym,
         home_label: (home_label_for(collection, locale) if collection["home"]),
         dir: ContentfulJekyll.dir_for(collection, locale),
@@ -132,7 +133,7 @@ module ContentfulJekyll
     # Fetches a content type into site.data.<name> instead of generating a
     # page per entry -- for entries that are only ever linked to from other
     # entries (e.g. authors, manufacturers) and have no page of their own.
-    def fetch_data_collection(site, client, collection, locale)
+    def fetch_data_collection(site, client, collection, locale, serializer)
       name = locale.data_key_for(collection["name"])
 
       if site.data.key?(name)
@@ -142,7 +143,7 @@ module ContentfulJekyll
       entries = []
 
       each_entry(client, entries_query(collection, locale)) do |entry|
-        entries << @serializer.serialize_entry(entry, 0)
+        entries << serializer.serialize_root(entry)
       end
 
       site.data[name] = entries
@@ -188,11 +189,13 @@ module ContentfulJekyll
         Jekyll.logger.warn LOG_TAG, "multiple entries (or an existing site file) produced the URL \"#{page.url}\" (entry #{entry.sys[:id]} included) -- only the last one written will survive in the build output"
       end
 
-      page.content = @serializer.render_body(entry.fields[context.body_field])
+      page.content = context.serializer.render_body(entry.fields[context.body_field])
       page.data["layout"] = context.collection["layout"]
       page.data["home_label"] = context.home_label if context.home_label
       page.data["locale"] = context.locale.code unless context.locale.primary?
-      page.data.merge!(@serializer.flatten_fields(entry, 0, skip: [context.body_field]))
+      page.data.merge!(context.serializer.serialize_root(entry, skip: [context.body_field]))
+      # The sanitized slug the URL was actually built from, not the raw field.
+      page.data["slug"] = slug
       # Generic alias for the social preview image field (see
       # _includes/seo.html), since content types name it differently.
       # Defaults to "image"; nil if absent, same as any other field.
