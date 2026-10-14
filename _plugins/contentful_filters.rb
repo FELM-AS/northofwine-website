@@ -1,27 +1,12 @@
-# Small Liquid filters shared across templates, so a convention only
-# needs to change in one place instead of being repeated at every call
-# site:
-#
-# `dir_href`: "/<dir>/" -- the URL-prefixing convention for
-# site.product_dir/site.manufacturer_dir (site.config values resolved once
-# by _plugins/contentful_listing_pages.rb), previously repeated as its
-# own `prepend: "/" | append: "/"` pair at every call site (breadcrumb.html,
-# menu.html, filter.html, product.html, 404.html).
-#
-# A nil/blank `dir` (e.g. contentful_data_collections' manufacturer entry
-# missing its optional `dir`, so site.manufacturer_dir is never set) would
-# otherwise silently build "//" -- a broken link with no build warning,
-# since every call site trusts this filter rather than guarding itself.
-# Raising here, the one shared place, catches it loudly instead.
-#
-# `country_lang`: see its own comment below.
-# `nb_number`: see its own comment below.
-# `unescape_html`: see its own comment below.
-# `strip_protocol`: see its own comment below.
 require "cgi"
 
 module ContentfulJekyll
+  # Small Liquid filters shared across templates, so a convention only
+  # needs to change in one place.
   module TemplateFilters
+    # "/<dir>/" for a site.config dir set by contentful_listing_pages.rb
+    # (site.product_dir, site.manufacturer_dir, site.about_dir). Raises on
+    # a nil/blank dir rather than silently building a broken "//" link.
     def dir_href(dir)
       raise "dir_href: no dir given -- a site.config value like site.product_dir/site.manufacturer_dir is nil or blank. Is the corresponding collection's `dir` set in _config.yml?" if dir.to_s.empty?
 
@@ -29,21 +14,12 @@ module ContentfulJekyll
     end
 
     # Norwegian numeric convention (Plan.md's Formatting section): comma
-    # decimal separator instead of a period. Used on salesPrice,
-    # alcoholContent, volume, and the 1-12 sensory scale values -- one
-    # filter instead of each template re-implementing the same `.to_s.sub`.
+    # decimal separator instead of a period.
     #
     # `decimals`, when given, formats to that many fixed decimal places
-    # first (e.g. `550 | nb_number: 2` -> "550,00", for a price that
-    # should always show cents even when the Contentful value is a whole
-    # number). Without it, the value's own precision is kept as-is and
-    # only the separator changes (e.g. alcoholContent "13.5" -> "13,5",
-    # while a whole-number field like volume or the sensory Symbol
-    # fields -- which never contain a "." to begin with -- pass through
-    # unchanged).
-    #
-    # nil/blank passes through untouched, so `{% if page.field %}` guards
-    # at call sites don't need to also special-case this filter.
+    # first (e.g. `550 | nb_number: 2` -> "550,00"). Without it, the
+    # value's own precision is kept and only the separator changes
+    # (e.g. "13.5" -> "13,5"). nil/blank passes through untouched.
     def nb_number(value, decimals = nil)
       return value if value.nil? || value.to_s.empty?
 
@@ -51,55 +27,26 @@ module ContentfulJekyll
       formatted.sub(".", ",")
     end
 
-    # Manufacturer/product `country` (via _data/countries.yml)
-    # -> language code, for the `lang` attribute on product/manufacturer
-    # names (planning/Plan.md's Formatting/Hyphenation sections). One
-    # filter here instead of product-card.html and manufacturer-card.html
-    # each indexing site.data.countries independently, so both stay in
-    # sync with a single lookup.
+    # Manufacturer `country` -> language code (_data/countries.yml), for
+    # the `lang` attribute on product/manufacturer names (Plan.md's
+    # Formatting/Hyphenation sections). nil if unknown.
     def country_lang(country)
       @context.registers[:site].data.dig("countries", country)
     end
 
-    # _includes/seo.html's meta-description fallback runs `strip_html` on
-    # a page's already-*rendered* `content` -- `strip_html` removes tags
-    # but leaves HTML entities like `&quot;`/`&amp;` as literal text,
-    # which then get escaped a *second* time when interpolated into the
-    # meta tag (`&quot;` -> `&amp;quot;`). Live today via a product's own
-    # Rich Text body: an embedded entry renders as
-    # `CGI.escapeHTML(title)` (contentful_rich_text.rb), so a product
-    # whose Rich Text embeds another entry with a `&`/`"` in its title
-    # hits this exact double-escape. (Listing pages -- the case this was
-    # first written against -- no longer can: contentful_listing_pages.rb
-    # now always sets an explicit page.description, so `default: content`
-    # never reaches their card markup. Kept general rather than
-    # listing-page-specific, since this is still a real, live path.)
-    # Unescaping once here, between `strip_html` and the final `| escape`,
-    # undoes exactly that one extra round of escaping.
-    #
-    # This filter also runs before seo.html's `normalize_whitespace`,
-    # so a decoded `&nbsp;` (-> a literal U+00A0 non-breaking space)
-    # needs handling here too: Ruby's `\s` (what normalize_whitespace
-    # matches on) doesn't treat U+00A0 as whitespace, so left as-is it
-    # would survive as a visually-blank but non-collapsing character --
-    # e.g. a copy-pasted "word&nbsp;&nbsp;word" would decode to two
-    # non-breaking spaces that normalize_whitespace can't collapse to
-    # one, unlike two literal spaces. Converted to a plain space here
-    # instead, so normalize_whitespace still sees only ordinary
-    # whitespace.
+    # For _includes/seo.html's meta-description fallback, between
+    # `strip_html` and the final `| escape`: strip_html leaves entities
+    # like `&quot;` (e.g. from an embedded entry's escaped title in Rich
+    # Text) as literal text, which `escape` would double-escape into
+    # `&amp;quot;`. Also turns a decoded `&nbsp;` into a plain space, since
+    # normalize_whitespace's `\s` doesn't match U+00A0.
     def unescape_html(value)
-      CGI.unescapeHTML(value.to_s).tr("\u00A0", " ")
+      CGI.unescapeHTML(value.to_s).tr(" ", " ")
     end
 
-    # manufacturer-card.html shows a manufacturer's `link` field with its
-    # protocol stripped (domain only). Liquid's `remove` filter is a
-    # literal, case-sensitive substring match, so a capitalized protocol
-    # (e.g. an unpublished draft that hasn't yet hit the field's
-    # lowercase-only validation pattern, viewed under
-    # CONTENTFUL_PREVIEW) would survive a chain of
-    # `remove:'http://' | remove:'https://'` untouched. Matches the same
-    # ftp/http/https protocols that field's Contentful validation
-    # pattern allows, case-insensitively.
+    # A manufacturer `link` without its protocol, for display. Matches the
+    # ftp/http/https protocols that field's Contentful validation allows,
+    # case-insensitively (Liquid's `remove` is case-sensitive).
     def strip_protocol(value)
       value.to_s.sub(/\A(ftp|https?):\/\//i, "")
     end

@@ -1,7 +1,5 @@
 module ContentfulJekyll
-  # Shared Jekyll.logger progname for every contentful_* plugin -- was
-  # previously defined identically in both contentful_entries_generator.rb
-  # and contentful_listing_pages.rb.
+  # Shared Jekyll.logger progname for every contentful_* plugin.
   LOG_TAG = "Contentful:"
 
   # code: locale to query, nil = no `locale` param (space's default).
@@ -29,23 +27,14 @@ module ContentfulJekyll
 
     # The site.data key for a locale-scoped collection fetched under
     # `base` (e.g. "manufacturers") -- `base` for the primary locale,
-    # "<base>_<data_suffix>" for any other. Both contentful_entries_
-    # generator.rb#fetch_data_collection (which writes this key) and
-    # contentful_listing_pages.rb (which reads it back) call this, so the
-    # naming convention can't drift between the two -- previously each
-    # computed `[base, data_suffix].compact.join("_")` independently.
+    # "<base>_<data_suffix>" for any other. Used by both the writer
+    # (EntriesGenerator) and the reader (ListingPagesGenerator).
     def data_key_for(base)
       [base, data_suffix].compact.join("_")
     end
 
-    # Joins `parts` into a URL path prefixed with this locale's own
-    # url_prefix (nil, a no-op, for the primary locale) -- the same
-    # locale-prefixing convention data_key_for applies to site.data keys,
-    # applied to URL paths instead. contentful_entries_generator.rb#
-    # build_page and contentful_listing_pages.rb#build_page both call
-    # this rather than each joining `[locale.url_prefix, ...]` inline, so
-    # the two can't independently drift on how blank/nil path segments
-    # get dropped.
+    # Joins `parts` into a URL path prefixed with this locale's url_prefix
+    # (none for the primary locale), dropping blank/nil segments.
     def path_for(*parts)
       [url_prefix, *parts].reject { |part| part.to_s.empty? }.join("/")
     end
@@ -99,13 +88,8 @@ module ContentfulJekyll
 
   # Resolves a label from collection config: `collection[key]` as a plain
   # string, or a Hash keyed by locale code (same per-locale-override
-  # convention as `dir`, see dir_for below) -- falling back to `default`
-  # instead of raising, since an untranslated heading isn't a broken URL
-  # the way a missing/misconfigured dir is. Shared by
-  # contentful_entries_generator.rb's home_label_for and
-  # contentful_listing_pages.rb's own label resolution, which previously
-  # each reimplemented this identically.
-  def self.label_for(collection, key, locale, default)
+  # convention as `dir`, see dir_for below), else `default`.
+  def self.label_for(collection, key, locale, default = nil)
     label = collection[key]
     label = label[locale.code] if label.is_a?(Hash)
     label || default

@@ -226,7 +226,7 @@ module ContentfulJekyll
     end
 
     def config_label(context, key)
-      ContentfulJekyll.label_for(context.collection, key, context.locale, nil) ||
+      ContentfulJekyll.label_for(context.collection, key, context.locale) ||
         raise("#{context.collection["content_type"]}: \"#{key}\" is missing from its _config.yml collection entry")
     end
   end

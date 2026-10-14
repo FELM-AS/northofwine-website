@@ -13,10 +13,9 @@
   text; `unescape_html` (contentful_filters.rb, see its own comment)
   undoes that before the final `| escape` re-escapes for the meta tag,
   or an entity in the rendered content would render here as a
-  double-escaped `&amp;quot;`. Every listing/filter page sets its own
-  page.description (contentful_listing_pages.rb), so `default: content`
-  is only actually reached for pages without one -- today, product,
-  Om oss, and Hjem.
+  double-escaped `&amp;quot;`. Every listing page (Om oss included) sets
+  its own page.description (contentful_listing_pages.rb), so
+  `default: content` is only reached for product pages and Hjem.
 {% endcomment %}
 {% assign meta_description = page.description | default: content | strip_html | unescape_html | normalize_whitespace | truncate: 160 %}
 {% assign has_description = meta_description != blank %}
@@ -45,7 +44,7 @@
 {% endif %}
 
 <meta property="og:title" content="{{ page_title | escape }}">
-<meta property="og:type" content="{% if page.home_label %}article{% else %}website{% endif %}">
+<meta property="og:type" content="website">
 <meta property="og:url" content="{{ page.url | absolute_url }}">
 {% if site.title %}
 <meta property="og:site_name" content="{{ site.title | escape }}">

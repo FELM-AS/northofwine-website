@@ -105,10 +105,8 @@ module ContentfulJekyll
       when Array
         value.map { |item| serialize_field(item, depth) }
       when String
-        # Normalized once here for every string field, every content
-        # type, every consumer -- not left to individual templates to
-        # remember (found via a real case: a manufacturer's `name` had
-        # a stray leading space in Contentful).
+        # Normalized once here for every string field, rather than left
+        # to each template (editors do leave stray leading spaces).
         value.strip
       else
         value
