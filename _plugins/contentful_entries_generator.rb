@@ -1,8 +1,8 @@
-require "set"
 require "contentful"
 require_relative "contentful_client"
 require_relative "contentful_locales"
 require_relative "contentful_serializer"
+require_relative "contentful_url_registry"
 
 module ContentfulJekyll
   # Jekyll::Generator that reads contentful_collections/
@@ -39,11 +39,7 @@ module ContentfulJekyll
       # extra JSON fetched and parsed for nothing on every entry, every
       # locale pass.
       @entry_include_depth = [entry_depth, MAX_INCLUDE_DEPTH].min
-      # Seeded with every existing static page's URL, so a Contentful
-      # entry colliding with one (e.g. a blank slug on dir: "" -> "/")
-      # gets a specific warning naming the entry, not just Jekyll's
-      # generic unnamed "destination shared by multiple files" one.
-      @built_dirs = Set.new(site.pages.map(&:url))
+      @urls = UrlRegistry.new(site.pages)
 
       collections = site.config["contentful_collections"] || []
       data_collections = site.config["contentful_data_collections"] || []
@@ -185,9 +181,7 @@ module ContentfulJekyll
       dir = context.locale.path_for(context.dir, slug)
       page = Jekyll::PageWithoutAFile.new(site, site.source, dir, "index.html")
 
-      unless @built_dirs.add?(page.url)
-        Jekyll.logger.warn LOG_TAG, "multiple entries (or an existing site file) produced the URL \"#{page.url}\" (entry #{entry.sys[:id]} included) -- only the last one written will survive in the build output"
-      end
+      @urls.register(page.url, "entry #{entry.sys[:id]} (content_type: #{context.collection["content_type"]})")
 
       page.content = context.serializer.render_body(entry.fields[context.body_field])
       page.data["layout"] = context.collection["layout"]

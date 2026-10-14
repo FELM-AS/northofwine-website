@@ -52,9 +52,11 @@ contentful_collections:
     dir: utvalg
     body_field: description
     order: fields.productShortName
+    menu_label: Utvalg
     section_heading: Vårt utvalg
     root_label: Alle viner
-    menu_label: Utvalg
+    root_description: Hele vinutvalget til North of Wine, vinimportør i Trondheim.
+    filter_description: "%s i North of Wine sitt vinutvalg."
 
 # Optional: how deep a linked entry's own fields get flattened before
 # falling back to an {id, link_type} stub. Defaults to 2 if unset.
@@ -108,15 +110,19 @@ contentful_data_collections:
   - content_type: manufacturer
     name: manufacturers
     dir: produsenter
+    menu_label: Produsenter
     section_heading: Våre vinhus
     root_label: Alle vinhus
-    menu_label: Produsenter
+    root_description: Vinprodusentene bak North of Wine sitt vinutvalg.
+    filter_description: "Vinprodusenter fra %s i North of Wine sitt utvalg."
     body_field: description
     order: fields.name
   - content_type: person
     name: people
     dir: omoss
     menu_label: Om oss
+    section_heading: Om oss
+    root_description: "Om North of Wine: selskap, lagmedlemmer og verdier."
 
 exclude:
   - README.md
