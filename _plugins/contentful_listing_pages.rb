@@ -110,7 +110,10 @@ module ContentfulJekyll
       # product pages using the exact same URL convention the pages
       # were built with.
       url_dir = locale.path_for(dir)
-      product_pages = site.pages.select { |page| page.url.start_with?("/#{url_dir}/") }
+      product_pages = nb_sort(
+        site.pages.select { |page| page.url.start_with?("/#{url_dir}/") },
+        "product_short_name"
+      )
       products_by_manufacturer = product_pages.group_by { |page| page.data.dig("manufacturer", "id") }
 
       context = ListingContext.new(
@@ -143,7 +146,7 @@ module ContentfulJekyll
       # ["name"] here (not a hardcoded "manufacturers" literal) is what
       # keeps this in sync if that collection's configured `name` ever
       # changes.
-      manufacturers = site.data[locale.data_key_for(manufacturer_collection["name"])] || []
+      manufacturers = nb_sort(site.data[locale.data_key_for(manufacturer_collection["name"])] || [], "name")
 
       context = ListingContext.new(
         dir: dir,
@@ -230,6 +233,28 @@ module ContentfulJekyll
       values.map do |value|
         build_page(site, locale, value, grouped[value], "the #{field} filter", context)
       end
+    end
+
+    # Norwegian alphabetical order by `field`. Contentful's own `order`
+    # (_config.yml) can't do this: the CDA has no collation parameter and
+    # compares strings case-insensitively with accents folded to their
+    # base letter, so "Åge Aleksandersen" sorted as "Age..." -- first,
+    # ahead of "Aime Arnoux" -- instead of last after Z. Its order is
+    # still the tiebreaker here (`index`), since sort_by isn't stable.
+    def nb_sort(items, field)
+      items.each_with_index.sort_by { |item, index| [nb_sort_key(item_field(item, field)), index] }.map(&:first)
+    end
+
+    # Æ/Ø/Å go after Z, in that order (ä/ö too, as in Norwegian
+    # dictionaries); every other accented letter sorts as its base letter
+    # (é -> e, ü -> u), and case is ignored -- matching what Contentful
+    # already did for everything except those three letters.
+    NB_LAST_LETTERS = { "æ" => "{", "ä" => "{", "ø" => "|", "ö" => "|", "å" => "}" }.freeze
+
+    def nb_sort_key(value)
+      value.to_s.downcase
+        .gsub(/[æäøöå]/, NB_LAST_LETTERS)
+        .unicode_normalize(:nfd).gsub(/\p{Mn}/, "")
     end
 
     # _data/countries.yml is still a manually-maintained country ->
