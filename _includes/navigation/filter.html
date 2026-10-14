@@ -1,15 +1,7 @@
 {% comment %}
-  Filter sidebar (Plan.md's Filter component) for Utvalg/Produsenter
-  listing pages: links to every sibling listing page under the same
-  section (the root "all" page plus each filter value) -- aria-current
-  marks the current one, the semantic "you are here" signal, no CSS
-  needed for it.
-
-  page.siblings is set directly by _plugins/contentful_listing_pages.rb
-  (the same generator that builds every listing page in a section), not
-  rediscovered here by scanning site.pages for a matching URL prefix --
-  that scan ran on every render and depended on a URL-prefix convention
-  that could silently drift from what the generator actually builds.
+  Listing sidebar: the section heading and a link to every listing page in
+  the section (page.siblings, from contentful_listing_pages.rb); button.html
+  marks the current one with aria-current. Om oss has no siblings.
 {% endcomment %}
 <nav class="filter" aria-label="{{ "navigation.filter" | t }}">
   <h1>{{ page.section_heading }}</h1>

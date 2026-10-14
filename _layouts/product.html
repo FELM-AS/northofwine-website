@@ -2,45 +2,16 @@
 layout: default
 ---
 {% comment %}
-  Product detail page (Plan.md #21): full description (the rendered
-  page body -- product's body_field is `description`, see _config.yml
-  -- {{ content }} below), grape composition, sensory profile text +
-  graphical ratings, food pairing, link back to the manufacturer's
-  card. Sidebar (breadcrumb + image) is _includes/navigation/breadcrumb.html,
-  wired in by _layouts/default.html's page.layout == "product" check.
+  Product detail page. The rendered description is {{ content }}; the
+  image is in the sidebar (_layouts/default.html).
 
-  Sensory ratings use native <meter> (a scalar measurement within a
-  known range -- exactly what these are), not a hand-rolled graphic:
-  browsers render a default gauge visualization for it with zero
-  custom CSS. Three axes, not four (Plan.md, already corrected):
-  fullness + freshness always, then tannins for Rødvin or sweetness
-  for every other productTypeName -- never both, matching the current
-  live site's own pattern (cross-checked against vinmonopolet.no,
-  whose classification this content model mirrors).
+  Sensory ratings are <meter>s on a 1-12 scale: fullness, freshness, and a
+  third axis -- tannins for Rødvin, sweetness for everything else. It's
+  resolved below so a product that only has the other field filled in
+  shows no third rating.
 
-  third_axis_value/third_axis_label resolve once, above, to whichever
-  of tannins/sweetness actually applies to this product's
-  productTypeName -- nothing in the Contentful schema stops a product
-  from having the *other* one filled in too (e.g. tannins on a Hvitvin),
-  so both the Sensorikk heading guard and the ratings <ul> guard check
-  this resolved value rather than "tannins or sweetness" directly, or a
-  product with only the non-matching field set would render an empty
-  <ul>/section instead of being suppressed like every other empty block
-  here.
-
-  lang on the product name (h1) and the manufacturer name link both
-  come from the manufacturer's own `country` (Plan.md's Hyphenation
-  section), via the same `country_lang` filter product-card.html and
-  manufacturer-card.html already use -- not the product's own free-text
-  `country` field, which isn't guaranteed to match spelling-wise.
-  Omitted if the product has no resolved manufacturer or that country
-  isn't in the lookup.
-
-  Alcohol %, volume, and the 1-12 sensory scale values are formatted
-  per Norwegian numeric convention via the `nb_number` filter (Plan.md's
-  Formatting section) -- a no-op for the sensory values today (they're
-  whole numbers with nothing to reformat) but applied uniformly per the
-  plan, so nothing needs revisiting if that ever changes.
+  lang on the name and the producer link comes from the manufacturer's
+  country (country_lang).
 {% endcomment %}
 {% assign product_lang = page.manufacturer.country | country_lang %}
 {% if page.product_type_name == "Rødvin" %}

@@ -40,18 +40,10 @@ module ContentfulJekyll
     end
   end
 
-  # Yields one Locale per contentful_locales entry, first = primary. A
-  # nil/empty config yields a single Locale.new(nil, nil), identical to a
-  # build with no locale support (the `.empty?` check matters: an explicit
-  # `[]` would otherwise silently iterate zero entries and fetch nothing).
-  # A configured single-entry list still sends an explicit `locale:` on
-  # every query, unlike the unconfigured case, so it never silently falls
-  # back to the space's default locale instead.
-  #
-  # An entry is a plain locale code (prefix == code) or a {code:, prefix:}
-  # Hash for a different URL/site.data prefix -- explicit rather than
-  # auto-derived from the code's region subtag, since that has a real
-  # collision case (en-US and en-GB can't both shorten to "en").
+  # Yields one Locale per contentful_locales entry, first = primary. Unset
+  # or empty yields a single Locale.new(nil, nil): no `locale` query param,
+  # no prefixes. An entry is a locale code (prefix == code) or a
+  # {code:, prefix:} Hash for a different URL/site.data prefix.
   def self.each_locale(configured)
     if configured.nil? || configured.empty?
       yield Locale.new(nil, nil)
@@ -68,11 +60,7 @@ module ContentfulJekyll
     return [entry, entry] unless entry.is_a?(Hash)
 
     code = entry["code"] || raise("contentful_locales: entry is missing \"code\": #{entry.inspect}")
-    # `entry.fetch("prefix", code)` only falls back to `code` when the key
-    # is absent entirely -- a `prefix:` key present in YAML with no value
-    # (as opposed to omitted) parses as an explicit nil, which #fetch
-    # would return as-is rather than falling back. Treat that the same as
-    # "not set".
+    # A `prefix:` key with no value parses as nil; treat it as unset.
     prefix = entry.fetch("prefix", code)
     prefix = code if prefix.nil?
 
@@ -86,16 +74,9 @@ module ContentfulJekyll
     [code, prefix]
   end
 
-  # `dir` is usually one string used for every locale; set it to a Hash
-  # keyed by locale code when the path segment itself needs translating
-  # (e.g. "produkter" vs "products"), not just prefixing.
-  #
-  # `dir` itself is required -- a nil value (key omitted from _config.yml
-  # entirely, or present with no value) raises immediately, the same way
-  # a per-locale Hash missing the current locale raises below, rather
-  # than silently generating pages at the site root. `dir: ""` (the
-  # site-root collection) is a distinct, valid, explicit value -- only a
-  # nil dir is an error.
+  # A collection's `dir`: one string for every locale, or a Hash keyed by
+  # locale code when the path segment itself is translated. Raises if it's
+  # missing (use dir: "" for the site root) or lacks the current locale.
   def self.dir_for(collection, locale)
     dir = collection["dir"]
 

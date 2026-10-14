@@ -1,9 +1,4 @@
-# Site-wide company/contact info for the Footer (planning/Plan.md:
-# "site-wide settings (footer contact info, social links) stay as
-# static Jekyll content/data", not pulled from Contentful). Keeping
-# this in _data/ rather than hardcoded in _includes/footer.html
-# matches the existing _data/countries.yml convention, and sets up
-# social/contact URLs to be checked once CI link-checking lands.
+# Company and contact info, read by the footer.
 name: North of Wine AS
 address:
   - Fosenkaia 7
@@ -20,10 +15,6 @@ social:
     url: https://www.instagram.com/northofwine/
     icon: brands/instagram
 helsenorge_url: https://helsenorge.no/rus-og-avhengighet/alkohol/alkohol-og-helse
-# Plan.md's SEO section: "Site-wide fallback image for pages without
-# one" -- read by _includes/seo.html for any page with no social_image
-# of its own (every Utvalg/Produsenter listing/filter page, Om oss,
-# Hjem). A site-relative path (run through `absolute_url`, so this
-# isn't itself a full URL) to an image checked into assets/, not a
-# Contentful asset -- unset until a real logo/photo exists.
+# Open Graph image for pages without their own (_includes/seo.html): a
+# site path to an image in assets/. Unset until one exists.
 # social_image: /assets/images/og-fallback.jpg

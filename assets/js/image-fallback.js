@@ -1,26 +1,12 @@
 ---
 ---
-// Two-stage image fallback for every <img> rendered by
-// _includes/contentful-image.html (Plan.md's Error Handling section):
-// 1. If the resized (`?w=`) request fails, retry the original,
-//    unresized asset (data-original).
-// 2. If the original also fails, fall back to a generic placeholder.
+// Two-stage fallback for images from _includes/contentful-image.html:
+// a failed resized image retries the original (data-original), and a
+// failed original falls back to PLACEHOLDER.
 //
-// Compared via getAttribute, not the `src` property: the property
-// always resolves to an absolute URL, while data-original/PLACEHOLDER
-// may be root-relative (relative_url) -- comparing the resolved
-// property against the literal attribute would never match, and a
-// broken placeholder would retry itself forever. PLACEHOLDER is baked
-// in here (this file has its own empty front matter, so Jekyll runs
-// it through Liquid) rather than read from a data attribute, since
-// it's one site-wide constant, not something that varies per <img>.
-//
-// `error` events don't bubble, but a capturing-phase listener on
-// `document` still sees them for every current and future <img> on
-// the page. Deliberately not `defer`red: the browser's preload
-// scanner can start fetching (and failing) images while the rest of
-// the page is still parsing, before a deferred script would run --
-// this has to be registered before that can happen.
+// Compares getAttribute values, not the absolute `src` property, so the
+// checks match root-relative URLs and a broken placeholder can't loop.
+// `error` doesn't bubble, so this listens in the capture phase.
 const PLACEHOLDER = "{{ "/assets/images/placeholder.svg" | relative_url }}";
 
 document.addEventListener(
@@ -34,7 +20,6 @@ document.addEventListener(
 
     if (src === img.dataset.original) {
       img.src = PLACEHOLDER;
-      // Same dictionary key as the visible text inside placeholder.svg.
       img.alt = {{ "image.unavailable" | t | jsonify }};
     } else {
       img.src = img.dataset.original;

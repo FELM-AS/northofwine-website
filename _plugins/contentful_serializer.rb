@@ -23,20 +23,10 @@ module ContentfulJekyll
       @entry_cache = {}
     end
 
-    # value: a Rich Text document (Hash), a plain/Markdown string, or nil.
-    # Generated pages are named "index.html", which Jekyll's markdown_ext
-    # never auto-converts, so both cases are rendered explicitly here.
-    #
-    # The plain-string branch escapes its input before handing it to
-    # Kramdown: Kramdown treats any text that looks like an HTML tag as
-    # raw HTML and emits it unescaped (standard Markdown behavior, not a
-    # Kramdown bug), so an editor's stray "&"/"<" in a plain Text field
-    # could otherwise render mangled or, worse, inject real markup.
-    # Escaping first makes every "&"/"<"/">" render literally and
-    # guarantees Kramdown only ever sees the Markdown syntax (*emphasis*,
-    # [links](...), blank-line paragraphs) this field is documented to
-    # support -- same CGI.escapeHTML convention contentful_rich_text.rb
-    # already uses for embedded-entry titles.
+    # value: a Rich Text document (Hash), a plain/Markdown string, or nil --
+    # rendered here, since Jekyll doesn't convert generated index.html pages.
+    # A plain string is HTML-escaped first, so an editor's "<"/"&" renders
+    # literally and only Markdown syntax is interpreted.
     def render_body(value)
       case value
       when Hash
@@ -113,11 +103,9 @@ module ContentfulJekyll
       end
     end
 
-    # Contentful::File only defines methods for keys present in the raw
-    # JSON -- an unprocessed asset (e.g. a draft via CONTENTFUL_PREVIEW)
-    # has no `url` key, so `file.url` raises NoMethodError, not nil
-    # (`file&.url` doesn't help). #safe_field guards every dynamic
-    # Contentful::File method read here.
+    # Contentful::File only defines methods for keys present in its JSON, so
+    # an unprocessed asset (e.g. a draft under CONTENTFUL_PREVIEW) raises on
+    # `file.url`. #safe_field guards each read.
     def serialize_asset(asset)
       file = asset.fields[:file]
       url = safe_field(file, :url)

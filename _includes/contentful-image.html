@@ -1,61 +1,16 @@
 {% comment %}
-  Renders an <img> for a Contentful asset, resized via the Images API
-  (https://www.contentful.com/developers/docs/concepts/images/) rather
-  than serving the original -- these can be several thousand px, which
-  is wasted bandwidth and (with no CSS yet to constrain size) renders
-  comically large. width/height attributes reflect the *resized*
-  dimensions (computed from the original aspect ratio), not the
-  original asset's, so they still correctly reserve layout space and
-  don't lie about what's actually being downloaded.
-
-  Also requests `fm=webp&q=75` -- the CDA's default is the source
-  file's own format (almost always JPEG here) at q=100, which is 2-5x
-  heavier than a q=75 WebP for no visible difference at these display
-  sizes (measured against real product photos: a 400px-wide product
-  shot drops from ~43KB at the default to ~15KB). Only added when
-  `asset.width` is known (i.e. a confirmed, already-processed image --
-  same condition guarding the width/height attributes below): forcing
-  a format conversion on a non-image asset (a PDF) or one Contentful
-  hasn't finished processing yet could fail where a bare `?w=` is
-  harmlessly ignored instead.
-
-  Renders nothing if the asset has no url at all -- callers don't need
-  their own "if x.image.url" guard around this include.
-
-  An asset can have a `url` but no `width` (CLAUDE.md: a non-image
-  asset, or one that hasn't finished processing yet, e.g. under
-  CONTENTFUL_PREVIEW) -- resizing still requests `?w=` (the Images API
-  resizes based on the source file, not on whether contentful.rb
-  happened to expose width/height metadata for it yet), just without
-  width/height attributes, since the resulting aspect ratio can't be
-  computed without an original width to scale from.
-
-  alt/src are escaped: `description`/`title`/url text ultimately come
-  from Contentful fields editors control, same convention as
-  _includes/button.html's href/text.
-
-  data-original feeds assets/js/image-fallback.js's two-stage fallback
-  (Plan.md's Error Handling section) -- see that file's own comment for
-  the full behavior. A plain data attribute, not inline `onerror`, so
-  every <img> this include renders is covered by one shared listener
-  instead of repeating the fallback logic per call site. The
-  placeholder path itself isn't repeated here -- it's one site-wide
-  constant, baked directly into image-fallback.js rather than restated
-  on every single image.
+  <img> for a Contentful asset, resized via the Images API (?w=). For a
+  processed image (asset.width known) it also requests WebP at q=75 and
+  sets width/height from the original aspect ratio. Renders nothing
+  without asset.url. data-original feeds assets/js/image-fallback.js.
 
   Params:
     asset        - required, a serialized Contentful asset (.url,
                    .width, .height, .description)
-    width        - required, target width in px; height is computed to
-                   preserve the original aspect ratio, not cropped
-    fallback_alt - alt text used when the asset itself has no
-                   `description` set in Contentful (Plan.md: alt text
-                   "from Contentful where possible"). Checked via
-                   `.size > 0`, not Liquid's `default` filter (which
-                   only substitutes for nil/false, not a blank string)
-                   -- relies on EntrySerializer#serialize_field having
-                   already stripped whitespace-only Contentful values
-                   down to "", not re-stripped here.
+    width        - required, target width in px; height keeps the
+                   original aspect ratio
+    fallback_alt - alt text when the asset has no description
+    class        - optional, any additional classes
 {% endcomment %}
 {% if include.asset.url %}
 {% if include.asset.description.size > 0 %}
@@ -64,14 +19,6 @@
 {% assign alt = include.fallback_alt %}
 {% endif %}
 {% assign asset_url = include.asset.url | escape %}
-{% comment %}
-  img_height is only ever read inside the same `if` it's assigned in
-  below (unlike size_attrs in an earlier version of this include, which
-  had to be reset on every call since {% include %} doesn't give
-  assigns their own scope in Jekyll's Liquid) -- so no reset needed
-  here, same inline-conditional-attribute convention as `lang` in
-  product-card.html/manufacturer-card.html.
-{% endcomment %}
 {% assign image_params = "" %}
 {% if include.asset.width > 0 %}
 {% assign img_height = include.width | times: include.asset.height | divided_by: include.asset.width %}

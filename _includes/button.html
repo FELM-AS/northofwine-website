@@ -1,23 +1,15 @@
 {% comment %}
-  Button component (Plan.md's Strong/Subtle variants) -- a plain <a>,
-  optionally with an icon before or after the text. The two variants
-  are left structurally identical for now (no class/attribute hook);
-  visual distinction is deferred to manual styling added later.
+  Button: a plain <a>, optionally with an icon before or after the text.
+  Templates escape every editor-controlled value; this include escapes
+  href, text and aria_label itself.
 
   Params:
-    href          - required. Escaped -- pass a plain URL string.
-    class         - optional, any additional classes.
-    text          - link text, escaped. Required unless aria_label is
-                    given for an icon-only button.
-    icon          - optional, raw HTML for the icon (e.g. an inline SVG
-                    or entity) -- intentionally NOT escaped, unlike
-                    href/text, since it's meant to carry markup.
-    icon_position - "left" or "right" (default "right"). Normalized
-                    (case/whitespace-insensitive); anything other than
-                    "left" renders on the right, matching the default.
-    aria_label    - optional, escaped. Accessible name for an icon-only
-                    button (no visible text) -- without it, the link
-                    renders with no accessible name at all.
+    href          - required, a plain URL
+    class         - optional, any additional classes
+    text          - link text; required unless aria_label is given
+    icon          - optional, icon path under _includes/icons/
+    icon_position - "left" or "right" (default "right")
+    aria_label    - optional accessible name, needed for an icon-only button
 {% endcomment %}
 {% assign icon_position = include.icon_position | default: "right" | downcase | strip %}
 {% assign has_icon = include.icon.size > 0 %}

@@ -59,10 +59,8 @@ module ContentfulJekyll
   end
 
   # Extension point: override a key to change markup, or add one for an
-  # unhandled node/mark type. Covers every gap in rich_text_renderer's
-  # defaults (checked against @contentful/rich-text-types' BLOCKS/INLINES/
-  # MARKS) except embedded-resource-block/-inline, left unmapped on
-  # purpose -- raises a build error like any other unhandled type.
+  # unhandled node/mark type. embedded-resource-block/-inline are left
+  # unmapped on purpose, so they fail the build rather than render wrong.
   RICH_TEXT_MAPPINGS = {
     "embedded-entry-block" => EmbeddedEntryBlockRenderer,
     "embedded-entry-inline" => EmbeddedEntryInlineRenderer,

@@ -1,22 +1,7 @@
-// Self-hosted DM Sans/DM Mono (Plan.md: "self-hosted, not loaded from a
-// third-party CDN [e.g. Google Fonts]" -- avoids the GDPR/IP-transfer
-// issue that ruled out Google Analytics). The actual point is that a
-// visitor's browser never talks to Google at request time; the font
-// files themselves still originate from Google Fonts (SIL Open Font
-// License -- see assets/fonts/DM-Sans-OFL.txt/DM-Mono-OFL.txt), fetched
-// once from https://fonts.googleapis.com/css2?family=... and committed
-// here as plain binaries. Re-fetch the same way to add a weight/style.
-//
-// Latin subset only (covers Norwegian plus the French/German/Italian/
-// Portuguese/Spanish diacritics this site's wine content uses, all
-// within Latin-1) -- an out-of-subset character (e.g. one manufacturer
-// name's "Š") just falls back to the next font in the stack, same as
-// any font missing a glyph.
-//
-// Relative `url()` paths (not `relative_url`): this file is never run
-// through Liquid, but doesn't need to be -- a path relative to the
-// compiled main.css's own location (assets/css/) is correct regardless
-// of _config.yml's `baseurl`.
+// Self-hosted DM Sans/DM Mono (Plan.md: no third-party font CDN, for
+// GDPR). Latin subset from Google Fonts, OFL-licensed (assets/fonts/);
+// re-fetch from fonts.googleapis.com/css2 to add a weight or style.
+// url()s are relative to the compiled assets/css/main.css.
 @mixin dm-face($family, $file, $weight, $style: normal) {
   @font-face {
     font-family: $family;

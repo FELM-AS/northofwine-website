@@ -4,12 +4,8 @@ title_key: pages.not_found.title
 ---
 
 {% comment %}
-  Custom 404 (Plan.md #25): same header/sidebar/footer as the rest of
-  the site (no special page.layout branch needed -- _layouts/default.html
-  already falls through to the plain no-sidebar case for any layout it
-  doesn't recognize), a friendly message, and links to Utvalg,
-  Produsenter and Om oss. No redirect from the old /kontakt.html -- low
-  traffic doesn't justify one.
+  404 page: a message and links to the main sections. GitHub Pages serves
+  /404.html for missing URLs.
 {% endcomment %}
 <h1>{{ "pages.not_found.title" | t }}</h1>
 <p>{{ "pages.not_found.message" | t }}</p>
