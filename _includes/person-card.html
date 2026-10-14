@@ -2,11 +2,13 @@
   Person card (Plan.md): image, name, email, phone, description. No
   card-wide link -- Person has no detail page of its own.
 
-  Every editor-controlled field below is escaped -- name/description
-  are free text, and email/phone (while pattern-validated in
-  Contentful's own UI) aren't guaranteed clean if ever written via the
-  Management API instead, same convention as _includes/button.html's
-  href/text.
+  Every editor-controlled field below is escaped -- name is free text,
+  and email/phone (while pattern-validated in Contentful's own UI)
+  aren't guaranteed clean if ever written via the Management API
+  instead, same convention as _includes/button.html's href/text.
+  `description` is the exception: it's this content type's body_field
+  (_config.yml), so it arrives already rendered to safe HTML by
+  EntrySerializer#render_body, same as manufacturer-card.html's.
 
   Params:
     person - required, a person Hash, e.g. an item off site.data.people.
@@ -21,5 +23,5 @@
   {% if person.phone.size > 0 %}
   <p><a href="tel:{{ person.phone | escape }}">{{ person.phone | escape }}</a></p>
   {% endif %}
-  <p>{{ person.description | escape | newline_to_br }}</p>
+  {{ person.description }}
 </article>

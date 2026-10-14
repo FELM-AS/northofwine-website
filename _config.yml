@@ -122,6 +122,7 @@ contentful_data_collections:
     dir: omoss
     menu_label: Om oss
     section_heading: Om oss
+    body_field: description
     root_description: "Om North of Wine: selskap, lagmedlemmer og verdier."
 
 exclude:
