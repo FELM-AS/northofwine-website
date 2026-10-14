@@ -154,23 +154,19 @@ module ContentfulJekyll
       )
 
       produsenter_pages = [build_page(site, locale, nil, manufacturers, "the root listing", context)]
-      # Country is a fixed 13-value enum (planning/Contentful-Content-Model.md,
-      # Plan-Issues.md #14: "Each of the 13 country values has its own
-      # static URL") -- unlike product_type_name/web_product_type_name
-      # above, every enum value gets a page regardless of whether a
-      # manufacturer currently has it, so a Filter sidebar can link to
-      # all 13 without any of them 404ing. _data/countries.yml (#8) is
-      # used as the list of those 13 values -- NOT fetched from
-      # Contentful, a manually-maintained shadow of the real schema
-      # enum, and not itself locale-specific (it's a country -> language
-      # code lookup, not editorial content). If it drifts out of sync
-      # (e.g. a manufacturer added from a genuinely new country), that
-      # country gets no filter page -- #build_grouped_pages below logs a
-      # build warning naming the affected manufacturer(s) when this
-      # happens.
+      # Only countries some manufacturer actually has get a filter page,
+      # same as product_type_name/web_product_type_name above -- a page
+      # per declared enum value (formerly _data/countries.yml's 13 keys)
+      # left the filter linking to empty pages for countries nobody
+      # imports from yet. Sorted so the filter's order doesn't depend on
+      # manufacturer order; plain codepoint order already puts Ø last, as
+      # Norwegian alphabetical order does. _data/countries.yml is now only
+      # the country -> language lookup for `lang` attributes
+      # (contentful_filters.rb#country_lang).
       produsenter_pages.concat(
-        build_grouped_pages(site, locale, manufacturers, "country", context, enum_values: (site.data["countries"] || {}).keys)
+        build_grouped_pages(site, locale, manufacturers, "country", context, sort: true)
       )
+      warn_missing_country_langs(site, manufacturers)
       link_siblings(produsenter_pages)
       site.pages.concat(produsenter_pages)
     end
@@ -222,34 +218,32 @@ module ContentfulJekyll
       pages.each { |page| page.data["siblings"] = pages }
     end
 
-    # One page per distinct value of `field` among `items`, plus (if
-    # `enum_values` is given) one for every declared enum value too, even
-    # if nothing currently has it -- so a Filter sidebar can link to all of
-    # them without any 404ing (e.g. Produsenter's country filter). Without
-    # `enum_values` (e.g. product_type_name/web_product_type_name), only
-    # values actually present get a page.
-    #
-    # `enum_values` is a manually-maintained shadow of Contentful's own
-    # field validation, not fetched from Contentful itself -- so an item
-    # whose `field` value isn't in that list would otherwise just silently
-    # get no filter page, with nothing in the build output pointing at
-    # why. Warning here, naming the specific unmatched entries, is the
-    # cheapest way to surface that drift without actually querying
-    # Contentful's content-type validations.
-    def build_grouped_pages(site, locale, items, field, context, enum_values: nil)
+    # One page per distinct value of `field` among `items` -- only values
+    # actually present get a page, so a filter never links to an empty
+    # one. `sort: true` orders the pages by value instead of by first
+    # appearance among `items`.
+    def build_grouped_pages(site, locale, items, field, context, sort: false)
       grouped = items.group_by { |item| item_field(item, field) }
       grouped.delete(nil)
 
-      if enum_values
-        unmatched_values = grouped.keys - enum_values
-        unmatched_values.each do |value|
-          entry_ids = grouped[value].map { |item| item_field(item, "id") }.join(", ")
-          Jekyll.logger.warn LOG_TAG, "#{grouped[value].size} #{context.item_type}(s) have #{field} \"#{value}\", which isn't in the configured enum_values list -- no filter page will be built for it (entries: #{entry_ids})"
-        end
+      values = sort ? grouped.keys.sort : grouped.keys
+      values.map do |value|
+        build_page(site, locale, value, grouped[value], "the #{field} filter", context)
       end
+    end
 
-      (enum_values || grouped.keys).map do |value|
-        build_page(site, locale, value, grouped[value] || [], "the #{field} filter", context)
+    # _data/countries.yml is still a manually-maintained country ->
+    # language code lookup (not fetched from Contentful). A country
+    # missing from it no longer loses its filter page, but its
+    # manufacturer/product names silently lose their `lang` attribute
+    # (hyphenation, screen-reader pronunciation) -- warn so it gets added.
+    def warn_missing_country_langs(site, manufacturers)
+      langs = site.data["countries"] || {}
+      manufacturers.group_by { |m| item_field(m, "country") }.each do |country, group|
+        next if country.nil? || langs.key?(country)
+
+        entry_ids = group.map { |m| item_field(m, "id") }.join(", ")
+        Jekyll.logger.warn LOG_TAG, "country \"#{country}\" has no language code in _data/countries.yml -- names from these manufacturers get no lang attribute (entries: #{entry_ids})"
       end
     end
 
