@@ -11,9 +11,9 @@
 {% endcomment %}
 <footer>
   <div>
+    {% capture helsenorge_link %}<a href="{{ site.data.company.helsenorge_url }}">{{ "footer.helsenorge" | t }}</a>{% endcapture %}
     <p class="small">
-      Bruk av alkohol kan gi ulike skadevirkninger. Nærmere informasjon finner du hos
-      <a href="{{ site.data.company.helsenorge_url }}">Helsenorge</a>.
+      {{ "footer.alcohol_warning" | t: link: helsenorge_link }}
     </p>
     <ul>
       {% for s in site.data.company.social %}
@@ -23,7 +23,7 @@
   </div>
   <address>
     <dl>
-      <dt>E-post</dt>
+      <dt>{{ "footer.email" | t }}</dt>
       <dd>
         <a href="mailto:{{ site.data.company.emails.post }}">{{ site.data.company.emails.post }}</a>
       </dd>
@@ -37,7 +37,7 @@
         {{ site.data.company.address | join: ", " }}
       </dd>
       <dd>
-        Org.nr. {{ site.data.company.org_number }}
+        {{ "footer.org_number" | t: number: site.data.company.org_number }}
       </dd>
     </dl>
   </address>

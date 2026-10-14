@@ -1,0 +1,91 @@
+# UI text for the nb-NO locale -- every piece of site copy that isn't
+# Contentful content. Read by the `t` Liquid filter in templates
+# ({{ "menu.open" | t }}) and by _plugins/contentful_listing_pages.rb,
+# both via _plugins/i18n.rb. A missing key fails the build.
+#
+# "%{name}" is a placeholder filled in by the caller, e.g.
+# {{ "product.see" | t: title: product.title }}. Add a locale by copying
+# this file to _data/i18n/<code>.yml (same keys) for each new
+# contentful_locales entry in _config.yml.
+
+common:
+  and: og
+
+menu:
+  label: Meny
+  open: Åpne meny
+  close: Lukk meny
+  home: Til forsiden
+
+navigation:
+  breadcrumb: Brødsmulesti
+  filter: Filter
+
+# Listing pages (Utvalg/Produsenter/Om oss), keyed by content type.
+# menu_label is also the nav link text and the root page's title;
+# root_label (optional) is the root page's link in the filter list.
+sections:
+  product:
+    menu_label: Utvalg
+    section_heading: Vårt utvalg
+    root_label: Alle viner
+    root_description: Hele vinutvalget til North of Wine, vinimportør i Trondheim.
+    filter_description: "%{value} i North of Wine sitt vinutvalg."
+    empty: Ingen viner funnet i denne kategorien ennå.
+  manufacturer:
+    menu_label: Produsenter
+    section_heading: Våre vinhus
+    root_label: Alle vinhus
+    root_description: Vinprodusentene bak North of Wine sitt vinutvalg.
+    filter_description: "Vinprodusenter fra %{value} i North of Wine sitt utvalg."
+    empty: Ingen vinprodusenter fra dette landet ennå.
+  person:
+    menu_label: Om oss
+    section_heading: Om oss
+    root_description: "Om North of Wine: selskap, lagmedlemmer og verdier."
+
+product:
+  method: Metode
+  producer: Produsent
+  fullness: Fylde
+  freshness: Friskhet
+  tannins: Garvestoffer
+  sweetness: Sødme
+  scale: "%{value} av 12"
+  food: Passer til
+  colour: Farge
+  odour: Lukt
+  taste: Smak
+  sku: Vårt varenummer
+  product_id: Vinmonopolets varenummer
+  grapes: Druer
+  storage: Lagring
+  alcohol: Alkohol
+  volume: Volum
+  litres: "%{value} liter"
+  packaging: Emballasje
+  cork: Kork
+  price: "%{value} kr"
+  see: "Se %{title}"
+
+manufacturer:
+  logo_alt: "%{name} logo"
+
+image:
+  unavailable: Bilde utilgjengelig
+
+footer:
+  # %{link} is the Helsenorge link, built in _includes/footer.html.
+  alcohol_warning: "Bruk av alkohol kan gi ulike skadevirkninger. Nærmere informasjon finner du hos %{link}."
+  helsenorge: Helsenorge
+  email: E-post
+  org_number: "Org.nr. %{number}"
+
+pages:
+  home:
+    title: Hjem
+    intro: Vinimport for det nasjonale og trønderske markedet.
+    cta: Se utvalget
+  not_found:
+    title: Siden finnes ikke
+    message: Beklager, denne siden finnes ikke.

@@ -1,9 +1,19 @@
 require "cgi"
+require_relative "i18n"
 
 module ContentfulJekyll
   # Small Liquid filters shared across templates, so a convention only
   # needs to change in one place.
   module TemplateFilters
+    # UI text from _data/i18n/<locale>.yml in the current page's locale
+    # (see i18n.rb): {{ "menu.open" | t }}, or with placeholders,
+    # {{ "product.see" | t: title: product.title }}. The result isn't
+    # escaped -- escape it where a placeholder carries editor content.
+    def t(key, vars = {})
+      page = @context.registers[:page]
+      I18n.translate(@context.registers[:site], page && page["locale"], key, vars)
+    end
+
     # "/<dir>/" for a site.config dir set by contentful_listing_pages.rb
     # (site.product_dir, site.manufacturer_dir, site.about_dir). Raises on
     # a nil/blank dir rather than silently building a broken "//" link.

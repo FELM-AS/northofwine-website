@@ -45,7 +45,7 @@
 {% assign manufacturer_products = include.products %}
 <article{% if manufacturer.id %} id="{{ manufacturer.id }}"{% endif %} class="card manufacturer">
   {% include contentful-image.html asset=manufacturer.image width=600 fallback_alt=manufacturer.title %}
-  {% assign logo_alt = manufacturer.title | append: " logo" %}
+  {% assign logo_alt = "manufacturer.logo_alt" | t: name: manufacturer.title %}
   {% include contentful-image.html asset=manufacturer.logo width=200 class='logo' fallback_alt=logo_alt %}
   <h2{% if manufacturer_lang %} lang="{{ manufacturer_lang }}"{% endif %}>{{ manufacturer.title | escape }}</h2>
   {% if manufacturer.link.size > 0 %}

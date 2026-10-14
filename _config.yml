@@ -36,9 +36,8 @@ lang: nb
 # (needed if it's literally "content", which collides with Jekyll's
 # page.content). image_field sets a different Open Graph/Twitter image
 # field (see _includes/seo.html), exposed as page.social_image either
-# way. menu_label/section_heading/root_label/root_description/
-# filter_description are the listing pages' copy, read by
-# _plugins/contentful_listing_pages.rb (see its class comment).
+# way. Listing page copy (menu labels, headings, descriptions) lives in
+# _data/i18n/<locale>.yml, not here.
 contentful_collections:
   # Only Product gets a generated page per entry (see planning/Plan.md and
   # planning/Contentful-Content-Model.md). `layout: product` is the full
@@ -50,11 +49,6 @@ contentful_collections:
     dir: utvalg
     body_field: description
     order: fields.productShortName
-    menu_label: Utvalg
-    section_heading: Vårt utvalg
-    root_label: Alle viner
-    root_description: Hele vinutvalget til North of Wine, vinimportør i Trondheim.
-    filter_description: "%s i North of Wine sitt vinutvalg."
 
 # Optional: how deep a linked entry's own fields get flattened before
 # falling back to an {id, link_type} stub. Defaults to 2 if unset.
@@ -108,20 +102,12 @@ contentful_data_collections:
   - content_type: manufacturer
     name: manufacturers
     dir: produsenter
-    menu_label: Produsenter
-    section_heading: Våre vinhus
-    root_label: Alle vinhus
-    root_description: Vinprodusentene bak North of Wine sitt vinutvalg.
-    filter_description: "Vinprodusenter fra %s i North of Wine sitt utvalg."
     body_field: description
     order: fields.name
   - content_type: person
     name: people
     dir: omoss
-    menu_label: Om oss
-    section_heading: Om oss
     body_field: description
-    root_description: "Om North of Wine: selskap, lagmedlemmer og verdier."
 
 exclude:
   - README.md

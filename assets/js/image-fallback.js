@@ -34,8 +34,8 @@ document.addEventListener(
 
     if (src === img.dataset.original) {
       img.src = PLACEHOLDER;
-      // Keep in sync with the visible text inside placeholder.svg.
-      img.alt = "Bilde utilgjengelig";
+      // Same dictionary key as the visible text inside placeholder.svg.
+      img.alt = {{ "image.unavailable" | t | jsonify }};
     } else {
       img.src = img.dataset.original;
     }

@@ -24,10 +24,11 @@
 <header>
   <div>
     {% include button.html href='/' icon='brands/now-symbol' text=site.title icon_position='left' %}
-    {% include icon-button.html type='button' id='menu-open' aria_controls='menu-dialog' aria_label='Åpne meny' icon='ui/menu' %}
+    {% assign open_label = "menu.open" | t %}
+    {% include icon-button.html type='button' id='menu-open' aria_controls='menu-dialog' aria_label=open_label icon='ui/menu' %}
   </div>
 </header>
-<dialog id="menu-dialog" aria-label="Meny">
+<dialog id="menu-dialog" aria-label="{{ "menu.label" | t }}">
   <form method="dialog">
     {% include navigation/menu.html %}
   </form>

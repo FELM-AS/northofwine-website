@@ -44,10 +44,10 @@ layout: default
 {% endcomment %}
 {% assign product_lang = page.manufacturer.country | country_lang %}
 {% if page.product_type_name == "Rødvin" %}
-{% assign third_axis_label = "Garvestoffer" %}
+{% assign third_axis_label = "product.tannins" | t %}
 {% assign third_axis_value = page.tannins %}
 {% else %}
-{% assign third_axis_label = "Sødme" %}
+{% assign third_axis_label = "product.sweetness" | t %}
 {% assign third_axis_value = page.sweetness %}
 {% endif %}
 <article>
@@ -59,14 +59,14 @@ layout: default
 
     {% if page.production_method_storage.size > 0 %}
     <dl>
-      <dt>Metode</dt>
+      <dt>{{ "product.method" | t }}</dt>
       <dd>{{ page.production_method_storage | escape | newline_to_br }}</dd>
     </dl>
     {% endif %}
 
     {% if page.manufacturer.id and page.manufacturer.title %}
     <dl>
-      <dt>Produsent</dt>
+      <dt>{{ "product.producer" | t }}</dt>
       <dd>
         <a href="{{ site.manufacturer_dir | dir_href | relative_url }}#{{ page.manufacturer.id }}"{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ page.manufacturer.title | escape }}</a>
       </dd>
@@ -78,19 +78,19 @@ layout: default
     {% if page.fullness or page.freshness or third_axis_value %}
     <dl>
       {% if page.fullness %}
-        <dt>Fylde</dt>
-        <dd><meter min="1" max="12" value="{{ page.fullness }}">{{ page.fullness | nb_number }} av 12</meter></dd>
+        <dt>{{ "product.fullness" | t }}</dt>
+        <dd><meter min="1" max="12" value="{{ page.fullness }}">{% assign scale_value = page.fullness | nb_number %}{{ "product.scale" | t: value: scale_value }}</meter></dd>
       {% endif %}
       {% if page.freshness %}
-        <dt>Friskhet</dt>
+        <dt>{{ "product.freshness" | t }}</dt>
         <dd>
-          <meter min="1" max="12" value="{{ page.freshness }}">{{ page.freshness | nb_number }} av 12</meter>
+          <meter min="1" max="12" value="{{ page.freshness }}">{% assign scale_value = page.freshness | nb_number %}{{ "product.scale" | t: value: scale_value }}</meter>
         </dd>
       {% endif %}
       {% if third_axis_value %}
         <dt>{{ third_axis_label }}</dt>
         <dd>
-          <meter min="1" max="12" value="{{ third_axis_value }}">{{ third_axis_value | nb_number }} av 12</meter>
+          <meter min="1" max="12" value="{{ third_axis_value }}">{% assign scale_value = third_axis_value | nb_number %}{{ "product.scale" | t: value: scale_value }}</meter>
         </dd>
       {% endif %}
     </dl>
@@ -99,21 +99,22 @@ layout: default
     {% if page.recommended_food.size > 0 or page.colour.size > 0 or page.odour.size > 0 or page.taste.size > 0 %}
     <dl>
       {% if page.recommended_food.size > 0 %}
-        <dt>Passer til</dt>
-        {% assign food_items = page.recommended_food | join: "|" | downcase | replace: " og ", "|" | replace: ", ", "|" | split: "|" %}
-        {% capture food_sentence %}{% for food in food_items %}{% unless forloop.first %}{% if forloop.last %} og {% else %}, {% endif %}{% endunless %}{{ food }}{% endfor %}{% endcapture %}
+        <dt>{{ "product.food" | t }}</dt>
+        {% assign and_word = "common.and" | t | prepend: " " | append: " " %}
+        {% assign food_items = page.recommended_food | join: "|" | downcase | replace: and_word, "|" | replace: ", ", "|" | split: "|" %}
+        {% capture food_sentence %}{% for food in food_items %}{% unless forloop.first %}{% if forloop.last %}{{ and_word }}{% else %}, {% endif %}{% endunless %}{{ food }}{% endfor %}{% endcapture %}
         <dd>{{ food_sentence | capitalize | escape }}</dd>
       {% endif %}
       {% if page.colour.size > 0 %}
-        <dt>Farge</dt>
+        <dt>{{ "product.colour" | t }}</dt>
         <dd>{{ page.colour | escape }}</dd>
       {% endif %}
       {% if page.odour.size > 0 %}
-        <dt>Lukt</dt>
+        <dt>{{ "product.odour" | t }}</dt>
         <dd>{{ page.odour | escape }}</dd>
       {% endif %}
       {% if page.taste.size > 0 %}
-        <dt>Smak</dt>
+        <dt>{{ "product.taste" | t }}</dt>
         <dd>{{ page.taste | escape }}</dd>
       {% endif %}
     </dl>
@@ -125,15 +126,15 @@ layout: default
     {% if page.sku.size > 0 or page.product_id or page.grape_desc.size > 0 or page.storage_potential or page.alcohol_content or page.volume > 0 or page.packaging_material or page.cork_type %}
     <dl>
       {% if page.sku.size > 0 %}
-        <dt>Vårt varenummer</dt>
+        <dt>{{ "product.sku" | t }}</dt>
         <dd>{{ page.sku | escape }}</dd>
       {% endif %}
       {% if page.product_id %}
-        <dt>Vinmonopolets varenummer</dt>
+        <dt>{{ "product.product_id" | t }}</dt>
         <dd>{{ page.product_id | escape }}</dd>
       {% endif %}
       {% if page.grape_desc.size > 0 %}
-        <dt>Druer</dt>
+        <dt>{{ "product.grapes" | t }}</dt>
         {% assign grape_pair_count = page.grape_desc.size %}
         {% if page.grape_pct.size < grape_pair_count %}{% assign grape_pair_count = page.grape_pct.size %}{% endif %}
         {% for grape in page.grape_desc limit: grape_pair_count %}
@@ -142,29 +143,30 @@ layout: default
         {% endfor %}
       {% endif %}
       {% if page.storage_potential %}
-        <dt>Lagring</dt>
+        <dt>{{ "product.storage" | t }}</dt>
         <dd>{{ page.storage_potential | escape }}</dd>
       {% endif %}
       {% if page.alcohol_content %}
-        <dt>Alkohol</dt>
+        <dt>{{ "product.alcohol" | t }}</dt>
         <dd>{{ page.alcohol_content | nb_number }}%</dd>
       {% endif %}
       {% if page.volume > 0 %}
-        <dt>Volum</dt>
+        <dt>{{ "product.volume" | t }}</dt>
         {% comment %} volume is in millilitres; drop the ",0" from whole litres. {% endcomment %}
         {% assign volume_ml = page.volume | modulo: 1000 %}
         {% if volume_ml == 0 %}
-          <dd>{{ page.volume | divided_by: 1000 }} liter</dd>
+          {% assign litres = page.volume | divided_by: 1000 %}
         {% else %}
-          <dd>{{ page.volume | divided_by: 1000.0 | nb_number }} liter</dd>
+          {% assign litres = page.volume | divided_by: 1000.0 | nb_number %}
         {% endif %}
+        <dd>{{ "product.litres" | t: value: litres }}</dd>
       {% endif %}
       {% if page.packaging_material %}
-        <dt>Emballasje</dt>
+        <dt>{{ "product.packaging" | t }}</dt>
         <dd>{{ page.packaging_material | escape }}</dd>
       {% endif %}
       {% if page.cork_type %}
-        <dt>Kork</dt>
+        <dt>{{ "product.cork" | t }}</dt>
         <dd>{{ page.cork_type | escape }}</dd>
       {% endif %}
     </dl>

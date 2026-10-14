@@ -8,7 +8,7 @@ layout: default
     {% include product-card.html product=item %}
   {% endfor %}
   {% if page.items.size == 0 %}
-    <p>Ingen viner funnet i denne kategorien ennå.</p>
+    <p>{{ "sections.product.empty" | t }}</p>
   {% endif %}
 
 {% elsif page.item_type == "manufacturer" %}
@@ -18,7 +18,7 @@ layout: default
     {% include manufacturer-card.html manufacturer=item products=item_products %}
   {% endfor %}
   {% if page.items.size == 0 %}
-    <p>Ingen vinprodusenter fra dette landet ennå.</p>
+    <p>{{ "sections.manufacturer.empty" | t }}</p>
   {% endif %}
 
 {% elsif page.item_type == "person" %}

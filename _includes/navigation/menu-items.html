@@ -12,6 +12,6 @@
   that file's class comment for why. Om oss has no config value to
   read (it's not a Contentful collection).
 {% endcomment %}
-<li><a class="button" href="{{ site.product_dir | dir_href | relative_url }}">{{ site.product_menu_label }}</a></li>
-<li><a class="button" href="{{ site.manufacturer_dir | dir_href | relative_url }}">{{ site.manufacturer_menu_label }}</a></li>
-<li><a class="button" href="{{ site.about_dir | dir_href | relative_url }}">{{ site.about_menu_label }}</a></li>
+<li><a class="button" href="{{ site.product_dir | dir_href | relative_url }}">{{ "sections.product.menu_label" | t }}</a></li>
+<li><a class="button" href="{{ site.manufacturer_dir | dir_href | relative_url }}">{{ "sections.manufacturer.menu_label" | t }}</a></li>
+<li><a class="button" href="{{ site.about_dir | dir_href | relative_url }}">{{ "sections.person.menu_label" | t }}</a></li>

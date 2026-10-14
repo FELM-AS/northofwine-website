@@ -1,6 +1,7 @@
 require "jekyll"
 require_relative "contentful_locales"
 require_relative "contentful_url_registry"
+require_relative "i18n"
 
 module ContentfulJekyll
   # Second generator, running after EntriesGenerator (priority :low): the
@@ -12,21 +13,18 @@ module ContentfulJekyll
   #
   # Cross-references are computed here once per build, so no template has
   # to rediscover them by scanning site.pages:
-  # - site.config["<section>_dir"]/["<section>_menu_label"] (product,
-  #   manufacturer, about): the primary locale's resolved dir and label,
-  #   for the nav. The nav isn't locale-aware yet, so it links to the
-  #   primary locale's pages.
+  # - site.config["<section>_dir"] (product, manufacturer, about): the
+  #   primary locale's resolved dir, for the nav. The nav isn't
+  #   locale-aware yet, so it links to the primary locale's pages.
   # - page.siblings on every Utvalg/Produsenter listing page: the section's
   #   listing pages, for navigation/filter.html.
   # - page.breadcrumb on every product page: see #link_breadcrumbs.
   # - page.products_by_manufacturer on Produsenter pages: manufacturer id
   #   -> that manufacturer's product pages, for manufacturer-card.html.
   #
-  # Listing copy comes from each collection's _config.yml entry, a plain
-  # string or a Hash keyed by locale code (ContentfulJekyll.label_for):
-  # menu_label, section_heading, root_description and, for sections with
-  # filters, filter_description ("%s" is replaced by the filter value) and
-  # an optional root_label (the root page's filter link, default menu_label).
+  # Listing copy (titles, headings, meta descriptions) comes from the
+  # locale's UI dictionary, under sections.<content_type> in
+  # _data/i18n/<locale>.yml (see i18n.rb).
   class ListingPagesGenerator < Jekyll::Generator
     safe true
     priority :low
@@ -111,7 +109,7 @@ module ContentfulJekyll
     end
 
     # Resolves the section's dir for this locale and, for the primary
-    # locale, exposes it and its menu label to the nav templates.
+    # locale, exposes it to the nav templates.
     def section_context(site, locale, collection, nav_key, item_type)
       context = ListingContext.new(
         collection: collection,
@@ -120,10 +118,7 @@ module ContentfulJekyll
         item_type: item_type
       )
 
-      if locale.primary?
-        site.config["#{nav_key}_dir"] = context.dir
-        site.config["#{nav_key}_menu_label"] = config_label(context, "menu_label")
-      end
+      site.config["#{nav_key}_dir"] = context.dir if locale.primary?
 
       context
     end
@@ -209,25 +204,29 @@ module ContentfulJekyll
       page = Jekyll::PageWithoutAFile.new(site, site.source, context.locale.path_for(context.dir, slug), "index.html")
       @urls.register(page.url, label)
 
-      menu_label = config_label(context, "menu_label")
+      menu_label = section_text(site, context, "menu_label")
       page.content = ""
       page.data["layout"] = "listing"
       page.data["title"] = value || menu_label
       # Explicit, since the generic fallback in _includes/seo.html would
       # otherwise truncate the rendered card markup into a meta description.
-      page.data["description"] = value ? format(config_label(context, "filter_description"), value) : config_label(context, "root_description")
+      page.data["description"] = value ? section_text(site, context, "filter_description", "value" => value) : section_text(site, context, "root_description")
       page.data["items"] = items
       page.data["item_type"] = context.item_type
-      page.data["section_heading"] = config_label(context, "section_heading")
-      page.data["root_nav_label"] = ContentfulJekyll.label_for(context.collection, "root_label", context.locale, menu_label) unless value
+      page.data["section_heading"] = section_text(site, context, "section_heading")
+      page.data["root_nav_label"] = root_label(site, context) || menu_label unless value
       page.data["locale"] = context.locale.page_code
 
       page
     end
 
-    def config_label(context, key)
-      ContentfulJekyll.label_for(context.collection, key, context.locale) ||
-        raise("#{context.collection["content_type"]}: \"#{key}\" is missing from its _config.yml collection entry")
+    def section_text(site, context, key, vars = {})
+      I18n.translate(site, context.locale.code, "sections.#{context.collection["content_type"]}.#{key}", vars)
+    end
+
+    # Optional, unlike the other section keys: nil if the dictionary has none.
+    def root_label(site, context)
+      I18n.lookup(site, context.locale.code, "sections.#{context.collection["content_type"]}.root_label")
     end
   end
 end

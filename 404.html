@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Siden finnes ikke
+title_key: pages.not_found.title
 ---
 
 {% comment %}
@@ -11,10 +11,10 @@ title: Siden finnes ikke
   Produsenter and Om oss. No redirect from the old /kontakt.html -- low
   traffic doesn't justify one.
 {% endcomment %}
-<h1>Siden finnes ikke</h1>
-<p>Beklager, denne siden finnes ikke.</p>
+<h1>{{ "pages.not_found.title" | t }}</h1>
+<p>{{ "pages.not_found.message" | t }}</p>
 <ul>
-  <li><a href="{{ site.product_dir | dir_href | relative_url }}">{{ site.product_menu_label }}</a></li>
-  <li><a href="{{ site.manufacturer_dir | dir_href | relative_url }}">{{ site.manufacturer_menu_label }}</a></li>
-  <li><a href="{{ site.about_dir | dir_href | relative_url }}">{{ site.about_menu_label }}</a></li>
+  <li><a href="{{ site.product_dir | dir_href | relative_url }}">{{ "sections.product.menu_label" | t }}</a></li>
+  <li><a href="{{ site.manufacturer_dir | dir_href | relative_url }}">{{ "sections.manufacturer.menu_label" | t }}</a></li>
+  <li><a href="{{ site.about_dir | dir_href | relative_url }}">{{ "sections.person.menu_label" | t }}</a></li>
 </ul>

@@ -30,7 +30,7 @@ There is no test suite, but CI does run the html-proofer link check above (a lin
 
 The generator plugin architecture described in this section is inherited from the `github-pages-contentful` template and is config-driven: adapting it to a content type means editing `_config.yml`, not the generator plugin (see the `contentful_collections`/`contentful_data_collections` table below). This section documents that generic machinery; the North of Wine-specific content model and page requirements live in `planning/` (see "Project" above).
 
-The site pulls its content from Contentful at **build time** rather than storing pages as files in the repo. Eight plugin files split that work along its natural seams:
+The site pulls its content from Contentful at **build time** rather than storing pages as files in the repo. Nine plugin files split that work along its natural seams:
 
 | File | Responsibility |
 | --- | --- |
@@ -41,7 +41,8 @@ The site pulls its content from Contentful at **build time** rather than storing
 | `_plugins/contentful_entries_generator.rb` | The `Jekyll::Generator` that drives the build: reads `_config.yml`, fetches entries, and turns each one into a generated page or a `site.data` entry. |
 | `_plugins/contentful_listing_pages.rb` | A second `Jekyll::Generator` (priority `:low`, runs after `contentful_entries_generator.rb`'s priority `:high`) that builds this site's Utvalg/Produsenter/Om oss listing pages — not part of the generic template, specific to this site's Plan.md requirements (see "Listing pages" below). |
 | `_plugins/contentful_url_registry.rb` | `UrlRegistry`: the URL collision check both generators share — seeded with the site's existing pages, warns naming both sides when two pages land on the same URL. |
-| `_plugins/contentful_filters.rb` | Shared Liquid filters: `dir_href` (`"/<dir>/"`, the one shared place templates turn a resolved collection `dir` into a URL), `nb_number`/`country_lang` (Norwegian number formatting and the country→language lookup, Plan.md's Formatting/Hyphenation sections), `unescape_html` (fixes a double-escape in `_includes/seo.html`'s meta-description fallback) and `strip_protocol`. |
+| `_plugins/i18n.rb` | `ContentfulJekyll::I18n`: looks up UI text in `_data/i18n/<locale>.yml` by dotted key — see "UI text (i18n)" below. |
+| `_plugins/contentful_filters.rb` | Shared Liquid filters: `t` (UI text, see "UI text (i18n)" below), `dir_href` (`"/<dir>/"`, the one shared place templates turn a resolved collection `dir` into a URL), `nb_number`/`country_lang` (Norwegian number formatting and the country→language lookup, Plan.md's Formatting/Hyphenation sections), `unescape_html` (fixes a double-escape in `_includes/seo.html`'s meta-description fallback) and `strip_protocol`. |
 
 ### Connecting to Contentful
 
@@ -69,7 +70,6 @@ To add a new content type, add a `contentful_collections` entry and a matching l
 | `order` | no | A raw [Contentful CDA order value](https://www.contentful.com/developers/docs/references/content-delivery-api/#/reference/search-parameters/order) (e.g. `-fields.publishDate`); defaults to `-sys.updatedAt`. |
 | `body_field` | no | Which field to render as page content, if not `body` (see "Content type conventions" below). |
 | `image_field` | no | Which field to expose as `page.social_image` (Open Graph/Twitter Card image, see "SEO, sitemap, robots.txt, 404" below), if not `image`. |
-| `menu_label`, `section_heading`, `root_label`, `root_description`, `filter_description` | for a listing section | Listing page copy, read only by `contentful_listing_pages.rb` — see "Listing pages" below. Also accepted on a `contentful_data_collections` entry. |
 
 A top-level `contentful_entry_depth` setting (default 2) controls how deep linked entries get flattened before degrading to a stub — see "Field exposure" below.
 
@@ -122,17 +122,17 @@ This mirrors how Contentful's own [jekyll-contentful-data-import](https://github
 
 Items and filter values are sorted in Norwegian alphabetical order (`nb_sort`, Æ/Ø/Å after Z), by `title` (the displayField) for items. Filter slugs are transliterated ASCII (`slugify mode: "latin"`).
 
-It also precomputes cross-references so templates never scan `site.pages`: `page.siblings` (a section's listing pages, for `navigation/filter.html`), `page.breadcrumb` on every product page (the filter pages it appears on, for `navigation/breadcrumb.html`), `page.products_by_manufacturer` on Produsenter pages, and `site.config["<product|manufacturer|about>_dir"]`/`["…_menu_label"]` (primary locale only) for the nav.
+It also precomputes cross-references so templates never scan `site.pages`: `page.siblings` (a section's listing pages, for `navigation/filter.html`), `page.breadcrumb` on every product page (the filter pages it appears on, for `navigation/breadcrumb.html`), `page.products_by_manufacturer` on Produsenter pages, and `site.config["<product|manufacturer|about>_dir"]` (primary locale only) for the nav.
 
-Listing copy comes from the collection's `_config.yml` entry — a plain string or a Hash keyed by locale code (`ContentfulJekyll.label_for`). Missing required keys raise:
+Listing copy comes from the UI dictionary under `sections.<content_type>` (see "UI text (i18n)" below): `menu_label` (nav link text and the root page's title), `section_heading` (the listing sidebar's `<h1>`), `root_description`/`filter_description` (meta descriptions; `%{value}` is the filter value), an optional `root_label` (the root page's link in the filter list, defaulting to `menu_label`) and `empty` (the empty-state message).
 
-| Key | Required | Meaning |
-| --- | --- | --- |
-| `menu_label` | yes | Nav link text and the root page's title. |
-| `section_heading` | yes | `<h1>` in the listing sidebar. |
-| `root_description` | yes | Root page's meta description. |
-| `filter_description` | if the section has filters | Filter pages' meta description; `%s` is replaced by the filter value. |
-| `root_label` | no | The root page's link text in the filter list; defaults to `menu_label`. |
+### UI text (i18n)
+
+Every piece of site copy that isn't Contentful content — labels, aria-labels, empty states, the footer disclaimer, Hjem/404 text, listing copy — lives in `_data/i18n/<locale code>.yml` (today only `nb-NO.yml`), a nested dictionary read by dotted key. Templates use the `t` filter: `{{ "menu.open" | t }}`, or with `%{name}` placeholders, `{{ "product.see" | t: title: product.title }}`. `t` picks the dictionary from `page.locale`, falling back to the primary locale (the first `contentful_locales` entry, else `site.lang`). Its output isn't escaped — escape it wherever a placeholder carries editor content. A missing key, placeholder value or dictionary file fails the build. Plugins use the same lookup via `ContentfulJekyll::I18n.translate`.
+
+A static page sets `title_key:` (e.g. `pages.home.title`) instead of `title:` in its front matter; `_layouts/default.html` translates it into the page title. `assets/js/image-fallback.js` and `assets/images/placeholder.svg` have empty front matter so they can use `t` too.
+
+Adding a locale means adding its `contentful_locales` entry and a `_data/i18n/<code>.yml` with the same keys.
 
 ### Data-only collections
 
@@ -155,7 +155,7 @@ With 2+ locales configured, each pass (`EntriesGenerator#generate`):
 - Sets `page.data["locale"]` to `Locale#page_code` — the locale code for a non-primary page, `nil` for the primary locale (matching the `nil` "no locale in play" convention used everywhere else). `contentful_listing_pages.rb` selects each locale's product pages by it. A Contentful field literally named `locale` (or `id`, `content_type`, `slug`, `layout`) on some content type would collide with these generator-set keys.
 - Gets its own `EntrySerializer` instance (`generate` constructs a fresh one per locale pass) so the entry-memoization cache (`@entry_cache`, keyed by `(entry id, depth)`) never returns one locale's cached, frozen field values for the same Contentful entry ID fetched under a different locale.
 
-`each_locale`'s URL/data-key prefix only covers the locale code itself. Collection settings can additionally be a Hash keyed by locale code instead of one plain value, for content that needs translating beyond what the prefix covers: `dir` (`ContentfulJekyll.dir_for`, resolved once per collection per locale pass in `fetch_collection` since it can't vary per entry), for when the URL path segment itself needs translating (e.g. `produkter` vs `products`), not just prefixing; and the listing copy keys (`.label_for`, see "Listing pages"). `.dir_for` raises immediately if a configured locale is missing from its Hash (a broken/empty URL segment is a real defect). A locale code has to already exist in the Contentful space (Settings → Locales) before it can be queried — the CDA returns a 400 ("Unknown locale") for one that isn't, with no fallback.
+`each_locale`'s URL/data-key prefix only covers the locale code itself. A collection's `dir` can additionally be a Hash keyed by locale code instead of one plain value (`ContentfulJekyll.dir_for`, resolved once per collection per locale pass in `fetch_collection` since it can't vary per entry), for when the URL path segment itself needs translating (e.g. `produkter` vs `products`), not just prefixing. `.dir_for` raises immediately if a configured locale is missing from its Hash (a broken/empty URL segment is a real defect). A locale code has to already exist in the Contentful space (Settings → Locales) before it can be queried — the CDA returns a 400 ("Unknown locale") for one that isn't, with no fallback.
 
 `<html lang>` in `_layouts/default.html` uses `page.locale`, falling back to the top-level `lang` setting in `_config.yml` (defaulting to `"en"` if that's unset too) — `page.locale` is `nil` for every primary-locale page, so without `site.lang` every primary page would get `lang="en"` regardless of what the primary locale actually is. Update `_config.yml`'s `lang` to match if the primary locale isn't English.
 

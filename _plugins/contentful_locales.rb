@@ -86,15 +86,6 @@ module ContentfulJekyll
     [code, prefix]
   end
 
-  # Resolves a label from collection config: `collection[key]` as a plain
-  # string, or a Hash keyed by locale code (same per-locale-override
-  # convention as `dir`, see dir_for below), else `default`.
-  def self.label_for(collection, key, locale, default = nil)
-    label = collection[key]
-    label = label[locale.code] if label.is_a?(Hash)
-    label || default
-  end
-
   # `dir` is usually one string used for every locale; set it to a Hash
   # keyed by locale code when the path segment itself needs translating
   # (e.g. "produkter" vs "products"), not just prefixing.

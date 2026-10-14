@@ -9,8 +9,8 @@
     product - required, a product's page data, e.g. `page` on a
               product detail page.
 {% endcomment %}
-<nav class="breadcrumb" aria-label="Brødsmulesti">
-  <a class="url" href="{{ site.product_dir | dir_href | relative_url | escape }}">{{ site.product_menu_label }}</a>
+<nav class="breadcrumb" aria-label="{{ "navigation.breadcrumb" | t }}">
+  <a class="url" href="{{ site.product_dir | dir_href | relative_url | escape }}">{{ "sections.product.menu_label" | t }}</a>
   {% for crumb in include.product.breadcrumb %}
     / <a class="url" href="{{ crumb.url | relative_url | escape }}">{{ crumb.title | escape }}</a>
   {% endfor %}

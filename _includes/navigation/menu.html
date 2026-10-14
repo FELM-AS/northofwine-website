@@ -7,7 +7,8 @@
 {% endcomment %}
 <nav class="menu inverted">
   <ul>
-    {% include icon-button.html type='submit' aria_label='Lukk meny' icon='ui/x' %}
+    {% assign close_label = "menu.close" | t %}
+    {% include icon-button.html type='submit' aria_label=close_label icon='ui/x' %}
     <li><a class="button" href="{{ '/' | relative_url }}">{{ site.title }}</a></li>
     {% include navigation/menu-items.html %}
   </ul>
