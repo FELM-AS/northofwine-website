@@ -51,7 +51,7 @@ module ContentfulJekyll
       formatted.sub(".", ",")
     end
 
-    # Manufacturer/product `country` (a fixed enum, see _data/countries.yml)
+    # Manufacturer/product `country` (via _data/countries.yml)
     # -> language code, for the `lang` attribute on product/manufacturer
     # names (planning/Plan.md's Formatting/Hyphenation sections). One
     # filter here instead of product-card.html and manufacturer-card.html

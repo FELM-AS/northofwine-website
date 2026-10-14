@@ -60,7 +60,7 @@ Products, manufacturers, and people are all edited directly in Contentful — th
 
 - **Adding/editing a product**: fill in the `product` content type's fields (see [`planning/Contentful-Content-Model.md`](planning/Contentful-Content-Model.md)) and publish. It appears at `/utvalg/<slug>/`, and on the Utvalg root plus its `productTypeName`/`webProductTypeName` filter pages, automatically.
 - **Adding/editing a manufacturer or person**: same idea — manufacturers appear on `/produsenter/` and their own country's filter page; people appear on `/omoss/`.
-- **Country enum**: the 13-value country enum used for hyphenation and the Produsenter country filters is mirrored in `_data/countries.yml` — adding a genuinely new country to the Contentful schema needs a matching entry there too, or that manufacturer gets no filter page (a build warning names it if this happens).
+- **Country → language**: `_data/countries.yml` maps each manufacturer country to a language code for hyphenation/`lang` attributes. Produsenter's country filters are built from the countries manufacturers actually have in Contentful, so a new country gets its filter page automatically, but it also needs an entry in `countries.yml` for the `lang` attribute (a build warning names the manufacturer(s) if it's missing).
 
 ## Deploying
 

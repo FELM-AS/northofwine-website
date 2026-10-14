@@ -1,18 +1,14 @@
-# Manufacturer `country` (fixed 13-value Contentful enum) -> language code,
-# for the `lang` attribute on product/manufacturer names (see
-# planning/Plan.md "Formatting" and "Hyphenation"). Deliberately explicit,
-# not derived from the country name, since the mapping isn't 1:1 in
-# general (only happens to be for these 13 values today).
+# Manufacturer `country` -> language code, for the `lang` attribute on
+# product/manufacturer names (see planning/Plan.md "Formatting" and
+# "Hyphenation"). Deliberately explicit, not derived from the country
+# name, since the mapping isn't 1:1 in general.
 #
-# NOT fetched from Contentful -- a manually-maintained shadow of the
-# actual schema enum. contentful_listing_pages.rb also uses these keys
-# as "the 13 valid countries" to generate Produsenter's filter pages.
-# If Contentful's country enum ever changes (e.g. a manufacturer from a
-# genuinely new country), this file needs a manual update too --
-# contentful_listing_pages.rb#build_enum_pages logs a build warning
-# naming the specific manufacturer(s) when it sees a country value not
-# listed here, so the drift is surfaced instead of silently dropped,
-# but this file itself still needs a human edit to fix it.
+# NOT fetched from Contentful -- a manually-maintained lookup. Produsenter's
+# country filter pages no longer come from this file (they're built from
+# the countries manufacturers actually have, see
+# contentful_listing_pages.rb), but a country missing here means its
+# names get no `lang` attribute -- the build logs a warning naming the
+# manufacturer(s) when that happens, so add the country here to fix it.
 Frankrike: fr
 Italia: it
 Tyskland: de
