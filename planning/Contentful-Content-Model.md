@@ -115,6 +115,6 @@ Display field: `name`
 ## Notes for the redesign
 
 - `subProductTypeName`, `productGroupName`, `mainProductTypeName` are Vinmonopolet classification fields, not used for site filtering. Vinmonopolet has no "Tokaj" category — that's why it lives in `webProductTypeName` instead.
-- Manufacturer `country` is a fixed enum (13 values: Frankrike, Italia, Tyskland, Østerrike, Spania, Portugal, Ungarn, Chile, Argentina, Australia, New Zealand, USA, Norge) — the Produsenter country filter has exactly these static pages to generate.
+- Manufacturer `country` is a fixed enum (13 values: Frankrike, Italia, Tyskland, Østerrike, Spania, Portugal, Ungarn, Chile, Argentina, Australia, New Zealand, USA, Norge) — the Produsenter country filter generates a static page only for the values manufacturers actually have.
 - Only `salesPrice` (Vinmonopolet retail price) is shown publicly. `salesPriceHoreca` is never shown on the site — trade pricing is given on request/by sales pitch.
 - Product's own `country` field (Land) is free text, independent of Manufacturer's new `country` enum — the two aren't guaranteed to match spelling-wise since they're separate fields.

@@ -92,9 +92,9 @@ Regenerated from the current Plan.md (supersedes the earlier version of this fil
 **Depends on:** #2
 
 ### 14. Filter component — manufacturers by country
-**Body:** One static page per country value (13 fixed values, see #8) under Produsenter.
+**Body:** One static page per country value (from the 13-value enum, see #8) that at least one manufacturer actually has, under Produsenter — countries with no manufacturers get no page and no filter link.
 **Acceptance criteria:**
-- Each of the 13 country values has its own static URL (e.g. `/produsenter/frankrike/`) listing only manufacturers from that country
+- Each country that has manufacturers has its own static URL (e.g. `/produsenter/frankrike/`) listing only manufacturers from that country
 **Depends on:** #2
 
 ### 15. Breadcrumb component

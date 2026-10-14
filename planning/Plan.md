@@ -55,7 +55,7 @@
   - Sidebar: breadcrumb + product image.
 - **Produsenter** (manufacturers)
   - Lists all manufacturers.
-  - Sidebar filters by country: fixed set of 13 countries (see Filter component).
+  - Sidebar filters by country: only countries at least one manufacturer has (see Filter component).
   - No manufacturer detail page and no separate per-manufacturer URL — represented as a card only, on this single page (matches the current site: one `/produsenter/` page, no `/produsenter/<slug>/...` pages).
   - Manufacturer card inline-lists that manufacturer's own products (product name linking directly to its Utvalg detail page), built from products' required `manufacturer` reference field.
   - Product detail pages link back here to the manufacturer's card (anchor link).
@@ -93,7 +93,7 @@
     - A product with both set appears on both filter pages (e.g. `productTypeName: Hvitvin` + `webProductTypeName: Tokaj` → listed on `/utvalg/hvitvin/` and `/utvalg/tokaj/`).
     - `webProductTypeName` values don't necessarily map to one parent `productTypeName`.
     - `subProductTypeName`, `productGroupName`, `mainProductTypeName` are Vinmonopolet classification fields, not used for filtering — Vinmonopolet has no "Tokaj" category, hence `webProductTypeName`.
-  - Manufacturers, by country: `country` is a fixed enum of 13 values (Frankrike, Italia, Tyskland, Østerrike, Spania, Portugal, Ungarn, Chile, Argentina, Australia, New Zealand, USA, Norge) — one static page per value.
+  - Manufacturers, by country: `country` is a fixed enum of 13 values (Frankrike, Italia, Tyskland, Østerrike, Spania, Portugal, Ungarn, Chile, Argentina, Australia, New Zealand, USA, Norge) — one static page per value that at least one manufacturer actually has, sorted alphabetically, so the filter never links to an empty page. A country gets its page automatically once a manufacturer from it is added.
 - **Breadcrumb**
   - `<page> / <productTypeName> / <webProductTypeName>` when both are set, otherwise `<page> / <productTypeName>`.
 
