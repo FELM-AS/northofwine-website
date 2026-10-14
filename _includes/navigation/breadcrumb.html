@@ -1,55 +1,17 @@
 {% comment %}
   Breadcrumb component (Plan.md): <page> / productTypeName / webProductTypeName
   when both are set on the current product, else <page> / productTypeName.
-  Each segment links to its actual filter page, built by
-  _plugins/contentful_listing_pages.rb -- found here by matching that
-  page's own title (the raw productTypeName/webProductTypeName value the
-  generator titled it with), not by independently recomputing its
-  slug/URL. That way this can never drift out of sync with however the
-  generator actually builds the URL (previously this re-slugified the
-  value itself via Liquid's `slugify: "latin"`, which only stayed correct
-  by coincidentally matching the generator's own Ruby-side
-  Jekyll::Utils.slugify(value, mode: "latin") call).
-  site.product_dir is resolved once by that same plugin via
-  ContentfulJekyll.dir_for, not looked up independently here -- see its
-  class comment for why.
-
-  Also filtered by `include.product.locale` -- contentful_listing_pages.rb
-  builds one type_page per locale (productTypeName/webProductTypeName
-  aren't Localized Contentful fields, so the same title can appear on
-  more than one locale's filter page), and without this, `first` would
-  always resolve to whichever locale's page happened to be built first
-  (the primary locale's), linking a non-primary-locale product's
-  breadcrumb to the wrong locale's filter page. Same
-  `where: "locale", <a page's own locale>` idiom CLAUDE.md's Locales
-  section documents for index.html's homepage grouping (currently inert
-  there -- no collection sets `home: true` yet) -- a no-op here too
-  today, since every page's `locale` is nil (only nb-NO is configured,
-  see _config.yml).
-
-  `product_filter_pages` precomputes the item_type/locale scoping shared
-  by both the productTypeName and webProductTypeName lookups below, so
-  a future change to that scoping can't be applied to one and missed on
-  the other.
+  include.product.breadcrumb is the list of filter pages this product
+  appears on, set by _plugins/contentful_listing_pages.rb (the generator
+  that builds those pages), so each link is that page's own URL and title.
 
   Params:
     product - required, a product's page data, e.g. `page` on a
               product detail page.
 {% endcomment %}
-{% assign product_dir = site.product_dir | dir_href %}
-{% assign product_filter_pages = site.pages | where: "item_type", "product" | where: "locale", include.product.locale %}
 <nav class="breadcrumb" aria-label="Brødsmulesti">
-  <a class="url" href="{{ product_dir | relative_url | escape }}">{{ site.product_menu_label }}</a>
-  {% if include.product.product_type_name %}
-    {% assign type_page = product_filter_pages | where: "title", include.product.product_type_name | first %}
-    {% if type_page %}
-      / <a class="url" href="{{ type_page.url | relative_url | escape }}">{{ include.product.product_type_name | escape }}</a>
-    {% endif %}
-  {% endif %}
-  {% if include.product.web_product_type_name %}
-    {% assign web_type_page = product_filter_pages | where: "title", include.product.web_product_type_name | first %}
-    {% if web_type_page %}
-      / <a class="url" href="{{ web_type_page.url | relative_url | escape }}">{{ include.product.web_product_type_name | escape }}</a>
-    {% endif %}
-  {% endif %}
+  <a class="url" href="{{ site.product_dir | dir_href | relative_url | escape }}">{{ site.product_menu_label }}</a>
+  {% for crumb in include.product.breadcrumb %}
+    / <a class="url" href="{{ crumb.url | relative_url | escape }}">{{ crumb.title | escape }}</a>
+  {% endfor %}
 </nav>

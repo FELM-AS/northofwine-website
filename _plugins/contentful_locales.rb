@@ -21,6 +21,12 @@ module ContentfulJekyll
       url_prefix&.downcase&.tr("-", "_")
     end
 
+    # page.data["locale"] for a page built in this locale pass: nil for
+    # the primary locale (falls back to site.lang), else the locale code.
+    def page_code
+      primary? ? nil : code
+    end
+
     # The site.data key for a locale-scoped collection fetched under
     # `base` (e.g. "manufacturers") -- `base` for the primary locale,
     # "<base>_<data_suffix>" for any other. Both contentful_entries_

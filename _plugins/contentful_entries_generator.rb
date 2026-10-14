@@ -192,7 +192,7 @@ module ContentfulJekyll
       page.content = context.serializer.render_body(entry.fields[context.body_field])
       page.data["layout"] = context.collection["layout"]
       page.data["home_label"] = context.home_label if context.home_label
-      page.data["locale"] = context.locale.code unless context.locale.primary?
+      page.data["locale"] = context.locale.page_code
       page.data.merge!(context.serializer.serialize_root(entry, skip: [context.body_field]))
       # The sanitized slug the URL was actually built from, not the raw field.
       page.data["slug"] = slug

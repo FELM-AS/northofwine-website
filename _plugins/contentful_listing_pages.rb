@@ -103,16 +103,11 @@ module ContentfulJekyll
       dir = ContentfulJekyll.dir_for(product_collection, locale)
       site.config["product_dir"] = dir if locale.primary?
       site.config["product_menu_label"] = ContentfulJekyll.label_for(product_collection, "menu_label", locale, "Utvalg") if locale.primary?
-      # locale.path_for is the same helper EntriesGenerator's build_page
-      # (contentful_entries_generator.rb) uses to prefix a non-primary
-      # locale's own generated pages -- using it here too, rather than
-      # filtering by page.data["locale"], scopes to this locale's
-      # product pages using the exact same URL convention the pages
-      # were built with.
-      url_dir = locale.path_for(dir)
       product_pages = nb_sort(
-        site.pages.select { |page| page.url.start_with?("/#{url_dir}/") },
-        "product_short_name"
+        site.pages.select do |page|
+          page.data["content_type"] == product_collection["content_type"] && page.data["locale"] == locale.page_code
+        end,
+        "title"
       )
       products_by_manufacturer = product_pages.group_by { |page| page.data.dig("manufacturer", "id") }
 
@@ -124,9 +119,11 @@ module ContentfulJekyll
         root_label: ContentfulJekyll.label_for(product_collection, "root_label", locale, "Alle viner")
       )
 
-      utvalg_pages = [build_page(site, locale, nil, product_pages, "the root listing", context)]
-      utvalg_pages.concat(build_grouped_pages(site, locale, product_pages, "product_type_name", context))
-      utvalg_pages.concat(build_grouped_pages(site, locale, product_pages, "web_product_type_name", context))
+      filter_pages = build_grouped_pages(site, locale, product_pages, "product_type_name", context) +
+                     build_grouped_pages(site, locale, product_pages, "web_product_type_name", context)
+      link_breadcrumbs(filter_pages)
+
+      utvalg_pages = [build_page(site, locale, nil, product_pages, "the root listing", context), *filter_pages]
       link_siblings(utvalg_pages)
       site.pages.concat(utvalg_pages)
 
@@ -146,7 +143,7 @@ module ContentfulJekyll
       # ["name"] here (not a hardcoded "manufacturers" literal) is what
       # keeps this in sync if that collection's configured `name` ever
       # changes.
-      manufacturers = nb_sort(site.data[locale.data_key_for(manufacturer_collection["name"])] || [], "name")
+      manufacturers = nb_sort(site.data[locale.data_key_for(manufacturer_collection["name"])] || [], "title")
 
       context = ListingContext.new(
         dir: dir,
@@ -157,18 +154,7 @@ module ContentfulJekyll
       )
 
       produsenter_pages = [build_page(site, locale, nil, manufacturers, "the root listing", context)]
-      # Only countries some manufacturer actually has get a filter page,
-      # same as product_type_name/web_product_type_name above -- a page
-      # per declared enum value (formerly _data/countries.yml's 13 keys)
-      # left the filter linking to empty pages for countries nobody
-      # imports from yet. Sorted so the filter's order doesn't depend on
-      # manufacturer order; plain codepoint order already puts Ø last, as
-      # Norwegian alphabetical order does. _data/countries.yml is now only
-      # the country -> language lookup for `lang` attributes
-      # (contentful_filters.rb#country_lang).
-      produsenter_pages.concat(
-        build_grouped_pages(site, locale, manufacturers, "country", context, sort: true)
-      )
+      produsenter_pages.concat(build_grouped_pages(site, locale, manufacturers, "country", context))
       warn_missing_country_langs(site, manufacturers)
       link_siblings(produsenter_pages)
       site.pages.concat(produsenter_pages)
@@ -221,16 +207,23 @@ module ContentfulJekyll
       pages.each { |page| page.data["siblings"] = pages }
     end
 
-    # One page per distinct value of `field` among `items` -- only values
-    # actually present get a page, so a filter never links to an empty
-    # one. `sort: true` orders the pages by value instead of by first
-    # appearance among `items`.
-    def build_grouped_pages(site, locale, items, field, context, sort: false)
+    # Each product page gets page.data["breadcrumb"]: the filter pages it
+    # appears on, in build order (productTypeName, then webProductTypeName),
+    # for _includes/navigation/breadcrumb.html to link to directly.
+    def link_breadcrumbs(filter_pages)
+      filter_pages.each do |filter_page|
+        filter_page.data["items"].each { |product| (product.data["breadcrumb"] ||= []) << filter_page }
+      end
+    end
+
+    # One page per distinct value of `field` among `items`, in Norwegian
+    # alphabetical order -- only values actually present get a page, so a
+    # filter never links to an empty one.
+    def build_grouped_pages(site, locale, items, field, context)
       grouped = items.group_by { |item| item_field(item, field) }
       grouped.delete(nil)
 
-      values = sort ? grouped.keys.sort : grouped.keys
-      values.map do |value|
+      grouped.keys.sort_by { |value| nb_sort_key(value) }.map do |value|
         build_page(site, locale, value, grouped[value], "the #{field} filter", context)
       end
     end
@@ -326,10 +319,7 @@ module ContentfulJekyll
       page.data["products_by_manufacturer"] = context.products_by_manufacturer
       page.data["section_heading"] = context.section_heading if context.section_heading
       page.data["root_nav_label"] = context.root_label if value.nil? && context.root_label
-      # Matches EntriesGenerator's own convention: only set (to a real
-      # value) for a non-primary locale, so a primary-locale listing page
-      # falls back to site.lang for <html lang> exactly like today.
-      page.data["locale"] = locale.code unless locale.primary?
+      page.data["locale"] = locale.page_code
 
       page
     end
