@@ -11,6 +11,7 @@
                    original aspect ratio
     fallback_alt - alt text when the asset has no description
     class        - optional, any additional classes
+    lazy         - optional, true for loading="lazy" (images below the fold)
 {% endcomment %}
 {% if include.asset.url %}
 {% if include.asset.description.size > 0 %}
@@ -24,5 +25,5 @@
 {% assign img_height = include.width | times: include.asset.height | divided_by: include.asset.width %}
 {% assign image_params = "&amp;fm=webp&amp;q=75" %}
 {% endif %}
-<img{% if include.class %} class="{{ include.class }}"{% endif %} src="{{ asset_url }}?w={{ include.width }}{{ image_params }}" alt="{{ alt | escape }}"{% if include.asset.width > 0 %} width="{{ include.width }}" height="{{ img_height }}"{% endif %} data-original="{{ asset_url }}">
+<img{% if include.class %} class="{{ include.class }}"{% endif %} src="{{ asset_url }}?w={{ include.width }}{{ image_params }}" alt="{{ alt | escape }}"{% if include.asset.width > 0 %} width="{{ include.width }}" height="{{ img_height }}"{% endif %} data-original="{{ asset_url }}"{% if include.lazy %} loading="lazy"{% endif %}>
 {% endif %}

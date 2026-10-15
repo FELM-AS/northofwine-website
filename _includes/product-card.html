@@ -9,13 +9,14 @@
   Params:
     product - required, a product page (`page` on a product page, or an
               item from a listing page's page.items)
+    lazy    - optional, lazy-load the image (see contentful-image.html)
 {% endcomment %}
 {% assign product = include.product %}
 {% assign product_lang = product.manufacturer.country | country_lang %}
 {% assign more_label = "product.see" | t: title: product.title %}
 
 <article class="card product">
-  {% include contentful-image.html asset=product.image width=240 fallback_alt=product.title %}
+  {% include contentful-image.html asset=product.image width=240 fallback_alt=product.title lazy=include.lazy %}
   <div class="content">
     <p class="metadata">
         {{ product.product_type_name | escape }}<br>

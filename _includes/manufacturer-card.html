@@ -8,14 +8,15 @@
     manufacturer - required, a manufacturer Hash (from
                    site.data.manufacturers or page.items)
     products     - its product pages (page.products_by_manufacturer[id])
+    lazy         - optional, lazy-load the images (see contentful-image.html)
 {% endcomment %}
 {% assign manufacturer = include.manufacturer %}
 {% assign manufacturer_lang = manufacturer.country | country_lang %}
 {% assign manufacturer_products = include.products %}
 <article{% if manufacturer.id %} id="{{ manufacturer.id }}"{% endif %} class="card manufacturer">
-  {% include contentful-image.html asset=manufacturer.image width=600 fallback_alt=manufacturer.title %}
+  {% include contentful-image.html asset=manufacturer.image width=600 fallback_alt=manufacturer.title lazy=include.lazy %}
   {% assign logo_alt = "manufacturer.logo_alt" | t: name: manufacturer.title %}
-  {% include contentful-image.html asset=manufacturer.logo width=200 class='logo' fallback_alt=logo_alt %}
+  {% include contentful-image.html asset=manufacturer.logo width=200 class='logo' fallback_alt=logo_alt lazy=include.lazy %}
   <h2{% if manufacturer_lang %} lang="{{ manufacturer_lang }}"{% endif %}>{{ manufacturer.title | escape }}</h2>
   {% if manufacturer.link.size > 0 %}
   <p><a class="url" href="{{ manufacturer.link | escape }}" target="_blank" rel="noopener">{{ manufacturer.link | strip_protocol | split:'/' | first | escape }}</a></p>
