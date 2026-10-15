@@ -105,6 +105,7 @@ module ContentfulJekyll
 
       page = build_page(site, nil, team_members, "the about page", context)
       page.data["about_entry"] = profiles.first
+      page.data["updated_at"] = latest_update([*team_members, *profiles])
       site.pages << page
     end
 
@@ -212,12 +213,19 @@ module ContentfulJekyll
       # otherwise truncate the rendered card markup into a meta description.
       page.data["description"] = value ? section_text(site, context, "filter_description", "value" => value) : section_text(site, context, "root_description")
       page.data["items"] = items
+      page.data["updated_at"] = latest_update(items)
       page.data["item_type"] = context.item_type
       page.data["section_heading"] = section_text(site, context, "section_heading")
       page.data["root_nav_label"] = root_label(site, context) || menu_label unless value
       page.data["locale"] = context.locale.page_code
 
       page
+    end
+
+    # The newest Contentful update among `items`, for the sitemap's
+    # <lastmod>; nil if none has one.
+    def latest_update(items)
+      items.filter_map { |item| item.respond_to?(:data) ? item.data["updated_at"] : item["updated_at"] }.max
     end
 
     def section_text(site, context, key, vars = {})
