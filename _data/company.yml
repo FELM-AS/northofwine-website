@@ -1,8 +1,11 @@
-# Company and contact info, read by the footer.
+# Company and contact info, read by the footer and the home page's
+# structured data (_includes/structured-data.html).
 name: North of Wine AS
 address:
-  - Fosenkaia 7
-  - 7010 Trondheim
+  street: Fosenkaia 7
+  postal_code: "7010"
+  city: Trondheim
+  country: "NO"
 org_number: NO 927 128 047 MVA
 emails:
   post: post@northofwine.no

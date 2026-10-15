@@ -1,0 +1,54 @@
+{% comment %}
+  JSON-LD for search engines: Organization and WebSite on Hjem, a
+  BreadcrumbList on product pages (the same trail as
+  navigation/breadcrumb.html). No Product markup: prices and offers could
+  count as alcohol advertising. Strings go through jsonify, then "<" is
+  escaped so editor content can't close the <script>.
+{% endcomment %}
+{% if page.home_hero %}
+{% assign company = site.data.company %}
+{% assign home_url = "/" | absolute_url %}
+<script type="application/ld+json">
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": {{ company.name | jsonify }},
+    "url": {{ home_url | jsonify }},
+    "logo": {{ "/assets/images/apple-touch-icon.png" | absolute_url | jsonify }},
+    "email": {{ company.emails.post | jsonify }},
+    "taxID": {{ company.org_number | remove: "MVA" | remove: "NO" | remove: " " | jsonify }},
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": {{ company.address.street | jsonify }},
+      "postalCode": {{ company.address.postal_code | jsonify }},
+      "addressLocality": {{ company.address.city | jsonify }},
+      "addressCountry": {{ company.address.country | jsonify }}
+    },
+    "sameAs": {{ company.social | map: "url" | jsonify }}
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": {{ site.title | jsonify }},
+    "url": {{ home_url | jsonify }}
+  }
+]
+</script>
+{% elsif page.layout == "product" %}
+{% assign root_url = site.product_dir | dir_href | absolute_url %}
+{% assign root_name = "sections.product.menu_label" | t %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": {{ root_name | jsonify }}, "item": {{ root_url | jsonify }} },
+    {% for crumb in page.breadcrumb %}
+    { "@type": "ListItem", "position": {{ forloop.index | plus: 1 }}, "name": {{ crumb.title | jsonify | replace: "<", "<" }}, "item": {{ crumb.url | absolute_url | jsonify }} },
+    {% endfor %}
+    { "@type": "ListItem", "position": {{ page.breadcrumb.size | plus: 2 }}, "name": {{ page.title | jsonify | replace: "<", "<" }} }
+  ]
+}
+</script>
+{% endif %}

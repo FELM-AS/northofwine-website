@@ -21,6 +21,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{{ document_title | escape }}</title>
   {% include seo.html %}
+  {% include structured-data.html %}
   {% comment %}
     favicon.ico isn't linked: Safari prefers a linked .ico over the SVG.
     Browsers without SVG favicons find it at the site root by default.
