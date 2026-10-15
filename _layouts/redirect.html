@@ -1,0 +1,21 @@
+---
+---
+{%- comment -%}
+  Old-site URL (e.g. /utvalg.html) forwarding to page.redirect_to. GitHub
+  Pages has no server-side redirects; search engines read an instant
+  meta refresh as a permanent one.
+{%- endcomment -%}
+{% assign target = page.redirect_to | relative_url %}
+<!doctype html>
+<html lang="{{ site.lang }}">
+<head>
+  <meta charset="utf-8">
+  <title>{{ "pages.redirect.title" | t }}</title>
+  <link rel="canonical" href="{{ page.redirect_to | absolute_url }}">
+  <meta http-equiv="refresh" content="0; url={{ target }}">
+</head>
+<body>
+  {% capture link %}<a href="{{ target }}">{{ page.redirect_to | absolute_url }}</a>{% endcapture %}
+  <p>{{ "pages.redirect.message" | t: link: link }}</p>
+</body>
+</html>

@@ -2,16 +2,24 @@
 {% comment %}
   Assigned once here and read by seo.html's include, so <title>/<html lang>
   can't drift from og:title/og:locale. Jekyll's Liquid shares assign-scope
-  between an includer and its {% include %}.
+  between an includer and its {% include %}. <title> adds the site name
+  (title_format); og:title doesn't, since og:site_name carries it.
 {% endcomment %}
 {% assign page_title = page.title | default: site.title %}
 {% if page.title_key %}{% assign page_title = page.title_key | t %}{% endif %}
+{% assign page_description = page.description %}
+{% if page.description_key %}{% assign page_description = page.description_key | t %}{% endif %}
 {% assign page_lang = page.locale | default: site.lang | default: "en" %}
+{% if page_title == site.title %}
+{% assign document_title = site.title %}
+{% else %}
+{% assign document_title = "title_format" | t: title: page_title, site: site.title %}
+{% endif %}
 <html lang="{{ page_lang }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>{{ page_title }}</title>
+  <title>{{ document_title | escape }}</title>
   {% include seo.html %}
   <link rel="stylesheet" href="{{ "/assets/css/main.css" | relative_url }}">
   <script src="{{ "/assets/js/menu.js" | relative_url }}" defer></script>

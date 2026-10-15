@@ -8,6 +8,9 @@
 # this file to _data/i18n/<code>.yml (same keys) for each new
 # contentful_locales entry in _config.yml.
 
+# <title> of every page but Hjem; og:title is the page title alone.
+title_format: "%{title} – %{site}"
+
 common:
   and: og
 
@@ -83,9 +86,12 @@ footer:
 
 pages:
   home:
-    title: Hjem
+    description: North of Wine AS er en vinimportør i Trondheim, med vin for det nasjonale og trønderske markedet.
     intro: Vinimport for det nasjonale og trønderske markedet.
     cta: Se utvalget
   not_found:
     title: Siden finnes ikke
     message: Beklager, denne siden finnes ikke.
+  redirect:
+    title: Siden har flyttet
+    message: "Siden har flyttet til %{link}."

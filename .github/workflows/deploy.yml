@@ -50,6 +50,8 @@ jobs:
         # --only-4xx: external redirects, timeouts, 5xx and DNS failures
         #   are other sites' problems, not ours to block on.
         # --ignore-status-codes 429: rate limiting isn't a broken link.
+        # --assume-extension "": otherwise /utvalg/ resolves to the
+        #   utvalg.html old-URL redirect instead of utvalg/index.html.
         run: |
           bundle exec htmlproofer ./_site \
             --checks Links,Scripts \
@@ -57,7 +59,8 @@ jobs:
             --ignore-urls "/^https:\/\/felm-as\.github\.io\/northofwine-website/" \
             --no-enforce-https \
             --only-4xx \
-            --ignore-status-codes 429
+            --ignore-status-codes 429 \
+            --assume-extension ""
       - uses: actions/upload-pages-artifact@v3
         with:
           path: "_site"

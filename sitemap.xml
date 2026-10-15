@@ -5,10 +5,10 @@ layout: none
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 {% comment %}
   Every page's URL, hand-rolled rather than jekyll-sitemap (see CLAUDE.md).
-  Skips 404/sitemap/robots and anything under /assets/ -- Sass, JS and SVG
-  files with front matter are pages too.
+  Skips noindex pages (404), old-URL redirects, sitemap/robots and anything under
+  /assets/ -- Sass, JS and SVG files with front matter are pages too.
 {% endcomment %}
-{% assign sitemap_pages = site.pages | where_exp: "p", "p.name != '404.html' and p.name != 'sitemap.xml' and p.name != 'robots.txt'" %}
+{% assign sitemap_pages = site.pages | where_exp: "p", "p.noindex != true and p.redirect_to == nil and p.name != 'sitemap.xml' and p.name != 'robots.txt'" %}
 {% for p in sitemap_pages %}
   {% unless p.url contains '/assets/' %}
   <url>

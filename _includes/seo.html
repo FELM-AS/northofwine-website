@@ -1,21 +1,35 @@
 {% comment %}
   Canonical, meta description, Open Graph and Twitter Card tags (see
-  CLAUDE.md's SEO section); page_title/page_lang come from default.html.
-  The description is page.description, else the rendered content as plain
-  text -- unescape_html stops its entities being escaped twice.
+  CLAUDE.md's SEO section); page_title/page_description/page_lang come
+  from default.html. The description is page_description, else the
+  rendered content as plain text -- unescape_html stops its entities
+  being escaped twice. A `noindex: true` page gets a robots noindex
+  instead of a canonical link and description.
 {% endcomment %}
-{% assign meta_description = page.description | default: content | strip_html | unescape_html | normalize_whitespace | truncate: 160 %}
+{% assign meta_description = page_description | default: content | strip_html | unescape_html | normalize_whitespace | truncate: 160 %}
 {% assign has_description = meta_description != blank %}
-{% assign og_locale = page_lang | replace: "-", "_" %}
+{% if page.noindex %}{% assign has_description = false %}{% endif %}
+{% assign og_locale = page.locale | og_locale %}
 {% comment %}
-  The page's own social image, else _data/company.yml's social_image (a
-  site path, hence absolute_url; unset today). Escaped, since the fallback
-  is hand-typed.
+  The page's own Contentful image, padded to a 1200x630 card so tall
+  bottle shots aren't cropped (JPG: not every link-preview crawler reads
+  WebP). Else _data/company.yml's social_image (a site path, hence
+  absolute_url; unset today), escaped since it's hand-typed.
 {% endcomment %}
-{% assign fallback_image_url = site.data.company.social_image | absolute_url %}
-{% assign social_image_url = page.social_image.url | default: fallback_image_url %}
+{% if page.social_image.url and page.social_image.width > 0 %}
+{% assign social_image_url = page.social_image.url | append: "?w=1200&h=630&fit=pad&bg=rgb:ffffff&fm=jpg" %}
+{% assign social_image_alt = page.social_image.description | default: page_title %}
+{% assign social_image_sized = true %}
+{% else %}
+{% assign social_image_url = site.data.company.social_image | absolute_url %}
+{% assign social_image_alt = site.title %}
+{% endif %}
 
+{% if page.noindex %}
+<meta name="robots" content="noindex">
+{% else %}
 <link rel="canonical" href="{{ page.url | absolute_url }}">
+{% endif %}
 {% if has_description %}
 <meta name="description" content="{{ meta_description | escape }}">
 {% endif %}
@@ -34,6 +48,11 @@
 {% endif %}
 {% if social_image_url %}
 <meta property="og:image" content="{{ social_image_url | escape }}">
+{% if social_image_sized %}
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+{% endif %}
+<meta property="og:image:alt" content="{{ social_image_alt | escape }}">
 {% endif %}
 
 <meta name="twitter:card" content="{% if social_image_url %}summary_large_image{% else %}summary{% endif %}">
@@ -43,4 +62,5 @@
 {% endif %}
 {% if social_image_url %}
 <meta name="twitter:image" content="{{ social_image_url | escape }}">
+<meta name="twitter:image:alt" content="{{ social_image_alt | escape }}">
 {% endif %}

@@ -54,6 +54,13 @@ module ContentfulJekyll
       CGI.unescapeHTML(value.to_s).tr(" ", " ")
     end
 
+    # Open Graph's og:locale for a page's locale (nil = primary): the
+    # locale code with "_" for "-", e.g. "nb-NO" -> "nb_NO".
+    def og_locale(locale_code)
+      code = locale_code || I18n.primary_code(@context.registers[:site])
+      code&.tr("-", "_")
+    end
+
     # A manufacturer `link` without its protocol, for display. Matches the
     # ftp/http/https protocols that field's Contentful validation allows,
     # case-insensitively (Liquid's `remove` is case-sensitive).
