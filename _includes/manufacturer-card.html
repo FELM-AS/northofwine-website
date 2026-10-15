@@ -1,51 +1,20 @@
 {% comment %}
-  Manufacturer card (Plan.md): image, logo, name, external link (new
-  tab), description, and an inline list of links to that manufacturer's
-  own products -- not a separate page (Manufacturer has no detail page
-  of its own; see planning/Plan.md's Produsenter section and the M3
-  roadmap decision this follows). No card-wide link, unlike the Product
-  card -- there's nowhere for the whole card to link to.
-
-  lang on the name comes directly from the manufacturer's own `country`
-  (the fixed enum, see the `country_lang` filter in
-  _plugins/contentful_filters.rb) -- no indirection needed here, unlike
-  the Product card.
-
-  Every editor-controlled field below is escaped -- name is free text
-  with no pattern validation, and `link`'s own validation regex
-  permits a literal `"`, same convention as _includes/button.html's
-  href/text. `description` is the exception: _config.yml configures it
-  as this content type's body_field, so it arrives here already
-  rendered to safe HTML by EntrySerializer#render_body (Markdown, same
-  as Product's own body field) -- output directly, not escaped,
-  mirroring _layouts/product.html's {{ content }}.
-
-  `id` on the <article> is the anchor target for the product detail
-  page's "back to manufacturer" link (Plan.md) -- Contentful entry ids
-  are plain alphanumeric strings, valid HTML id values as-is.
+  Manufacturer card: image, logo, name, external link, description and
+  links to its products. No card-wide link -- manufacturers have no page
+  of their own. `id` is the anchor product pages link back to.
+  description is already-rendered HTML (body_field), so it isn't escaped.
 
   Params:
-    manufacturer - required, a manufacturer Hash, e.g. an item off
-                    site.data.manufacturers or a listing page's
-                    page.items.
-    products     - that manufacturer's own product pages, precomputed
-                    once per build by _plugins/contentful_listing_pages.rb
-                    (matched by manufacturer id, not name -- names
-                    aren't guaranteed unique, ids are) and passed in via
-                    _layouts/listing.html's
-                    page.products_by_manufacturer[item.id], rather than
-                    this card rediscovering them itself by scanning
-                    site.pages on every render. Scoped per locale by
-                    that generator itself (each locale pass groups only
-                    its own locale's product pages), so this card never
-                    needs to filter by locale independently.
+    manufacturer - required, a manufacturer Hash (from
+                   site.data.manufacturers or page.items)
+    products     - its product pages (page.products_by_manufacturer[id])
 {% endcomment %}
 {% assign manufacturer = include.manufacturer %}
 {% assign manufacturer_lang = manufacturer.country | country_lang %}
 {% assign manufacturer_products = include.products %}
 <article{% if manufacturer.id %} id="{{ manufacturer.id }}"{% endif %} class="card manufacturer">
   {% include contentful-image.html asset=manufacturer.image width=600 fallback_alt=manufacturer.title %}
-  {% assign logo_alt = manufacturer.title | append: " logo" %}
+  {% assign logo_alt = "manufacturer.logo_alt" | t: name: manufacturer.title %}
   {% include contentful-image.html asset=manufacturer.logo width=200 class='logo' fallback_alt=logo_alt %}
   <h2{% if manufacturer_lang %} lang="{{ manufacturer_lang }}"{% endif %}>{{ manufacturer.title | escape }}</h2>
   {% if manufacturer.link.size > 0 %}

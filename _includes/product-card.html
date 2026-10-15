@@ -1,43 +1,18 @@
 {% comment %}
-  Product card (Plan.md): metadata (productTypeName + webProductTypeName
-  when set; country, region), image, name, and price + arrow icon (only
-  when product_id exists and sales_price is a real, positive price --
-  a bare truthy check would also pass a salesPrice of 0, e.g. an
-  editor-created entry still awaiting pricing, and render a
-  fully-formatted "0,00 kr" that reads as a deliberate free price.
-  sales_price_horeca is never shown, it's trade pricing given by
-  request. The entire card is clickable via a "stretched link": the
-  `.more` arrow button's ::after pseudo-element (_sass/_components.scss)
-  is absolutely positioned to cover the whole card, positioned relative
-  to .card's own `position: relative` -- not a real wrapping <a>, which
-  would have nested an <a> inside the card's own price/arrow buttons.
-  `.more`'s aria_label carries the accessible name for that whole-card
-  link, not just "view arrow".
-
-  Price is formatted per Norwegian convention (Plan.md's Formatting
-  section) via the `nb_number` filter in _plugins/contentful_filters.rb --
-  comma decimal separator, always 2 decimals, "kr" suffix (e.g. "550,00 kr").
-
-  lang on the product name comes from the *manufacturer's* country (a
-  fixed enum), not the product's own free-text country field, which
-  isn't guaranteed to match spelling-wise (Plan.md's Hyphenation
-  section) -- via the `country_lang` filter in
-  _plugins/contentful_filters.rb. Omitted if the product has no
-  resolved manufacturer (a handful of entries currently do -- see
-  planning/Plan-Issues.md #6) or that country isn't in the lookup.
-
-  Every editor-controlled field below is escaped -- these are free
-  text (no pattern validation on productTypeName/webProductTypeName/
-  country/region/productShortName), same convention as
-  _includes/button.html's href/text.
+  Product card: type, country/region, image, name, a Vinmonopolet price
+  button and an arrow link. The price button needs a product_id and a
+  price above 0 (0 means "not priced yet", not free); sales_price_horeca
+  is trade pricing and never shown. The whole card is clickable via the
+  arrow's ::after "stretched link" (_sass/_components.scss), so no <a>
+  wraps the card's own buttons.
 
   Params:
-    product - required, a product page, e.g. `page` on a product
-              detail page, or an item off a listing page's `page.items`.
+    product - required, a product page (`page` on a product page, or an
+              item from a listing page's page.items)
 {% endcomment %}
 {% assign product = include.product %}
 {% assign product_lang = product.manufacturer.country | country_lang %}
-{% capture more_label %}Se {{ product.title }}{% endcapture %}
+{% assign more_label = "product.see" | t: title: product.title %}
 
 <article class="card product">
   {% include contentful-image.html asset=product.image width=240 fallback_alt=product.title %}
@@ -53,8 +28,9 @@
     <h2{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ product.title | escape }}</h2>
     <div class="button-group">
       {% if product.product_id and product.sales_price > 0 %}
-        {% capture vmp_url %}https://vinmonopolet.no/p/{{ product.product_id | escape }} {% endcapture %}
-        {% capture price %}{{ product.sales_price | nb_number: 2}} {% endcapture %}
+        {% assign vmp_url = "https://vinmonopolet.no/p/" | append: product.product_id %}
+        {% assign price_value = product.sales_price | nb_number: 2 %}
+        {% assign price = "product.price" | t: value: price_value %}
         {% include button.html href=vmp_url text=price class='vmp' icon='brands/vinmonopolet'%}
       {% endif %}
       {% include button.html href=product.url class='more' icon='ui/arrow-right' aria_label=more_label %}

@@ -1,13 +1,11 @@
 {% comment %}
-  Header overlay menu (Plan.md): the dialog's close button, a Hjem link
-  (hero.html's own logo link isn't shown inside this overlay), followed
-  by the shared Utvalg/Produsenter/Om oss links in
-  navigation/menu-items.html (also used by Hjem's inline sidebar,
-  navigation/hero.html -- see that file for what's different there).
+  Menu dialog contents: close button, a Hjem link, and the shared
+  menu-items.html links.
 {% endcomment %}
 <nav class="menu inverted">
   <ul>
-    {% include icon-button.html type='submit' aria_label='Lukk meny' icon='ui/x' %}
+    {% assign close_label = "menu.close" | t %}
+    {% include icon-button.html type='submit' aria_label=close_label icon='ui/x' %}
     <li><a class="button" href="{{ '/' | relative_url }}">{{ site.title }}</a></li>
     {% include navigation/menu-items.html %}
   </ul>

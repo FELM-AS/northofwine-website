@@ -1,33 +1,17 @@
 {% comment %}
-  Header component (Plan.md): Home button + menu button, opening the
-  Menu overlay. Uses a native <dialog> (assets/js/menu.js just calls
-  showModal()) -- focus trapping and Escape-to-close are native <dialog>
-  modal behavior, not hand-rolled. Closing is a <form method="dialog">
-  submit button, needing no JS at all.
-
-  aria-label gives the dialog an accessible name -- with only a plain
-  nav list inside and no heading of its own, it would otherwise
-  announce to screen readers as an unnamed dialog, undermining Plan.md's
-  Accessibility section (the menu overlay must be fully usable, which
-  includes being properly identified, not just operable).
-
-  Reserved spot for a future language switcher (Plan.md's
-  Internationalization section) -- deliberately no markup yet: with
-  contentful_locales still just [nb-NO] (_config.yml), there's nothing
-  to switch to, and a switcher with a single option would be confusing
-  UI, not a reservation of one. Add it here, next to the menu button,
-  once a second locale is actually configured -- each_locale
-  (_plugins/contentful_locales.rb) is already what every page's own
-  locale-prefixed URL comes from, so linking "this same page in locale
-  X" only needs each_locale's list, not a new mechanism.
+  Header: home button and menu button. The menu is a native <dialog>
+  (assets/js/menu.js calls showModal()), which handles focus trapping and
+  Escape; the close button submits its <form method="dialog">. A language
+  switcher goes next to the menu button once a second locale exists.
 {% endcomment %}
 <header>
   <div>
     {% include button.html href='/' icon='brands/now-symbol' text=site.title icon_position='left' %}
-    {% include icon-button.html type='button' id='menu-open' aria_controls='menu-dialog' aria_label='Åpne meny' icon='ui/menu' %}
+    {% assign open_label = "menu.open" | t %}
+    {% include icon-button.html type='button' id='menu-open' aria_controls='menu-dialog' aria_label=open_label icon='ui/menu' %}
   </div>
 </header>
-<dialog id="menu-dialog" aria-label="Meny">
+<dialog id="menu-dialog" aria-label="{{ "menu.label" | t }}">
   <form method="dialog">
     {% include navigation/menu.html %}
   </form>

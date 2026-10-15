@@ -1,8 +1,8 @@
-require "set"
 require "contentful"
 require_relative "contentful_client"
 require_relative "contentful_locales"
 require_relative "contentful_serializer"
+require_relative "contentful_url_registry"
 
 module ContentfulJekyll
   # Jekyll::Generator that reads contentful_collections/
@@ -18,32 +18,23 @@ module ContentfulJekyll
     MAX_PAGE_SIZE = 1000
     MAX_INCLUDE_DEPTH = 10
 
-    # Per-collection/locale constants, computed once in fetch_collection
-    # and passed as one object to build_page instead of growing its param list.
-    CollectionContext = Struct.new(:collection, :locale, :body_field, :home_label, :dir, :image_field, keyword_init: true)
+    # Per-collection/locale values shared by every page build_page makes.
+    CollectionContext = Struct.new(:collection, :locale, :serializer, :body_field, :dir, :image_field, keyword_init: true)
 
     def generate(site)
       client = ContentfulClient.build
 
       if client.nil?
-        token_var = ContentfulClient.preview? ? "CONTENTFUL_PREVIEW_ACCESS_TOKEN" : "CONTENTFUL_ACCESS_TOKEN"
-        Jekyll.logger.warn LOG_TAG, "CONTENTFUL_SPACE_ID / #{token_var} not set, skipping content fetch"
+        Jekyll.logger.warn LOG_TAG, "CONTENTFUL_SPACE_ID / #{ContentfulClient.token_var} not set, skipping content fetch"
         return
       end
 
       display_fields = fetch_display_fields(client)
       entry_depth = site.config["contentful_entry_depth"] || EntrySerializer::DEFAULT_ENTRY_DEPTH
-      # EntrySerializer never flattens past entry_depth levels regardless
-      # of how much Contentful resolves, so asking the CDA to resolve more
-      # than that (up to its own MAX_INCLUDE_DEPTH hard cap) would just be
-      # extra JSON fetched and parsed for nothing on every entry, every
-      # locale pass.
+      # EntrySerializer never flattens deeper than entry_depth, so asking
+      # the CDA to resolve more links than that would be wasted JSON.
       @entry_include_depth = [entry_depth, MAX_INCLUDE_DEPTH].min
-      # Seeded with every existing static page's URL, so a Contentful
-      # entry colliding with one (e.g. a blank slug on dir: "" -> "/")
-      # gets a specific warning naming the entry, not just Jekyll's
-      # generic unnamed "destination shared by multiple files" one.
-      @built_dirs = Set.new(site.pages.map(&:url))
+      @urls = UrlRegistry.new(site.pages)
 
       collections = site.config["contentful_collections"] || []
       data_collections = site.config["contentful_data_collections"] || []
@@ -52,10 +43,10 @@ module ContentfulJekyll
       ContentfulJekyll.each_locale(site.config["contentful_locales"]) do |locale|
         # Fresh EntrySerializer per locale, so its memoization cache never
         # mixes translations across locales.
-        @serializer = EntrySerializer.new(site, display_fields, entry_depth, body_fields)
+        serializer = EntrySerializer.new(site, display_fields, entry_depth, body_fields)
 
-        collections.each { |collection| fetch_collection(site, client, collection, locale) }
-        data_collections.each { |collection| fetch_data_collection(site, client, collection, locale) }
+        collections.each { |collection| fetch_collection(site, client, collection, locale, serializer) }
+        data_collections.each { |collection| fetch_data_collection(site, client, collection, locale, serializer) }
       end
     end
 
@@ -76,15 +67,9 @@ module ContentfulJekyll
       fields
     end
 
-    # Maps content_type id -> body-like field symbol, from whichever
-    # collections (page-generating or data-only) configure a `body_field`.
-    # Threaded into EntrySerializer so #flatten_fields renders that one
-    # field via #render_body (Markdown for a plain Text field, full Rich
-    # Text otherwise) no matter how the entry is reached -- a data
-    # collection fetch (fetch_data_collection) or a linked-entry reference
-    # (EntrySerializer#serialize_field's Contentful::Entry case) -- not
-    # just a page's own body (build_page already handles that case
-    # separately via its own explicit render_body call).
+    # Maps content_type id -> configured body_field symbol, from page and
+    # data collections alike, so EntrySerializer renders that field via
+    # #render_body however the entry is reached (page, site.data, or link).
     def body_fields_for(collections)
       collections.each_with_object({}) do |collection, result|
         next unless collection["body_field"]
@@ -104,12 +89,12 @@ module ContentfulJekyll
       query
     end
 
-    def fetch_collection(site, client, collection, locale)
+    def fetch_collection(site, client, collection, locale, serializer)
       context = CollectionContext.new(
         collection: collection,
         locale: locale,
+        serializer: serializer,
         body_field: (collection["body_field"] || "body").to_sym,
-        home_label: (home_label_for(collection, locale) if collection["home"]),
         dir: ContentfulJekyll.dir_for(collection, locale),
         image_field: collection["image_field"] || "image"
       )
@@ -120,19 +105,10 @@ module ContentfulJekyll
       end
     end
 
-    # Homepage section heading: explicit `label` (a string, or a Hash
-    # keyed by locale code, mirroring `dir`), else a humanized content_type
-    # (e.g. "newsArticle" -> "News Article"). Unlike dir_for, falls back
-    # instead of raising -- an untranslated heading isn't a broken URL.
-    def home_label_for(collection, locale)
-      default = Contentful::Support.snakify(collection["content_type"]).split("_").map(&:capitalize).join(" ")
-      ContentfulJekyll.label_for(collection, "label", locale, default)
-    end
-
     # Fetches a content type into site.data.<name> instead of generating a
-    # page per entry -- for entries that are only ever linked to from other
-    # entries (e.g. authors, manufacturers) and have no page of their own.
-    def fetch_data_collection(site, client, collection, locale)
+    # page per entry -- for entries with no page of their own (e.g.
+    # manufacturers, people).
+    def fetch_data_collection(site, client, collection, locale, serializer)
       name = locale.data_key_for(collection["name"])
 
       if site.data.key?(name)
@@ -142,7 +118,7 @@ module ContentfulJekyll
       entries = []
 
       each_entry(client, entries_query(collection, locale)) do |entry|
-        entries << @serializer.serialize_entry(entry, 0)
+        entries << serializer.serialize_root(entry)
       end
 
       site.data[name] = entries
@@ -167,49 +143,39 @@ module ContentfulJekyll
     end
 
     # Returns nil (skipping the entry, with a warning) if the entry has no
-    # usable slug -- both a missing slug field (sanitized_slug returns nil)
-    # and a whitespace/punctuation-only one (Jekyll::Utils.slugify returns
-    # "") must never fall through to build_page, since
-    # [nil, ...].reject(&:empty?) would silently land either on the bare
-    # collection dir (e.g. "/utvalg/"), colliding with that collection's
-    # own root listing page (see contentful_listing_pages.rb).
+    # usable slug -- otherwise its page would land on the bare collection
+    # dir (e.g. "/utvalg/") and collide with that section's listing page.
     def build_page(site, entry, context)
       slug = sanitized_slug(entry)
 
-      if slug.nil? || slug.empty?
+      if slug.empty?
         Jekyll.logger.warn LOG_TAG, "entry #{entry.sys[:id]} (content_type: #{context.collection["content_type"]}) has no slug -- skipping, no page built for it"
         return nil
       end
 
-      dir = context.locale.path_for(context.dir, slug)
-      page = Jekyll::PageWithoutAFile.new(site, site.source, dir, "index.html")
+      page = Jekyll::PageWithoutAFile.new(site, site.source, context.locale.path_for(context.dir, slug), "index.html")
+      @urls.register(page.url, "entry #{entry.sys[:id]} (content_type: #{context.collection["content_type"]})")
 
-      unless @built_dirs.add?(page.url)
-        Jekyll.logger.warn LOG_TAG, "multiple entries (or an existing site file) produced the URL \"#{page.url}\" (entry #{entry.sys[:id]} included) -- only the last one written will survive in the build output"
-      end
-
-      page.content = @serializer.render_body(entry.fields[context.body_field])
+      page.content = context.serializer.render_body(entry.fields[context.body_field])
       page.data["layout"] = context.collection["layout"]
-      page.data["home_label"] = context.home_label if context.home_label
-      page.data["locale"] = context.locale.code unless context.locale.primary?
-      page.data.merge!(@serializer.flatten_fields(entry, 0, skip: [context.body_field]))
-      # Generic alias for the social preview image field (see
-      # _includes/seo.html), since content types name it differently.
-      # Defaults to "image"; nil if absent, same as any other field.
+      page.data["locale"] = context.locale.page_code
+      page.data.merge!(context.serializer.serialize_root(entry, skip: [context.body_field]))
+      # The sanitized slug the URL was built from, not the raw field.
+      page.data["slug"] = slug
+      # Generic alias for the social preview image (see _includes/seo.html),
+      # since content types name that field differently.
       page.data["social_image"] = page.data[context.image_field]
 
       page
     end
 
-    # Sanitizes a slug into a URL-safe form via Jekyll's own slugify (same
-    # normalization as post permalinks).
+    # The entry's slug run through Jekyll's own slugify (same normalization
+    # as post permalinks); "" if it has none.
     def sanitized_slug(entry)
-      raw_slug = entry.fields[:slug]
-      return raw_slug if raw_slug.nil?
+      raw_slug = entry.fields[:slug].to_s
+      slug = Jekyll::Utils.slugify(raw_slug)
 
-      slug = Jekyll::Utils.slugify(raw_slug.to_s)
-
-      if slug != raw_slug.to_s
+      if slug != raw_slug && !raw_slug.empty?
         Jekyll.logger.warn LOG_TAG, "slug \"#{raw_slug}\" (entry #{entry.sys[:id]}) isn't URL-safe, using \"#{slug}\" instead"
       end
 

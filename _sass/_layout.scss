@@ -1,9 +1,4 @@
-// The one deliberate layout rule this site uses CSS for at all (see
-// planning/Plan.md's Layout section): the sidebar sits beside the main
-// content on wider screens and stacks above it on small screens. Plain
-// unstyled HTML would just stack at any width, so this one requirement
-// needs a media query -- everything else on the site stays unstyled,
-// semantic HTML with no classes and no decorative CSS.
+// Page grid: header, sidebar beside main, footer; stacked on narrow screens.
 
 body {
   position: relative;

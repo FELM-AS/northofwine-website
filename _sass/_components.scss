@@ -30,11 +30,7 @@
     --color-text-on-strong-highlight: hsla(var(--palette-neutral-100) / 1);
 }
 
-// Rule groups repeated (verbatim or near-verbatim) more than once in this
-// file. Kept local here rather than shared with another partial's @use
-// module (main.scss's _typography.scss/_components.scss are separate
-// Sass modules) -- not worth that coupling for the one remaining
-// cross-file duplicate (p.small / footer dl dt).
+// Rule groups used more than once in this file.
 %unstyled-list{
     display: flex;
     padding: 0;
@@ -49,10 +45,9 @@
 }
 
 header{
-    // Fix to keep header at full width to keep content from bleeding on iOS Safari
+    // Full-bleed width, so content doesn't show beside it on iOS Safari.
     width: calc(100% + var(--size-padding-layout) * 2);
     margin-left: calc(var(--size-padding-layout) * -1);
-    //
     position: sticky;
     top: 0;
     box-sizing: border-box;

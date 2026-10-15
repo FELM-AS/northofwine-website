@@ -1,19 +1,12 @@
 {% comment %}
-  Footer component (Plan.md): contact emails, business info, social
-  links, and the Helsenorge alcohol-advertising disclaimer. `ordre@`
-  is intentionally dropped (Plan.md). Content/URLs come from
-  _data/company.yml, not hardcoded here (Plan.md: "site-wide settings
-  ... stay as static Jekyll content/data").
-
-  Also a reserved spot for a future language switcher, alongside
-  header.html's own -- see that file's comment for why there's no
-  markup here yet.
+  Footer: contact info and social links from _data/company.yml, plus the
+  Helsenorge alcohol disclaimer (Plan.md). `ordre@` is left out on purpose.
 {% endcomment %}
 <footer>
   <div>
+    {% capture helsenorge_link %}<a href="{{ site.data.company.helsenorge_url }}">{{ "footer.helsenorge" | t }}</a>{% endcapture %}
     <p class="small">
-      Bruk av alkohol kan gi ulike skadevirkninger. Nærmere informasjon finner du hos
-      <a href="{{ site.data.company.helsenorge_url }}">Helsenorge</a>.
+      {{ "footer.alcohol_warning" | t: link: helsenorge_link }}
     </p>
     <ul>
       {% for s in site.data.company.social %}
@@ -23,7 +16,7 @@
   </div>
   <address>
     <dl>
-      <dt>E-post</dt>
+      <dt>{{ "footer.email" | t }}</dt>
       <dd>
         <a href="mailto:{{ site.data.company.emails.post }}">{{ site.data.company.emails.post }}</a>
       </dd>
@@ -37,7 +30,7 @@
         {{ site.data.company.address | join: ", " }}
       </dd>
       <dd>
-        Org.nr. {{ site.data.company.org_number }}
+        {{ "footer.org_number" | t: number: site.data.company.org_number }}
       </dd>
     </dl>
   </address>

@@ -1,14 +1,6 @@
-# Manufacturer `country` -> language code, for the `lang` attribute on
-# product/manufacturer names (see planning/Plan.md "Formatting" and
-# "Hyphenation"). Deliberately explicit, not derived from the country
-# name, since the mapping isn't 1:1 in general.
-#
-# NOT fetched from Contentful -- a manually-maintained lookup. Produsenter's
-# country filter pages no longer come from this file (they're built from
-# the countries manufacturers actually have, see
-# contentful_listing_pages.rb), but a country missing here means its
-# names get no `lang` attribute -- the build logs a warning naming the
-# manufacturer(s) when that happens, so add the country here to fix it.
+# Manufacturer country -> language code, for the `lang` attribute on
+# product and manufacturer names. Maintained by hand; the build warns
+# about any manufacturer country missing here.
 Frankrike: fr
 Italia: it
 Tyskland: de

@@ -14,10 +14,10 @@ module ContentfulJekyll
       entry = node["data"]["target"]
       return "" unless entry.respond_to?(:fields)
 
-      title = title_for(entry)
-      return "" if title.nil?
+      title = title_for(entry).to_s.strip
+      return "" if title.empty?
 
-      "<#{tag} class=\"embedded-entry\">#{CGI.escapeHTML(title.to_s)}</#{tag}>"
+      "<#{tag} class=\"embedded-entry\">#{CGI.escapeHTML(title)}</#{tag}>"
     end
 
     # displayField-driven title, threaded in via mappings[:display_fields]
@@ -59,10 +59,8 @@ module ContentfulJekyll
   end
 
   # Extension point: override a key to change markup, or add one for an
-  # unhandled node/mark type. Covers every gap in rich_text_renderer's
-  # defaults (checked against @contentful/rich-text-types' BLOCKS/INLINES/
-  # MARKS) except embedded-resource-block/-inline, left unmapped on
-  # purpose -- raises a build error like any other unhandled type.
+  # unhandled node/mark type. embedded-resource-block/-inline are left
+  # unmapped on purpose, so they fail the build rather than render wrong.
   RICH_TEXT_MAPPINGS = {
     "embedded-entry-block" => EmbeddedEntryBlockRenderer,
     "embedded-entry-inline" => EmbeddedEntryInlineRenderer,
