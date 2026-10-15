@@ -1,17 +1,17 @@
 {% comment %}
   Breadcrumb component (Plan.md): <page> / productTypeName / webProductTypeName
   when both are set on the current product, else <page> / productTypeName.
-  include.product.breadcrumb is the list of filter pages this product
-  appears on, set by _plugins/contentful_listing_pages.rb (the generator
-  that builds those pages), so each link is that page's own URL and title.
+  include.product.breadcrumb is the product root listing, then the filter
+  pages this product appears on, set by _plugins/contentful_listing_pages.rb
+  (the generator that builds those pages), so each link is that page's own
+  URL and title.
 
   Params:
     product - required, a product's page data, e.g. `page` on a
               product detail page.
 {% endcomment %}
 <nav class="breadcrumb" aria-label="{{ "navigation.breadcrumb" | t }}">
-  <a class="url" href="{{ site.product_dir | dir_href | relative_url | escape }}">{{ "sections.product.menu_label" | t }}</a>
   {% for crumb in include.product.breadcrumb %}
-    / <a class="url" href="{{ crumb.url | relative_url | escape }}">{{ crumb.title | escape }}</a>
+    {% unless forloop.first %}/ {% endunless %}<a class="url" href="{{ crumb.url | relative_url | escape }}">{{ crumb.title | escape }}</a>
   {% endfor %}
 </nav>

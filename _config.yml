@@ -1,10 +1,12 @@
 title: North of Wine
-description: North of Wine AS – vinimportør i Trondheim.
 # Staging: GitHub Pages serves the site under a project subpath until
 # northofwine.no is freed up. At cutover, set baseurl to "", url to
-# "https://northofwine.no", and add a CNAME file.
+# "https://northofwine.no", remove noindex, and add a CNAME file.
 baseurl: "/northofwine-website"
 url: "https://felm-as.github.io"
+# Asks search engines not to index any page, so staging doesn't compete
+# with the live site.
+noindex: true
 # <html lang> for primary-locale pages.
 lang: nb
 

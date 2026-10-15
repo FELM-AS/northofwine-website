@@ -4,10 +4,11 @@
 
   Params:
     person - required, a person Hash (from site.data.people or page.items)
+    lazy   - optional, lazy-load the image (see contentful-image.html)
 {% endcomment %}
 {% assign person = include.person %}
 <article class="card person">
-  {% include contentful-image.html asset=person.image width=400 fallback_alt=person.title %}
+  {% include contentful-image.html asset=person.image width=400 fallback_alt=person.title lazy=include.lazy %}
   <h2>{{ person.title | escape }}</h2>
   {% if person.email.size > 0 %}
   <p><a href="mailto:{{ person.email | escape }}">{{ person.email | escape }}</a></p>

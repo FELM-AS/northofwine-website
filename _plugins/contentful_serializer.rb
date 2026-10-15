@@ -62,9 +62,10 @@ module ContentfulJekyll
     # A fetched (top-level) entry: a generated page's data or one
     # site.data item. Same shape and link depth either way, so templates
     # can treat both alike. Not memoized or frozen -- a page merges it
-    # into its own mutable page.data.
+    # into its own mutable page.data. updated_at feeds the sitemap; set
+    # last, so an `updatedAt` field can't replace it.
     def serialize_root(entry, skip: [])
-      entry_header(entry).merge(flatten_fields(entry, 0, skip: skip))
+      entry_header(entry).merge(flatten_fields(entry, 0, skip: skip)).merge("updated_at" => entry.sys[:updated_at]&.to_time)
     end
 
     # Flattens a linked entry like #flatten_fields, so `page.author.title`

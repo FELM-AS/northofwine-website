@@ -27,7 +27,8 @@
     <dl>
       <dt>{{ site.data.company.name }}</dt>
       <dd>
-        {{ site.data.company.address | join: ", " }}
+        {% assign address = site.data.company.address %}
+        {{ address.street }}, {{ address.postal_code }} {{ address.city }}
       </dd>
       <dd>
         {{ "footer.org_number" | t: number: site.data.company.org_number }}

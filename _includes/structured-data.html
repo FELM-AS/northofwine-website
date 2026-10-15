@@ -1,0 +1,51 @@
+{% comment %}
+  JSON-LD for search engines: Organization and WebSite on Hjem, a
+  BreadcrumbList on product pages (page.breadcrumb, the same trail as
+  navigation/breadcrumb.html). No Product markup: prices and offers could
+  count as alcohol advertising. Strings go through json_script, so editor
+  content can't close the <script>.
+{% endcomment %}
+{% if page.home %}
+{% assign company = site.data.company %}
+{% assign home_url = "/" | absolute_url %}
+<script type="application/ld+json">
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": {{ company.name | json_script }},
+    "url": {{ home_url | json_script }},
+    "logo": {{ "/assets/images/apple-touch-icon.png" | absolute_url | json_script }},
+    "email": {{ company.emails.post | json_script }},
+    "taxID": {{ company.org_number | remove: "MVA" | remove: "NO" | remove: " " | json_script }},
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": {{ company.address.street | json_script }},
+      "postalCode": {{ company.address.postal_code | json_script }},
+      "addressLocality": {{ company.address.city | json_script }},
+      "addressCountry": {{ company.address.country | json_script }}
+    },
+    "sameAs": {{ company.social | map: "url" | json_script }}
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": {{ site.title | json_script }},
+    "url": {{ home_url | json_script }}
+  }
+]
+</script>
+{% elsif page.layout == "product" %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {% for crumb in page.breadcrumb %}
+    { "@type": "ListItem", "position": {{ forloop.index }}, "name": {{ crumb.title | json_script }}, "item": {{ crumb.url | absolute_url | json_script }} },
+    {% endfor %}
+    { "@type": "ListItem", "position": {{ page.breadcrumb.size | plus: 1 }}, "name": {{ page.title | json_script }} }
+  ]
+}
+</script>
+{% endif %}

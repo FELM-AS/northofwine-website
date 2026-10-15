@@ -1,4 +1,5 @@
 require "cgi"
+require "json"
 require_relative "i18n"
 
 module ContentfulJekyll
@@ -21,6 +22,12 @@ module ContentfulJekyll
       raise "dir_href: no dir given -- a site.config value like site.product_dir/site.manufacturer_dir is nil or blank. Is the corresponding collection's `dir` set in _config.yml?" if dir.to_s.empty?
 
       "/#{dir}/"
+    end
+
+    # jsonify for an inline <script> (structured-data.html): "<" as
+    # <, so editor content can't close the <script>.
+    def json_script(value)
+      JSON.generate(value).gsub("<", "\\u003c")
     end
 
     # Norwegian numeric convention (Plan.md's Formatting section): comma
@@ -52,6 +59,13 @@ module ContentfulJekyll
     # normalize_whitespace's `\s` doesn't match U+00A0.
     def unescape_html(value)
       CGI.unescapeHTML(value.to_s).tr(" ", " ")
+    end
+
+    # Open Graph's og:locale for a page's locale (nil = primary): the
+    # locale code with "_" for "-", e.g. "nb-NO" -> "nb_NO".
+    def og_locale(locale_code)
+      code = locale_code || I18n.primary_code(@context.registers[:site])
+      code&.tr("-", "_")
     end
 
     # A manufacturer `link` without its protocol, for display. Matches the

@@ -165,6 +165,9 @@ module ContentfulJekyll
       # Generic alias for the social preview image (see _includes/seo.html),
       # since content types name that field differently.
       page.data["social_image"] = page.data[context.image_field]
+      # The meta description (_includes/seo.html): the body alone, not the
+      # layout around it. Unless the content type has its own description.
+      page.data["description"] ||= page.content unless page.content.strip.empty?
 
       page
     end

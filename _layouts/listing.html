@@ -1,11 +1,16 @@
 ---
 layout: default
 ---
+{% comment %}
+  Only the first cards' images (roughly what's visible on load) load
+  eagerly; the rest are lazy.
+{% endcomment %}
 
 {% if page.item_type == "product" %}
 
   {% for item in page.items %}
-    {% include product-card.html product=item %}
+    {% assign lazy = false %}{% if forloop.index > 6 %}{% assign lazy = true %}{% endif %}
+    {% include product-card.html product=item lazy=lazy %}
   {% endfor %}
   {% if page.items.size == 0 %}
     <p>{{ "sections.product.empty" | t }}</p>
@@ -15,7 +20,8 @@ layout: default
 
   {% for item in page.items %}
     {% assign item_products = page.products_by_manufacturer[item.id] %}
-    {% include manufacturer-card.html manufacturer=item products=item_products %}
+    {% assign lazy = false %}{% if forloop.index > 2 %}{% assign lazy = true %}{% endif %}
+    {% include manufacturer-card.html manufacturer=item products=item_products lazy=lazy %}
   {% endfor %}
   {% if page.items.size == 0 %}
     <p>{{ "sections.manufacturer.empty" | t }}</p>
@@ -29,6 +35,7 @@ layout: default
   </section>
 
   {% for item in page.items %}
-    {% include person-card.html person=item %}
+    {% assign lazy = false %}{% if forloop.index > 2 %}{% assign lazy = true %}{% endif %}
+    {% include person-card.html person=item lazy=lazy %}
   {% endfor %}
 {% endif %}
