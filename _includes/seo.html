@@ -4,7 +4,8 @@
   from default.html. The description is page_description, else the
   rendered content as plain text -- unescape_html stops its entities
   being escaped twice. A `noindex: true` page gets a robots noindex
-  instead of a canonical link and description.
+  instead of a canonical link and description; _config.yml's `noindex`
+  adds the robots noindex to every page (staging).
 {% endcomment %}
 {% assign meta_description = page_description | default: content | strip_html | unescape_html | normalize_whitespace | truncate: 160 %}
 {% assign has_description = meta_description != blank %}
@@ -24,11 +25,12 @@
 {% assign social_image_alt = site.title %}
 {% endif %}
 
-{% if page.noindex %}
+{% if page.noindex or site.noindex %}
 <meta name="robots" content="noindex">
-{% else %}
-<link rel="canonical" href="{{ page.url | absolute_url }}">
 {% endif %}
+{% unless page.noindex %}
+<link rel="canonical" href="{{ page.url | absolute_url }}">
+{% endunless %}
 {% if has_description %}
 <meta name="description" content="{{ meta_description | escape }}">
 {% endif %}

@@ -11,6 +11,7 @@
 <head>
   <meta charset="utf-8">
   <title>{{ "pages.redirect.title" | t }}</title>
+  {% if site.noindex %}<meta name="robots" content="noindex">{% endif %}
   <link rel="canonical" href="{{ page.redirect_to | absolute_url }}">
   <meta http-equiv="refresh" content="0; url={{ target }}">
 </head>
