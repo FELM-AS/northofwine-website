@@ -35,6 +35,7 @@ layout: default
   </section>
 
   {% for item in page.items %}
-    {% include person-card.html person=item %}
+    {% assign lazy = false %}{% if forloop.index > 2 %}{% assign lazy = true %}{% endif %}
+    {% include person-card.html person=item lazy=lazy %}
   {% endfor %}
 {% endif %}

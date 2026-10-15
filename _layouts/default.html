@@ -10,7 +10,7 @@
 {% assign page_description = page.description %}
 {% if page.description_key %}{% assign page_description = page.description_key | t %}{% endif %}
 {% assign page_lang = page.locale | default: site.lang | default: "en" %}
-{% if page_title == site.title %}
+{% if page.home %}
 {% assign document_title = site.title %}
 {% else %}
 {% assign document_title = "title_format" | t: title: page_title, site: site.title %}
@@ -42,7 +42,7 @@
   {% endif %}
 </head>
 <body>
-  {% if page.home_hero %}
+  {% if page.home %}
     <aside>
       {% include navigation/hero.html %}
     </aside>

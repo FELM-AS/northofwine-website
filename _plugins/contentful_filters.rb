@@ -1,4 +1,5 @@
 require "cgi"
+require "json"
 require_relative "i18n"
 
 module ContentfulJekyll
@@ -21,6 +22,12 @@ module ContentfulJekyll
       raise "dir_href: no dir given -- a site.config value like site.product_dir/site.manufacturer_dir is nil or blank. Is the corresponding collection's `dir` set in _config.yml?" if dir.to_s.empty?
 
       "/#{dir}/"
+    end
+
+    # jsonify for an inline <script> (structured-data.html): "<" as
+    # <, so editor content can't close the <script>.
+    def json_script(value)
+      JSON.generate(value).gsub("<", "\\u003c")
     end
 
     # Norwegian numeric convention (Plan.md's Formatting section): comma

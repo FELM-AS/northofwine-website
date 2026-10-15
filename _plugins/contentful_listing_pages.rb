@@ -64,10 +64,11 @@ module ContentfulJekyll
         "title"
       )
 
+      root = build_page(site, nil, products, "the product root listing", context)
       filter_pages = build_grouped_pages(site, products, "product_type_name", context) +
                      build_grouped_pages(site, products, "web_product_type_name", context)
-      link_breadcrumbs(filter_pages)
-      add_section(site, [build_page(site, nil, products, "the product root listing", context), *filter_pages])
+      link_breadcrumbs(root, filter_pages)
+      add_section(site, [root, *filter_pages])
 
       products.group_by { |page| page.data.dig("manufacturer", "id") }
     end
@@ -135,12 +136,14 @@ module ContentfulJekyll
       site.pages.concat(pages)
     end
 
-    # Each product page gets page.data["breadcrumb"]: the filter pages it
-    # appears on, in build order (productTypeName, then webProductTypeName),
-    # for navigation/breadcrumb.html to link to directly.
-    def link_breadcrumbs(filter_pages)
+    # Each product page gets page.data["breadcrumb"]: the root listing,
+    # then the filter pages it appears on in build order (productTypeName,
+    # then webProductTypeName), for navigation/breadcrumb.html and
+    # structured-data.html.
+    def link_breadcrumbs(root, filter_pages)
+      root.data["items"].each { |product| product.data["breadcrumb"] = [root] }
       filter_pages.each do |filter_page|
-        filter_page.data["items"].each { |product| (product.data["breadcrumb"] ||= []) << filter_page }
+        filter_page.data["items"].each { |product| product.data["breadcrumb"] << filter_page }
       end
     end
 
