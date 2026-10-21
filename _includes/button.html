@@ -10,10 +10,11 @@
     icon          - optional, icon path under _includes/icons/
     icon_position - "left" or "right" (default "right")
     aria_label    - optional accessible name, needed for an icon-only button
+    new_tab       - optional, open the link in a new tab
 {% endcomment %}
 {% assign icon_position = include.icon_position | default: "right" | downcase | strip %}
 {% assign has_icon = include.icon.size > 0 %}
-<a class="button {{ include.class | escape }}" href="{{ include.href | relative_url | escape }}" {% if include.aria_label %}aria-label="{{ include.aria_label | escape }}"{% endif %} {% if include.href == page.url %} aria-current="page" {% endif %}>
+<a class="button {{ include.class | escape }}" href="{{ include.href | relative_url | escape }}" {% if include.new_tab %}target="_blank" rel="noopener"{% endif %} {% if include.aria_label %}aria-label="{{ include.aria_label | escape }}"{% endif %} {% if include.href == page.url %} aria-current="page" {% endif %}>
   {% if has_icon and icon_position == "left" %}
     {% include icons/{{ include.icon }}.svg %}
   {% endif %}
