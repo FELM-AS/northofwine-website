@@ -12,7 +12,7 @@ lang: nb
 
 # GoatCounter site code (the <code> in https://<code>.goatcounter.com).
 # No analytics snippet is emitted while unset.
-# goatcounter_code: mysite
+goatcounter_code: northofwine
 
 # Content types that get a generated page per entry, at /<dir>/<slug>/.
 # Keys are documented in CLAUDE.md ("How a page gets built").
