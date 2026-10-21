@@ -16,7 +16,3 @@
 @include dm-face("DM Sans", "../fonts/dm-sans-400-italic.woff2", 400, italic);
 @include dm-face("DM Sans", "../fonts/dm-sans-700.woff2", 700);
 @include dm-face("DM Mono", "../fonts/dm-mono-400.woff2", 400);
-
-body {
-  font-family: "DM Sans", sans-serif;
-}

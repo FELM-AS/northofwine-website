@@ -9,11 +9,15 @@
     --size-line-height-medium: 32px;
     --size-line-height-large: 36px;
     --size-line-height-huge: 48px;
-    
+
     --size-font-weight-regular: 400;
     --size-font-weight-bold: 700;
 
     --font-family-mono: "DM Mono", monospace;
+}
+
+body {
+    font-family: "DM Sans", sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6{

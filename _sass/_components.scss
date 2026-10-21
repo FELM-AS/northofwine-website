@@ -113,7 +113,6 @@ dialog#menu-dialog{
     }
 }
 
-
 nav{
     padding: var(--size-padding-container);
 
@@ -173,7 +172,6 @@ section{
         }
     }
 }
-
 
 .button{
     display: inline-flex;
@@ -329,13 +327,6 @@ section{
     .vmp{
         z-index: 100;
     }
-}
-
-main.list{
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    align-content: start;
-    gap: var(--size-padding-layout);
 }
 
 hr{
