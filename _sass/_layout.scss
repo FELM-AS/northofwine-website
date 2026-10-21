@@ -55,6 +55,7 @@ footer {
 @media (max-width: 720px) {
   body, body.hero {
     grid-template-columns: 1fr;
+    grid-template-rows: auto;
     grid-template-areas:
       "header"
       "aside"

@@ -10,6 +10,6 @@ home: true
 {% endcomment %}
 <section>
   <h1>{{ site.title | replace: " of ", "<br>of&nbsp;" }}</h1>
-  <p>{{ "pages.home.intro" | t }}</p>
-  <p><a href="{{ site.product_dir | dir_href | relative_url }}">{{ "pages.home.cta" | t }}</a></p>
+  <p class="lead">{{ "pages.home.intro" | t }}</p>
+  <p class="lead"><a href="{{ site.product_dir | dir_href | relative_url }}">{{ "pages.home.cta" | t }}</a></p>
 </section>
