@@ -53,19 +53,29 @@ footer {
 }
 
 @media (max-width: 720px) {
-  body, body.hero {
+  body {
     grid-template-columns: 1fr;
-    grid-template-rows: auto;
     grid-template-areas:
       "header"
       "aside"
       "main"
       "footer";
   }
-  body.hero nav{
-    height: auto;
-    min-height: 50vh;
+
+  body.hero{
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+      "aside"
+      "main"
+      "footer";
+
+    nav{
+      height: auto;
+      min-height: 60vh;
+    }
   }
+
   aside{
     width: auto !important;
   }
