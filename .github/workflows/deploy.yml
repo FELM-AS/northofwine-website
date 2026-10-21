@@ -25,7 +25,7 @@ jobs:
     if: github.event_name != 'repository_dispatch' || vars.CONTENTFUL_AUTOBUILD_DISABLED != 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: "3.3"
@@ -41,8 +41,6 @@ jobs:
         # Fails the build (and so the deploy) on a broken link.
         # --checks Links,Scripts: no Images check -- a missing Contentful
         #   image shouldn't block deploys; image-fallback.js covers it.
-        # --swap-urls: strip the staging baseurl to resolve internal links
-        #   in _site/. Update with baseurl/--ignore-urls at domain cutover.
         # --ignore-urls: absolute links to our own site (the canonical tag)
         #   would be checked against the live site, so a new page would
         #   fail on its own canonical URL before it's ever deployed.
@@ -55,13 +53,12 @@ jobs:
         run: |
           bundle exec htmlproofer ./_site \
             --checks Links,Scripts \
-            --swap-urls "^/northofwine-website/:/" \
-            --ignore-urls "/^https:\/\/felm-as\.github\.io\/northofwine-website/" \
+            --ignore-urls "/^https:\/\/northofwine\.no/" \
             --no-enforce-https \
             --only-4xx \
             --ignore-status-codes 429 \
             --assume-extension ""
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: "_site"
 
@@ -73,4 +70,4 @@ jobs:
     needs: build
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
