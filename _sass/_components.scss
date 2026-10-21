@@ -172,6 +172,10 @@ aside{
 
 section{
     padding: var(--size-padding-container);
+
+    &.wide{
+        grid-column: 1 / -1;
+    }
 }
 
 .inverted{
@@ -285,16 +289,28 @@ section{
     }
 
     &.person{
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        align-content: flex-start;
+
+        > div{
+            flex: 1 1 320px;
+        }
 
         h2{
-            flex: 0 0 auto;
+            margin: 0;
+        }
+
+        a{
+            overflow-wrap: anywhere;
         }
 
         img{
-            width: 100%;
+            flex: 0 0 auto;
+            width: 240px;
             height: auto;
-            aspect-ratio: 3 / 2;
+            aspect-ratio: 1 / 1;
             object-fit: cover;
             object-position: center;
             padding: var(--size-padding-element);

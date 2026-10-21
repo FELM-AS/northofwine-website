@@ -95,7 +95,7 @@ module ContentfulJekyll
       return unless collection && collection["dir"]
 
       context = section_context(site, locale, collection, "about", "person")
-      people = site.data[locale.data_key_for(collection["name"])] || []
+      people = nb_sort(site.data[locale.data_key_for(collection["name"])] || [], "title")
       profiles, team_members = people.partition { |person| person["company_profile"] }
 
       if profiles.empty?

@@ -29,8 +29,8 @@ layout: default
 
 {% elsif page.item_type == "person" %}
 
-  <section>
-    <h2>{{ page.about_entry.title }}</h2>
+  <section class="wide">
+    <h2>{{ page.about_entry.title | escape }}</h2>
     {{ page.about_entry.description }}
   </section>
 
