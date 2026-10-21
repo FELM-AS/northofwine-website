@@ -108,7 +108,7 @@ This mirrors how Contentful's own [jekyll-contentful-data-import](https://github
 
 ### Homepage & navigation
 
-**`index.html`** (Hjem) is a hand-authored static page, not a Contentful collection — company name + short intro text, with `home: true` in its front matter. That flag tells `_layouts/default.html` to suppress the header entirely and render the Menu directly in the sidebar instead (Plan.md: Hjem has no header, sidebar *is* the nav) — driven by data on the page itself, never by inspecting `page.url`.
+**`index.html`** (Hjem) is a hand-authored static page, not a Contentful collection — company name + short intro text, with `home: true` in its front matter. That flag tells `_layouts/default.html` to suppress the header entirely and render the Menu directly in the sidebar instead (Plan.md: Hjem has no header, sidebar *is* the nav) — driven by data on the page itself, never by inspecting `page.url`. The same flag puts `class="hero"` on `<body>`, which `_sass/_layout.scss` turns into a two-column hero (menu on `assets/images/texture.png` with the `domen.svg` illustration, intro beside it). The `<h1>` is `site.title` with `" of "` replaced by `<br>of&nbsp;` so the line break and non-breaking space hold; a title without " of " renders as plain text.
 
 (The generic template's `home`/`label` homepage sections and `nav: true` collection-driven nav are both removed here: Hjem is a static page and the nav is a fixed Menu component.)
 

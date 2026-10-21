@@ -1,19 +1,34 @@
 :root{
     --size-font-size-small: 12px;
     --size-font-size-regular: 16px;
+    --size-font-size-lead: 20px;
     --size-font-size-medium: 24px;
     --size-font-size-large: 30px;
     --size-font-size-huge: 40px;
+    --size-font-size-xhuge: 72px;
     --size-line-height-small: 16px;
     --size-line-height-regular: 24px;
+    --size-line-height-lead: 24px;
     --size-line-height-medium: 32px;
     --size-line-height-large: 36px;
     --size-line-height-huge: 48px;
-    
+    --size-line-height-xhuge: 72px;
+
     --size-font-weight-regular: 400;
     --size-font-weight-bold: 700;
 
     --font-family-mono: "DM Mono", monospace;
+}
+
+@media (max-width: 720px) {
+    :root{
+        --size-font-size-xhuge: 48px;
+        --size-line-height-xhuge: 48px;
+    }
+}
+
+body {
+    font-family: "DM Sans", sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6{
@@ -28,6 +43,13 @@ h1{
     font-size: var(--size-font-size-huge);
     line-height: var(--size-line-height-huge);
     margin-bottom: var(--size-line-height-regular);
+}
+
+.hero h1{
+    font-size: var(--size-font-size-xhuge);
+    line-height: var(--size-line-height-xhuge);
+    margin-bottom: var(--size-line-height-regular);
+    letter-spacing: -0.02em;
 }
 
 h2{
@@ -62,6 +84,11 @@ p{
     &.small{
         font-size: var(--size-font-size-small);
         line-height: var(--size-line-height-small);
+    }
+
+    &.lead{
+        font-size: var(--size-font-size-lead);
+        line-height: var(--size-line-height-lead);
     }
 }
 

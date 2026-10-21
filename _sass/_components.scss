@@ -113,7 +113,6 @@ dialog#menu-dialog{
     }
 }
 
-
 nav{
     padding: var(--size-padding-container);
 
@@ -125,13 +124,29 @@ nav{
     &.menu{
         aspect-ratio: 1 / 1;
         width: 100%;
+        background-image: url(../images/texture.png);
+        background-repeat: no-repeat;
+        background-position: bottom right;
+        background-size: cover;
         box-sizing: border-box;
     }
 }
 
-aside{
-    position: relative;
+.hero {
+    nav{
+        padding: var(--size-padding-layout);
+        background-image: url(../images/domen.svg), url(../images/texture.png);
+        background-repeat: no-repeat, no-repeat;
+        background-position: bottom right;
+        background-size: contain, cover;
+    }
+    section, footer{
+        padding: var(--size-padding-layout);
+        border: none;
+    }
+}
 
+aside{
     nav, img{
         position: sticky;
         top: calc(
@@ -173,7 +188,6 @@ section{
         }
     }
 }
-
 
 .button{
     display: inline-flex;
@@ -297,7 +311,7 @@ section{
             margin: 0 0 var(--size-padding-element) 0;
         }
     }
-    
+
     .content{
         display: flex;
         flex: 1 1 auto;
@@ -329,13 +343,6 @@ section{
     .vmp{
         z-index: 100;
     }
-}
-
-main.list{
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    align-content: start;
-    gap: var(--size-padding-layout);
 }
 
 hr{
