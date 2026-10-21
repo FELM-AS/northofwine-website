@@ -17,7 +17,7 @@ social:
   - name: Instagram
     url: https://www.instagram.com/northofwine/
     icon: brands/instagram
-helsenorge_url: https://helsenorge.no/rus-og-avhengighet/alkohol/alkohol-og-helse
+helsenorge_url: https://www.helsenorge.no/alkohol/alkohol-og-helse
 # Open Graph image for pages without their own (_includes/seo.html): a
 # site path to a 1200x630 image in assets/.
 social_image: /assets/images/og-fallback.jpg
