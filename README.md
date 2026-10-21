@@ -2,7 +2,7 @@
 
 The website for [North of Wine AS](https://northofwine.no), a Norwegian wine importer based in Trondheim. Content (products, manufacturers, people) is authored and edited in Contentful, fetched at build time, and rendered by Jekyll into a static site deployed to GitHub Pages via GitHub Actions.
 
-**Status:** pre-launch. The real domain, `northofwine.no`, is still serving the old site; this repo currently deploys to a temporary GitHub Pages URL (`https://felm-as.github.io/northofwine-website/`) until DNS is cut over (tracked in the issue tracker).
+**Status:** live at [northofwine.no](https://northofwine.no), deployed from this repo.
 
 Originally scaffolded from the `github-pages-contentful` template's Contentful → Jekyll → GitHub Pages architecture, but this repo is no longer a template — it's the concrete site for one company. See [`planning/Plan.md`](planning/Plan.md) for the full design/requirements spec this was built against, [`planning/Plan-Issues.md`](planning/Plan-Issues.md) for the implementation breakdown, [`planning/Contentful-Content-Model.md`](planning/Contentful-Content-Model.md) for the exact Contentful fields, and [`CLAUDE.md`](CLAUDE.md) for how the underlying Contentful→Jekyll build pipeline works internally.
 
@@ -71,10 +71,8 @@ Products, manufacturers, and people are all edited directly in Contentful — th
 Every build also runs the link checker used in CI; run it locally after `bundle exec jekyll build` if you've touched anything link-related:
 
 ```
-bundle exec htmlproofer ./_site --checks Links,Scripts --swap-urls "^/northofwine-website/:/" --ignore-urls "/^https:\/\/felm-as\.github\.io\/northofwine-website/" --no-enforce-https --only-4xx --ignore-status-codes 429
+bundle exec htmlproofer ./_site --checks Links,Scripts --ignore-urls "/^https:\/\/northofwine\.no/" --assume-extension "" --no-enforce-https --only-4xx --ignore-status-codes 429
 ```
-
-(The `--swap-urls`/`--ignore-urls` flags exist only because of the temporary GitHub Pages project-site path mentioned above — see the matching comment in `deploy.yml` for what to change once the custom domain lands.)
 
 ## Further reading
 
