@@ -32,7 +32,8 @@
         {% assign vmp_url = "https://vinmonopolet.no/p/" | append: product.product_id %}
         {% assign price_value = product.sales_price | nb_number: 2 %}
         {% assign price = "product.price" | t: value: price_value %}
-        {% include button.html href=vmp_url text=price class='vmp' icon='brands/vinmonopolet'%}
+        {% assign price_label = "product.price_label" | t: value: price_value %}
+        {% include button.html href=vmp_url text=price class='vmp' icon='ui/shopping-cart' aria_label=price_label new_tab=true %}
       {% endif %}
       {% include button.html href=product.url class='more' icon='ui/arrow-right' aria_label=more_label %}
     </div>
