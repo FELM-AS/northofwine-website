@@ -69,6 +69,7 @@ product:
   packaging: Emballasje
   cork: Kork
   price: "%{value} kr"
+  price_label: "%{value} kr, via vinmonopolet.no"
   see: "Se %{title}"
 
 manufacturer:
