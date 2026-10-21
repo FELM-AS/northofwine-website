@@ -11,6 +11,21 @@ body {
   padding: 0 var(--size-padding-layout) var(--size-padding-layout) var(--size-padding-layout);
   gap: var(--size-padding-layout);
   margin: 0;
+
+  &.hero{
+    min-height: 100vh;
+    box-sizing: border-box;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr auto;
+    grid-template-areas:
+      "aside main"
+      "aside footer";
+    padding: var(--size-padding-layout);
+
+    nav{
+      height: 100%;
+    }
+  }
 }
 
 header {
@@ -38,13 +53,17 @@ footer {
 }
 
 @media (max-width: 720px) {
-  body {
+  body, body.hero {
     grid-template-columns: 1fr;
     grid-template-areas:
       "header"
       "aside"
       "main"
       "footer";
+  }
+  body.hero nav{
+    height: auto;
+    min-height: 50vh;
   }
   aside{
     width: auto !important;

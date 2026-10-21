@@ -124,13 +124,29 @@ nav{
     &.menu{
         aspect-ratio: 1 / 1;
         width: 100%;
+        background-image: url(../images/texture.png);
+        background-repeat: no-repeat;
+        background-position: bottom right;
+        background-size: cover;
         box-sizing: border-box;
     }
 }
 
-aside{
-    position: relative;
+.hero {
+    nav{
+        padding: var(--size-padding-layout);
+        background-image: url(../images/domen.svg), url(../images/texture.png);
+        background-repeat: no-repeat, no-repeat;
+        background-position: bottom right;
+        background-size: contain, cover;
+    }
+    section, footer{
+        padding: var(--size-padding-layout);
+        border: none;
+    }
+}
 
+aside{
     nav, img{
         position: sticky;
         top: calc(

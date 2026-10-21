@@ -88,7 +88,7 @@ pages:
   home:
     description: North of Wine AS er en vinimportør i Trondheim, med vin for det nasjonale og trønderske markedet.
     intro: Vinimport for det nasjonale og trønderske markedet.
-    cta: Se utvalget
+    cta: Se vårt utvalg
   not_found:
     title: Siden finnes ikke
     message: Beklager, denne siden finnes ikke.
