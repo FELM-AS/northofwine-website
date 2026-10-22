@@ -99,6 +99,11 @@ dialog#menu-dialog{
         display: flex;
         justify-content: space-between;
     }
+    nav{
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
     nav ul{
         place-items: flex-end;
     }
