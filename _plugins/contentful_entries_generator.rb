@@ -25,7 +25,11 @@ module ContentfulJekyll
       client = ContentfulClient.build
 
       if client.nil?
-        Jekyll.logger.warn LOG_TAG, "CONTENTFUL_SPACE_ID / #{ContentfulClient.token_var} not set, skipping content fetch"
+        missing = ContentfulClient.missing_vars.join(", ")
+        # A production build without content would deploy an empty catalog.
+        raise Jekyll::Errors::FatalException, "#{LOG_TAG} #{missing} not set, refusing to build production without content" if Jekyll.env == "production"
+
+        Jekyll.logger.warn LOG_TAG, "#{missing} not set, skipping content fetch"
         return
       end
 
@@ -58,7 +62,7 @@ module ContentfulJekyll
     def fetch_display_fields(client)
       fields = {}
 
-      each_page(client.content_types(limit: MAX_PAGE_SIZE), client) do |content_type|
+      each_page(client.content_types(order: "sys.id", limit: MAX_PAGE_SIZE), client) do |content_type|
         next if content_type.display_field.nil?
 
         fields[content_type.id] = Contentful::Support.snakify(content_type.display_field)
@@ -81,12 +85,22 @@ module ContentfulJekyll
     def entries_query(collection, locale)
       query = {
         content_type: collection["content_type"],
-        order: collection["order"] || "-sys.updatedAt",
+        order: unique_order(collection["order"] || "-sys.updatedAt"),
         include: @entry_include_depth,
         limit: MAX_PAGE_SIZE
       }
       query[:locale] = locale.code if locale.code
       query
+    end
+
+    # Pages are fetched with `skip`, so the order must be unique: entries
+    # that tie could otherwise swap between requests, fetching one twice
+    # and another not at all. sys.id breaks every tie. Keys are stripped,
+    # since the CDA rejects a space after a comma.
+    def unique_order(order)
+      keys = order.split(",").map(&:strip).reject(&:empty?)
+      keys << "sys.id" unless keys.any? { |key| key.delete_prefix("-") == "sys.id" }
+      keys.join(",")
     end
 
     def fetch_collection(site, client, collection, locale, serializer)
@@ -154,8 +168,6 @@ module ContentfulJekyll
       end
 
       page = Jekyll::PageWithoutAFile.new(site, site.source, context.locale.path_for(context.dir, slug), "index.html")
-      @urls.register(page.url, "entry #{entry.sys[:id]} (content_type: #{context.collection["content_type"]})")
-
       page.content = context.serializer.render_body(entry.fields[context.body_field])
       page.data["layout"] = context.collection["layout"]
       page.data["locale"] = context.locale.page_code
@@ -168,6 +180,7 @@ module ContentfulJekyll
       # The meta description (_includes/seo.html): the body alone, not the
       # layout around it. Unless the content type has its own description.
       page.data["description"] ||= page.content unless page.content.strip.empty?
+      @urls.register(page.url, UrlRegistry.label_for(page))
 
       page
     end
