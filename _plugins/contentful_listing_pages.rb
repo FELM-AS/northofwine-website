@@ -99,7 +99,7 @@ module ContentfulJekyll
       profiles, team_members = people.partition { |person| person["company_profile"] }
 
       if profiles.empty?
-        Jekyll.logger.warn LOG_TAG, "About (Om oss) page: no person entry with companyProfile=true found. The About page's intro text will be blank."
+        Jekyll.logger.warn LOG_TAG, "About (Om oss) page: no person entry with companyProfile=true found. The About page will have no intro."
       elsif profiles.size > 1
         Jekyll.logger.warn LOG_TAG, "About (Om oss) page: #{profiles.size} person entries have companyProfile=true (entries: #{profiles.map { |p| p["id"] }.join(", ")}) -- only the first is used as the intro, and all of them are excluded from the team list."
       end

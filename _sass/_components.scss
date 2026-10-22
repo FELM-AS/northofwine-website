@@ -118,7 +118,7 @@ dialog#menu-dialog{
     }
 }
 
-nav{
+nav, .filter{
     padding: var(--size-padding-container);
 
     ul{
@@ -152,7 +152,7 @@ nav{
 }
 
 aside{
-    nav, img{
+    nav, .filter, img{
         position: sticky;
         top: calc(
             var(--size-padding-container) +

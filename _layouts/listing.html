@@ -29,10 +29,12 @@ layout: default
 
 {% elsif page.item_type == "person" %}
 
+  {% if page.about_entry %}
   <section class="wide">
     <h2>{{ page.about_entry.title | escape }}</h2>
     {{ page.about_entry.description }}
   </section>
+  {% endif %}
 
   {% for item in page.items %}
     {% assign lazy = false %}{% if forloop.index > 2 %}{% assign lazy = true %}{% endif %}
