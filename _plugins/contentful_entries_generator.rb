@@ -165,8 +165,6 @@ module ContentfulJekyll
       end
 
       page = Jekyll::PageWithoutAFile.new(site, site.source, context.locale.path_for(context.dir, slug), "index.html")
-      @urls.register(page.url, "entry #{entry.sys[:id]} (content_type: #{context.collection["content_type"]})")
-
       page.content = context.serializer.render_body(entry.fields[context.body_field])
       page.data["layout"] = context.collection["layout"]
       page.data["locale"] = context.locale.page_code
@@ -179,6 +177,7 @@ module ContentfulJekyll
       # The meta description (_includes/seo.html): the body alone, not the
       # layout around it. Unless the content type has its own description.
       page.data["description"] ||= page.content unless page.content.strip.empty?
+      @urls.register(page.url, UrlRegistry.label_for(page))
 
       page
     end

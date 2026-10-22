@@ -65,8 +65,7 @@ module ContentfulJekyll
       )
 
       root = build_page(site, nil, products, "the product root listing", context)
-      filter_pages = build_grouped_pages(site, products, "product_type_name", context) +
-                     build_grouped_pages(site, products, "web_product_type_name", context)
+      filter_pages = build_grouped_pages(site, products, %w[product_type_name web_product_type_name], context)
       link_breadcrumbs(root, filter_pages)
       add_section(site, [root, *filter_pages])
 
@@ -82,7 +81,7 @@ module ContentfulJekyll
 
       pages = [
         build_page(site, nil, manufacturers, "the manufacturer root listing", context),
-        *build_grouped_pages(site, manufacturers, "country", context)
+        *build_grouped_pages(site, manufacturers, %w[country], context)
       ]
       pages.each { |page| page.data["products_by_manufacturer"] = products_by_manufacturer }
       warn_missing_country_langs(site, manufacturers)
@@ -137,8 +136,8 @@ module ContentfulJekyll
     end
 
     # Each product page gets page.data["breadcrumb"]: the root listing,
-    # then the filter pages it appears on in build order (productTypeName,
-    # then webProductTypeName), for navigation/breadcrumb.html and
+    # then the filter pages it appears on in build order (see
+    # #build_grouped_pages), for navigation/breadcrumb.html and
     # structured-data.html.
     def link_breadcrumbs(root, filter_pages)
       root.data["items"].each { |product| product.data["breadcrumb"] = [root] }
@@ -147,16 +146,31 @@ module ContentfulJekyll
       end
     end
 
-    # One page per distinct value of `field` among `items`, in Norwegian
-    # alphabetical order -- only values actually present get a page, so a
-    # filter never links to an empty one.
-    def build_grouped_pages(site, items, field, context)
-      grouped = items.group_by { |item| item_field(item, field) }
-      grouped.delete(nil)
+    # One page per distinct value of `fields` among `items` -- only values
+    # actually present get a page, so a filter never links to an empty one.
+    # Ordered by field, then Norwegian alphabetical order within each.
+    # Values with the same slug (from any field, e.g. "Rødvin" as both
+    # productTypeName and webProductTypeName) share one page with the
+    # union of their items, named by the first one found.
+    def build_grouped_pages(site, items, fields, context)
+      groups = {}
 
-      grouped.keys.sort_by { |value| nb_sort_key(value) }.map do |value|
-        build_page(site, value, grouped[value], "the #{field} filter", context)
+      fields.each do |field|
+        grouped = items.group_by { |item| item_field(item, field) }
+        grouped.delete(nil)
+
+        grouped.keys.sort_by { |value| nb_sort_key(value) }.each do |value|
+          group = groups[filter_slug(value)] ||= { value: value, label: "the #{field} filter \"#{value}\"", items: [] }
+          group[:items].concat(grouped[value])
+        end
       end
+
+      # `items &` keeps the items' own (sorted) order and drops duplicates.
+      groups.values.map { |group| build_page(site, group[:value], items & group[:items], group[:label], context) }
+    end
+
+    def filter_slug(value)
+      Jekyll::Utils.slugify(value, mode: "latin")
     end
 
     # Norwegian alphabetical order by `field`. Contentful's own `order`
@@ -204,7 +218,7 @@ module ContentfulJekyll
     # (e.g. "Rødvin"), transliterated to an ASCII slug (mode: "latin").
     # label: what's building this page, named in a URL collision warning.
     def build_page(site, value, items, label, context)
-      slug = Jekyll::Utils.slugify(value, mode: "latin") if value
+      slug = filter_slug(value) if value
       page = Jekyll::PageWithoutAFile.new(site, site.source, context.locale.path_for(context.dir, slug), "index.html")
       @urls.register(page.url, label)
 
