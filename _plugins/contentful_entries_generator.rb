@@ -81,12 +81,19 @@ module ContentfulJekyll
     def entries_query(collection, locale)
       query = {
         content_type: collection["content_type"],
-        order: collection["order"] || "-sys.updatedAt",
+        order: unique_order(collection["order"] || "-sys.updatedAt"),
         include: @entry_include_depth,
         limit: MAX_PAGE_SIZE
       }
       query[:locale] = locale.code if locale.code
       query
+    end
+
+    # Pages are fetched with `skip`, so the order must be unique: entries
+    # that tie could otherwise swap between requests, fetching one twice
+    # and another not at all. sys.id breaks every tie.
+    def unique_order(order)
+      order.split(",").any? { |key| key.delete_prefix("-") == "sys.id" } ? order : "#{order},sys.id"
     end
 
     def fetch_collection(site, client, collection, locale, serializer)

@@ -67,13 +67,13 @@ To add a new content type, add a `contentful_collections` entry and a matching l
 | `content_type` | yes | The Contentful content type id to fetch. |
 | `layout` | yes | Which layout renders the page. |
 | `dir` | yes | URL path prefix (`dir: ""` → site root). |
-| `order` | no | A raw [Contentful CDA order value](https://www.contentful.com/developers/docs/references/content-delivery-api/#/reference/search-parameters/order) (e.g. `-fields.publishDate`); defaults to `-sys.updatedAt`. |
+| `order` | no | A raw [Contentful CDA order value](https://www.contentful.com/developers/docs/references/content-delivery-api/#/reference/search-parameters/order) (e.g. `-fields.publishDate`); defaults to `-sys.updatedAt`. `,sys.id` is appended unless it's already there (see below). |
 | `body_field` | no | Which field to render as page content, if not `body` (see "Content type conventions" below). |
 | `image_field` | no | Which field to expose as `page.social_image` (Open Graph/Twitter Card image, see "SEO, sitemap, robots.txt, 404" below), if not `image`. |
 
 A top-level `contentful_entry_depth` setting (default 2) controls how deep linked entries get flattened before degrading to a stub — see "Field exposure" below.
 
-Entries are fetched with `include` set to `contentful_entry_depth` (capped at the CDA's own hard maximum of 10 levels) — asking the CDA to resolve more levels than `EntrySerializer` will ever flatten would just be extra JSON fetched and parsed for nothing — and paginated in `MAX_PAGE_SIZE`-sized (1000, the CDA's hard limit) requests until exhausted, via the shared `each_page` loop, so content types with more entries than one page are no longer silently truncated. `each_page` is generic over any Contentful CDA list endpoint (entries, content types, ...), since `Contentful::Array#next_page` dispatches by the resource's own type.
+Entries are fetched with `include` set to `contentful_entry_depth` (capped at the CDA's own hard maximum of 10 levels) — asking the CDA to resolve more levels than `EntrySerializer` will ever flatten would just be extra JSON fetched and parsed for nothing — and paginated in `MAX_PAGE_SIZE`-sized (1000, the CDA's hard limit) requests until exhausted, via the shared `each_page` loop, so content types with more entries than one page are no longer silently truncated. Pages are fetched by `skip`, so `entries_query` makes the order unique with a `sys.id` tiebreaker — entries that tie on the order key could otherwise swap between requests, fetching one twice and another not at all. `each_page` is generic over any Contentful CDA list endpoint (entries, content types, ...), since `Contentful::Array#next_page` dispatches by the resource's own type.
 
 ### Content type conventions
 
