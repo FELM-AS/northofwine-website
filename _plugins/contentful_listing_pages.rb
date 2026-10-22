@@ -170,11 +170,12 @@ module ContentfulJekyll
 
     # Æ/Ø/Å go after Z, in that order (ä/ö too, as in Norwegian
     # dictionaries); every other accented letter sorts as its base letter
-    # (é -> e, ü -> u), and case is ignored.
+    # (é -> e, ü -> u), and case is ignored. NFC first, so a decomposed
+    # "Å" (A + combining ring, e.g. pasted from macOS) matches too.
     NB_LAST_LETTERS = { "æ" => "{", "ä" => "{", "ø" => "|", "ö" => "|", "å" => "}" }.freeze
 
     def nb_sort_key(value)
-      value.to_s.downcase
+      value.to_s.unicode_normalize(:nfc).downcase
         .gsub(/[æäøöå]/, NB_LAST_LETTERS)
         .unicode_normalize(:nfd).gsub(/\p{Mn}/, "")
     end
