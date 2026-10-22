@@ -1,6 +1,71 @@
-require "cgi"
 require "contentful"
+require "digest"
+require "kramdown"
+require "kramdown-parser-gfm"
 require_relative "contentful_rich_text"
+
+module Kramdown
+  module Parser
+    # GFM for editor text: raw HTML ("<b>", "<!-- -->") and {::...}
+    # extensions render as literal text, while Markdown that uses "<"/">"
+    # (autolinks, blockquotes) still works. The parsed tree keeps only
+    # link/image attributes with safe URLs, so {: ...}/{#id} syntax can't
+    # add event handlers, ids or classes.
+    class NoHtmlGFM < GFM
+      ATTRIBUTES = %w[href src alt title].freeze
+      URL_SCHEMES = %w[http https mailto tel].freeze
+
+      def initialize(source, options)
+        super
+        @block_parsers -= [:block_extensions]
+        @span_parsers -= [:span_extensions]
+      end
+
+      def parse
+        super
+        sanitize(@root)
+        @footnotes.each_value { |footnote| sanitize(footnote[:content]) }
+        @root.options[:abbrev_attr].each_value { |attr| sanitize_attr(attr) }
+      end
+
+      protected
+
+      # Kept registered rather than removed: the table parser calls
+      # :span_html by name.
+      def parse_block_html
+        false
+      end
+
+      def parse_span_html
+        add_text(@src.getch)
+      end
+
+      private
+
+      def sanitize(el)
+        sanitize_attr(el.attr)
+        # Footnote ids are "fn:<name>"; prefixed per text so two
+        # descriptions on one page don't share them.
+        el.options[:name] = "#{footnote_prefix}-#{el.options[:name]}" if el.type == :footnote
+        el.children.each { |child| sanitize(child) }
+      end
+
+      def sanitize_attr(attr)
+        attr.select! { |name, value| ATTRIBUTES.include?(name) && (!%w[href src].include?(name) || safe_url?(value)) }
+      end
+
+      # Browsers ignore control characters and whitespace in a URL's scheme.
+      def safe_url?(url)
+        scheme = url.gsub(/[\x00-\x20]/, "")[/\A([a-z][a-z0-9+.-]*):/i, 1]
+        scheme.nil? || URL_SCHEMES.include?(scheme.downcase)
+      end
+
+      def footnote_prefix
+        @footnote_prefix ||= Digest::SHA1.hexdigest(source)[0, 8]
+      end
+    end
+  end
+end
 
 module ContentfulJekyll
   # Turns a Contentful::Entry into Jekyll-usable data: a flattened field
@@ -25,8 +90,8 @@ module ContentfulJekyll
 
     # value: a Rich Text document (Hash), a plain/Markdown string, or nil --
     # rendered here, since Jekyll doesn't convert generated index.html pages.
-    # A plain string is HTML-escaped first, so an editor's "<"/"&" renders
-    # literally and only Markdown syntax is interpreted.
+    # A plain string is Markdown without raw HTML (Kramdown::Parser::NoHtmlGFM),
+    # so an editor's "<b>" renders literally.
     def render_body(value)
       case value
       when Hash
@@ -34,7 +99,7 @@ module ContentfulJekyll
       when nil
         ""
       else
-        markdown_converter.convert(CGI.escapeHTML(value.to_s))
+        markdown_converter.convert(value.to_s.unicode_normalize(:nfc))
       end
     end
 
@@ -97,8 +162,10 @@ module ContentfulJekyll
         value.map { |item| serialize_field(item, depth) }
       when String
         # Normalized once here for every string field, rather than left
-        # to each template (editors do leave stray leading spaces).
-        value.strip
+        # to each template (editors do leave stray leading spaces). NFC,
+        # so a decomposed "Å" (A + combining ring, as pasted from macOS)
+        # sorts, groups and slugifies like the precomposed one.
+        value.strip.unicode_normalize(:nfc)
       else
         value
       end
@@ -141,8 +208,14 @@ module ContentfulJekyll
       @rich_text_renderer ||= RichTextRenderer::Renderer.new(RICH_TEXT_MAPPINGS.merge(display_fields: @display_fields))
     end
 
+    # Jekyll's own kramdown converter, so the site's Markdown settings apply,
+    # with NoHtmlGFM as parser and no heading ids (several descriptions
+    # can share a page).
     def markdown_converter
-      @markdown_converter ||= @site.find_converter_instance(Jekyll::Converters::Markdown)
+      @markdown_converter ||= begin
+        kramdown = (@site.config["kramdown"] || {}).merge("input" => "NoHtmlGFM", "auto_ids" => false)
+        Jekyll::Converters::Markdown::KramdownParser.new(@site.config.merge("kramdown" => kramdown))
+      end
     end
   end
 end

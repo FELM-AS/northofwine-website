@@ -41,9 +41,11 @@ contentful_locales:
 # contentful_entry_depth: 2
 
 # A single line break in a Markdown description becomes a <br>, as
-# editors expect from Contentful's plain Text fields.
+# editors expect from Contentful's plain Text fields. Quotes are
+# Norwegian: «» outside, ‘’ inside.
 kramdown:
   hard_wrap: true
+  smart_quotes: lsquo,rsquo,laquo,raquo
 
 exclude:
   - README.md

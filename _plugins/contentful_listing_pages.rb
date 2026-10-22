@@ -191,7 +191,8 @@ module ContentfulJekyll
 
     # Æ/Ø/Å go after Z, in that order (ä/ö too, as in Norwegian
     # dictionaries); every other accented letter sorts as its base letter
-    # (é -> e, ü -> u), and case is ignored.
+    # (é -> e, ü -> u), and case is ignored. Values are already NFC
+    # (EntrySerializer#serialize_field).
     NB_LAST_LETTERS = { "æ" => "{", "ä" => "{", "ø" => "|", "ö" => "|", "å" => "}" }.freeze
 
     def nb_sort_key(value)
