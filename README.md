@@ -1,82 +1,77 @@
 # northofwine.no
 
-The website for [North of Wine AS](https://northofwine.no), a Norwegian wine importer based in Trondheim. Content (products, manufacturers, people) is authored and edited in Contentful, fetched at build time, and rendered by Jekyll into a static site deployed to GitHub Pages via GitHub Actions.
+The website for [North of Wine AS](https://northofwine.no), a Norwegian wine importer based in Trondheim. Products, producers and people are edited in Contentful, fetched at build time, and rendered by Jekyll into a static site that GitHub Actions deploys to GitHub Pages.
 
-**Status:** live at [northofwine.no](https://northofwine.no), deployed from this repo.
-
-Originally scaffolded from the `github-pages-contentful` template's Contentful → Jekyll → GitHub Pages architecture, but this repo is no longer a template — it's the concrete site for one company. See [`planning/Plan.md`](planning/Plan.md) for the full design/requirements spec this was built against, [`planning/Plan-Issues.md`](planning/Plan-Issues.md) for the implementation breakdown, [`planning/Contentful-Content-Model.md`](planning/Contentful-Content-Model.md) for the exact Contentful fields, and [`CLAUDE.md`](CLAUDE.md) for how the underlying Contentful→Jekyll build pipeline works internally.
-
-## Features
-
-**Pages**, all built from Contentful content except Hjem/Om oss (hand-authored) and 404:
-
-- **Hjem** (`/`) — home page; sidebar doubles as the site nav here instead of a header.
-- **Utvalg** (`/utvalg/`) — the product catalog: an unfiltered listing plus one page per wine type (`productTypeName`/`webProductTypeName`, e.g. `/utvalg/rodvin/`) and one page per product (grape composition, sensory ratings as native `<meter>` gauges, food pairing, alcohol/volume/SKU).
-- **Produsenter** (`/produsenter/`) — the manufacturer listing plus one page per country of origin (all 13 enum values get a page even with zero current manufacturers, so a filter link never 404s).
-- **Om oss** (`/omoss/`) — company text plus the People roster.
-- **404** — a custom not-found page instead of GitHub's own default.
-
-**Content & formatting**
-
-- Product/Manufacturer/Person entries are fetched straight from Contentful at build time (see [`planning/Contentful-Content-Model.md`](planning/Contentful-Content-Model.md) for the field reference) — there's no local copy to keep in sync.
-- Prices, alcohol %, volume, and sensory scores follow Norwegian numeric convention (comma decimals, `kr` suffix on prices).
-- Product/manufacturer names get a `lang` attribute derived from the manufacturer's own country (via `_data/countries.yml`), for correct hyphenation and screen-reader pronunciation.
-- Internationalization groundwork is in place (locale-aware URLs, `site.data` keys, and generators) even though only Norwegian (`nb-NO`) is configured today — adding a second locale is a one-line `_config.yml` change, not a rebuild, once that locale exists in Contentful's own Settings → Locales (the CDA hard-fails with "Unknown locale" otherwise).
-
-**Resilience & accessibility**
-
-- Every image goes through a two-stage client-side fallback: a failed resize retries the original asset, and a fully broken/missing asset falls back to a generic placeholder — see `assets/js/image-fallback.js`.
-- Alt text is required and set from Contentful where available (else the item's name); a product card's image falls back to `alt=""` (decorative) instead, since the card's heading already names the product; the header's menu overlay is a native `<dialog>` (full keyboard support — focus trapping, Escape-to-close — for free).
-- The build never fails on missing content fields — Liquid just renders an absent field as empty. An entry missing its `slug` specifically is skipped with a build warning instead of being built at a broken URL.
-
-**Fonts** — DM Sans and DM Mono are self-hosted (`assets/fonts/`, `_sass/_fonts.scss`) rather than loaded from Google's CDN at request time, avoiding an unnecessary third-party request/IP transfer. DM Mono is currently unused, reserved for a later design decision.
-
-**SEO** — every page gets a canonical link, a meta description, and Open Graph/Twitter Card tags automatically (`_includes/seo.html`), plus a hand-rolled `sitemap.xml`/`robots.txt` that stay correct as content is added or removed, with no extra config.
-
-**Analytics** — [GoatCounter](https://www.goatcounter.com/) (free, cookie-less, no consent banner needed) is wired in but inactive until `_config.yml`'s `goatcounter_code` is set to a real account's site code.
-
-**CI** — every push runs `html-proofer` against the built site (`.github/workflows/deploy.yml`) to catch broken internal/external links before they ship, gating the deploy.
+This README is for developers and operators: local setup, how content gets from Contentful to the live site, deploying, and keeping the site running. For what the site does, see [FEATURES.md](FEATURES.md). For how the build works internally, see [CLAUDE.md](CLAUDE.md). For the Contentful fields, see [Contentful-Content-Model.md](Contentful-Content-Model.md).
 
 ## Setup
 
 1. Install dependencies: `bundle install`
-2. Copy `.env.example` to `.env` and fill in your Contentful credentials (in Contentful: Settings → API keys → add or open an API key for a Content Delivery API token; the space ID is on the same page):
+2. Copy `.env.example` to `.env` and fill in the Contentful credentials. In Contentful, go to Settings → API keys and open or add a key; it shows the space ID and the Content Delivery API token.
    ```
    CONTENTFUL_SPACE_ID=
    CONTENTFUL_ACCESS_TOKEN=
    CONTENTFUL_ENVIRONMENT=master
    ```
-3. `bundle exec jekyll serve` — local dev server at `http://localhost:4000`.
+3. `bundle exec jekyll serve` starts a local server at `http://localhost:4000`.
 
-All three are required. Without a `.env`, the build still succeeds — it just generates zero Contentful-backed pages, logging a warning instead of failing. A production build (`JEKYLL_ENV=production`, as in CI) fails instead, so missing Actions secrets can't deploy an empty site.
+All three variables are required. Without them a local build still succeeds, but with no products, producers or people (a warning says so). A production build (`JEKYLL_ENV=production`, as in CI) fails instead, so missing secrets can't deploy an empty site.
+
+There's no test suite. Check a change with `bundle exec jekyll build --trace` and look at the HTML in `_site/`. If the change touches links, also run the link check CI runs:
+
+```
+bundle exec htmlproofer ./_site --checks Links,Scripts --ignore-urls "/^https:\/\/northofwine\.no/" --no-enforce-https --only-4xx --ignore-status-codes 429 --assume-extension ""
+```
 
 ### Previewing draft content
 
-Set `CONTENTFUL_PREVIEW=true` and `CONTENTFUL_PREVIEW_ACCESS_TOKEN` (a separate token from your CDA `CONTENTFUL_ACCESS_TOKEN`, issued in Contentful under the same space) to build against draft/unpublished content instead of only published entries. **Don't** set these in the production deploy workflow's secrets — doing so publishes draft content to the live public site.
+Set `CONTENTFUL_PREVIEW=true` and `CONTENTFUL_PREVIEW_ACCESS_TOKEN` (the Preview API token, on the same API key page in Contentful) to build with draft content as well as published. Never add these to the repo's Actions secrets: the deploy would publish drafts to the live site.
 
 ## Editing content
 
-Products, manufacturers, and people are all edited directly in Contentful — there are no content files in this repo to touch. Publishing an entry doesn't update the live site by itself yet; see "Deploying" below.
+Products, producers and people are edited in Contentful. There are no content files in this repo. Field reference and editing conventions: [Contentful-Content-Model.md](Contentful-Content-Model.md).
 
-- **Adding/editing a product**: fill in the `product` content type's fields (see [`planning/Contentful-Content-Model.md`](planning/Contentful-Content-Model.md)) and publish. It appears at `/utvalg/<slug>/`, and on the Utvalg root plus its `productTypeName`/`webProductTypeName` filter pages, automatically.
-- **Adding/editing a manufacturer or person**: same idea — manufacturers appear on `/produsenter/` and their own country's filter page; people appear on `/omoss/`.
-- **Country → language**: `_data/countries.yml` maps each manufacturer country to a language code for hyphenation/`lang` attributes. Produsenter's country filters are built from the countries manufacturers actually have in Contentful, so a new country gets its filter page automatically, but it also needs an entry in `countries.yml` for the `lang` attribute (a build warning names the manufacturer(s) if it's missing).
+- **Product:** appears at `/utvalg/<slug>/`, on the Utvalg page, and on the filter pages for its `productTypeName` and `webProductTypeName`.
+- **Producer:** appears on `/produsenter/` and on its country's page. A country not yet in `_data/countries.yml` needs a language code added there (the build warns).
+- **Person:** appears on `/omoss/`. The entry marked *Company Profile* is the page's company text instead.
+- **Site text** (Hjem's intro, labels, the footer warning) is in `_data/i18n/nb-NO.yml`. Contact details and social links are in `_data/company.yml`. Changing these needs a commit.
+
+**Publishing in Contentful does not update the site yet.** The Contentful webhook isn't set up ([#3](https://github.com/FELM-AS/northofwine-website/issues/3)). After editing content, start a deploy by hand (see below).
 
 ## Deploying
 
-- **Push to `main`** always builds and deploys (`.github/workflows/deploy.yml`).
-- **Contentful publish** can also trigger a build+deploy automatically, once a webhook is configured in Contentful's own settings — see CLAUDE.md's "Contentful publish trigger" section for the exact setup (a GitHub PAT, the webhook URL/payload). To pause this during a bulk content edit, set the `CONTENTFUL_AUTOBUILD_DISABLED` repo variable to `true` (`gh variable set CONTENTFUL_AUTOBUILD_DISABLED --body true`); unset it to resume.
-- A manual run is always available too: **Actions → Deploy to GitHub Pages → Run workflow**.
+`.github/workflows/deploy.yml` builds the site, checks every link, and deploys to GitHub Pages. A broken link or a build error stops the deploy, and the live site stays as it was. There is no staging site: every deploy goes straight to production.
 
-Every build also runs the link checker used in CI; run it locally after `bundle exec jekyll build` if you've touched anything link-related:
+A deploy runs:
 
-```
-bundle exec htmlproofer ./_site --checks Links,Scripts --ignore-urls "/^https:\/\/northofwine\.no/" --assume-extension "" --no-enforce-https --only-4xx --ignore-status-codes 429
-```
+- on every push to `main`;
+- by hand: **Actions → Deploy to GitHub Pages → Run workflow** (or `gh workflow run deploy.yml`);
+- on Contentful publish, once the webhook is set up. The steps are in CLAUDE.md's "Contentful publish trigger" section. Once it exists, set the repo variable `CONTENTFUL_AUTOBUILD_DISABLED` to `true` to pause those deploys during a bulk edit, and unset it to resume.
 
-## Further reading
+## Operations
 
-- [`planning/Plan.md`](planning/Plan.md) — the full design spec (pages, components, formatting, i18n, accessibility, SEO, analytics) this site was built against.
-- [`planning/Plan-Issues.md`](planning/Plan-Issues.md) — that plan broken into individual issues, for historical/implementation-order reference (check the repo's actual issue tracker for current status, not this document).
-- [`planning/Contentful-Content-Model.md`](planning/Contentful-Content-Model.md) — field-by-field reference for the `product`, `manufacturer`, and `person` content types.
-- [`CLAUDE.md`](CLAUDE.md) — how the Contentful → Jekyll build pipeline itself works (the generator plugins, locale handling, field serialization, SEO internals) — the deeper "how" behind the features described above.
+### Secrets and settings
+
+| What | Where |
+| --- | --- |
+| `CONTENTFUL_SPACE_ID`, `CONTENTFUL_ACCESS_TOKEN`, `CONTENTFUL_ENVIRONMENT` | Repo Actions secrets. To rotate the token: create a new Content Delivery API key in Contentful, update the secret, run a deploy, then delete the old key. |
+| `CONTENTFUL_AUTOBUILD_DISABLED` | Repo Actions variable (only matters once the webhook exists). |
+| Webhook token (once set up) | A fine-grained GitHub token stored in the Contentful webhook's headers, not in this repo. Rotate it in both places. |
+| Analytics | GoatCounter site code `northofwine` (`goatcounter_code` in `_config.yml`). Dashboard: https://northofwine.goatcounter.com |
+
+### Domain
+
+- **DNS:** hosted at Domeneshop. `northofwine.no` has A records for GitHub Pages' four addresses (185.199.108–111.153). `www` is a CNAME to `felm-as.github.io`.
+- **GitHub Pages:** in the repo's Settings → Pages, the source is "GitHub Actions", the custom domain is `northofwine.no`, and "Enforce HTTPS" is on.
+- **`_config.yml`:** `url` must stay `https://northofwine.no`. Canonical links, share previews and the sitemap are built from it.
+
+### When a deploy fails
+
+Open the failed run in the Actions tab. The error names the cause:
+
+- **"… not set, refusing to build production without content":** an Actions secret is missing or empty. Add it back and re-run.
+- **"… both produce "/utvalg/…/"":** two entries (or an entry and a filter value) land on the same URL. Change one slug in Contentful and re-run.
+- **html-proofer lists broken links:** fix the link (in Contentful, `_data/`, or a template). If an external site was down, re-run later.
+- **"i18n: missing key …":** a template uses a text key that isn't in `_data/i18n/nb-NO.yml`. Add it.
+
+To undo a bad code change, revert the commit on `main`; the push deploys the previous version. To undo bad content, fix or unpublish the entry in Contentful and run a deploy.
