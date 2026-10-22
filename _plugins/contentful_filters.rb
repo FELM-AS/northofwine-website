@@ -25,13 +25,13 @@ module ContentfulJekyll
     end
 
     # jsonify for an inline <script> (structured-data.html): "<" as
-    # <, so editor content can't close the <script>.
+    # \u003c, so editor content can't close the <script>.
     def json_script(value)
       JSON.generate(value).gsub("<", "\\u003c")
     end
 
-    # Norwegian numeric convention (Plan.md's Formatting section): comma
-    # decimal separator instead of a period.
+    # Norwegian numeric convention: comma decimal separator instead of a
+    # period.
     #
     # `decimals`, when given, formats to that many fixed decimal places
     # first (e.g. `550 | nb_number: 2` -> "550,00"). Without it, the
@@ -45,8 +45,8 @@ module ContentfulJekyll
     end
 
     # Manufacturer `country` -> language code (_data/countries.yml), for
-    # the `lang` attribute on product/manufacturer names (Plan.md's
-    # Formatting/Hyphenation sections). nil if unknown.
+    # the `lang` attribute on product/manufacturer names (hyphenation,
+    # pronunciation). nil if unknown.
     def country_lang(country)
       @context.registers[:site].data.dig("countries", country)
     end

@@ -1,6 +1,6 @@
-// Self-hosted DM Sans/DM Mono (Plan.md: no third-party font CDN, for
-// GDPR). Latin subset from Google Fonts, OFL-licensed (assets/fonts/);
-// re-fetch from fonts.googleapis.com/css2 to add a weight or style.
+// Self-hosted DM Sans/DM Mono (no third-party font CDN, for GDPR).
+// Latin subset from Google Fonts, OFL-licensed (assets/fonts/); re-fetch
+// from fonts.googleapis.com/css2 to add a weight or style.
 // url()s are relative to the compiled assets/css/main.css.
 @mixin dm-face($family, $file, $weight, $style: normal) {
   @font-face {
