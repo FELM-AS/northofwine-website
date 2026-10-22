@@ -48,7 +48,7 @@ Originally scaffolded from the `github-pages-contentful` template's Contentful �
    ```
 3. `bundle exec jekyll serve` — local dev server at `http://localhost:4000`.
 
-Without a `.env`, the build still succeeds — it just generates zero Contentful-backed pages, logging a warning instead of failing. A production build (`JEKYLL_ENV=production`, as in CI) fails instead, so missing Actions secrets can't deploy an empty site.
+All three are required. Without a `.env`, the build still succeeds — it just generates zero Contentful-backed pages, logging a warning instead of failing. A production build (`JEKYLL_ENV=production`, as in CI) fails instead, so missing Actions secrets can't deploy an empty site.
 
 ### Previewing draft content
 

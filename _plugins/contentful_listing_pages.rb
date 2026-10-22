@@ -160,7 +160,14 @@ module ContentfulJekyll
         grouped.delete(nil)
 
         grouped.keys.sort_by { |value| nb_sort_key(value) }.each do |value|
-          group = groups[filter_slug(value)] ||= { value: value, label: "the #{field} filter \"#{value}\"", items: [] }
+          slug = filter_slug(value)
+          # e.g. "–", or a non-Latin script: its page would take the root's URL.
+          if slug.empty?
+            Jekyll.logger.warn LOG_TAG, "#{field} \"#{value}\" has no letters or digits to make a URL from -- skipping its filter page"
+            next
+          end
+
+          group = groups[slug] ||= { value: value, label: "the #{field} filter \"#{value}\"", items: [] }
           group[:items].concat(grouped[value])
         end
       end
@@ -216,7 +223,7 @@ module ContentfulJekyll
 
     # value: nil for the root "all items" page, else the filter value
     # (e.g. "Rødvin"), transliterated to an ASCII slug (mode: "latin").
-    # label: what's building this page, named in a URL collision warning.
+    # label: what's building this page, named in a URL collision error.
     def build_page(site, value, items, label, context)
       slug = filter_slug(value) if value
       page = Jekyll::PageWithoutAFile.new(site, site.source, context.locale.path_for(context.dir, slug), "index.html")

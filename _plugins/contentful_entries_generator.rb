@@ -27,7 +27,7 @@ module ContentfulJekyll
       if client.nil?
         missing = ContentfulClient.missing_vars.join(", ")
         # A production build without content would deploy an empty catalog.
-        raise Jekyll::Errors::FatalException, "Contentful: #{missing} not set, refusing to build production without content" if Jekyll.env == "production"
+        raise Jekyll::Errors::FatalException, "#{LOG_TAG} #{missing} not set, refusing to build production without content" if Jekyll.env == "production"
 
         Jekyll.logger.warn LOG_TAG, "#{missing} not set, skipping content fetch"
         return
@@ -62,7 +62,7 @@ module ContentfulJekyll
     def fetch_display_fields(client)
       fields = {}
 
-      each_page(client.content_types(limit: MAX_PAGE_SIZE), client) do |content_type|
+      each_page(client.content_types(order: "sys.id", limit: MAX_PAGE_SIZE), client) do |content_type|
         next if content_type.display_field.nil?
 
         fields[content_type.id] = Contentful::Support.snakify(content_type.display_field)
@@ -95,9 +95,12 @@ module ContentfulJekyll
 
     # Pages are fetched with `skip`, so the order must be unique: entries
     # that tie could otherwise swap between requests, fetching one twice
-    # and another not at all. sys.id breaks every tie.
+    # and another not at all. sys.id breaks every tie. Keys are stripped,
+    # since the CDA rejects a space after a comma.
     def unique_order(order)
-      order.split(",").any? { |key| key.delete_prefix("-") == "sys.id" } ? order : "#{order},sys.id"
+      keys = order.split(",").map(&:strip).reject(&:empty?)
+      keys << "sys.id" unless keys.any? { |key| key.delete_prefix("-") == "sys.id" }
+      keys.join(",")
     end
 
     def fetch_collection(site, client, collection, locale, serializer)

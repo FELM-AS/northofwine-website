@@ -24,14 +24,15 @@ module ContentfulClient
     Contentful::Client.new(
       space: env("CONTENTFUL_SPACE_ID"),
       access_token: env(token_var),
-      environment: env("CONTENTFUL_ENVIRONMENT") || "master",
+      environment: env("CONTENTFUL_ENVIRONMENT"),
       api_url: preview? ? "preview.contentful.com" : "cdn.contentful.com"
     )
   end
 
-  # The required credential env vars that are unset or empty.
+  # The required env vars that are unset or empty. The environment has no
+  # default, so a lost secret can't silently build from `master`.
   def self.missing_vars
-    ["CONTENTFUL_SPACE_ID", token_var].select { |name| env(name).nil? }
+    ["CONTENTFUL_SPACE_ID", token_var, "CONTENTFUL_ENVIRONMENT"].select { |name| env(name).nil? }
   end
 
   def self.env(name)
