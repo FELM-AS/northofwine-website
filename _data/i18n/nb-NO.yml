@@ -46,6 +46,7 @@ sections:
     menu_label: Om oss
     section_heading: Om oss
     root_description: "Om North of Wine: selskap, lagmedlemmer og verdier."
+    empty: Det er ikke lagt inn noe om oss ennå.
 
 product:
   method: Metode

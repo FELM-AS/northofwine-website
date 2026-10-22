@@ -97,12 +97,11 @@ dialog#menu-dialog{
 
     form{
         display: flex;
-        justify-content: space-between;
-    }
-    nav{
-        display: flex;
         flex-direction: column;
         align-items: flex-end;
+    }
+    nav{
+        padding: 0;
     }
     nav ul{
         place-items: flex-end;
@@ -118,23 +117,23 @@ dialog#menu-dialog{
     }
 }
 
-nav, .filter{
+nav, .filter, .menu{
     padding: var(--size-padding-container);
+}
 
-    ul{
-        @extend %unstyled-list;
-        flex-direction: column;
-    }
+nav ul{
+    @extend %unstyled-list;
+    flex-direction: column;
+}
 
-    &.menu{
-        aspect-ratio: 1 / 1;
-        width: 100%;
-        background-image: url(../images/texture.png);
-        background-repeat: no-repeat;
-        background-position: bottom right;
-        background-size: cover;
-        box-sizing: border-box;
-    }
+.menu{
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    background-image: url(../images/texture.png);
+    background-repeat: no-repeat;
+    background-position: bottom right;
+    background-size: cover;
+    box-sizing: border-box;
 }
 
 .hero {
@@ -152,7 +151,7 @@ nav, .filter{
 }
 
 aside{
-    nav, .filter, img{
+    .filter, img{
         position: sticky;
         top: calc(
             var(--size-padding-container) +
