@@ -25,7 +25,11 @@ module ContentfulJekyll
       client = ContentfulClient.build
 
       if client.nil?
-        Jekyll.logger.warn LOG_TAG, "CONTENTFUL_SPACE_ID / #{ContentfulClient.token_var} not set, skipping content fetch"
+        missing = ContentfulClient.missing_vars.join(", ")
+        # A production build without content would deploy an empty catalog.
+        raise Jekyll::Errors::FatalException, "Contentful: #{missing} not set, refusing to build production without content" if Jekyll.env == "production"
+
+        Jekyll.logger.warn LOG_TAG, "#{missing} not set, skipping content fetch"
         return
       end
 

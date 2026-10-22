@@ -46,7 +46,7 @@ The site pulls its content from Contentful at **build time** rather than storing
 
 ### Connecting to Contentful
 
-`contentful_client.rb` builds a `Contentful::Client` from `CONTENTFUL_SPACE_ID` / `CONTENTFUL_ACCESS_TOKEN` / `CONTENTFUL_ENVIRONMENT` env vars, returning `nil` if credentials are missing — local builds without a `.env` still succeed, just with no generated pages (`EntriesGenerator` logs a warning and returns early).
+`contentful_client.rb` builds a `Contentful::Client` from `CONTENTFUL_SPACE_ID` / `CONTENTFUL_ACCESS_TOKEN` / `CONTENTFUL_ENVIRONMENT` env vars, returning `nil` if credentials are missing — local builds without a `.env` still succeed, just with no generated pages (`EntriesGenerator` logs a warning and returns early). A production build (`JEKYLL_ENV=production`, as CI sets) fails instead, naming the missing variable, so a lost secret can't deploy an empty catalog.
 
 Set `CONTENTFUL_PREVIEW=true` to build against draft content instead of only published entries: the client then reads `CONTENTFUL_PREVIEW_ACCESS_TOKEN` (a separate token from the CDA `CONTENTFUL_ACCESS_TOKEN`, issued separately in Contentful) and points at `preview.contentful.com` instead of `cdn.contentful.com`.
 
@@ -186,7 +186,7 @@ Most sites built from this template won't have blog/news-shaped content anyway (
 
 GitHub Pages' built-in Jekyll build runs in "safe mode," which disables custom plugins and network access — incompatible with a generator that calls the Contentful API. Because of this, the site is **not** deployed via GitHub's automatic Jekyll build; instead `.github/workflows/deploy.yml` runs `bundle exec jekyll build` directly (full plugin support) and publishes `_site/` via `actions/deploy-pages`. The GitHub repo's Pages source must be set to "GitHub Actions", not "Deploy from a branch".
 
-Contentful credentials must be present both locally (`.env`, gitignored) and in CI (repo Actions secrets: `CONTENTFUL_SPACE_ID`, `CONTENTFUL_ACCESS_TOKEN`, `CONTENTFUL_ENVIRONMENT`) — the generator silently produces zero generated pages if they're absent rather than failing the build.
+Contentful credentials must be present both locally (`.env`, gitignored) and in CI (repo Actions secrets: `CONTENTFUL_SPACE_ID`, `CONTENTFUL_ACCESS_TOKEN`, `CONTENTFUL_ENVIRONMENT`) — without them a local build produces zero generated pages (with a warning), and a CI build fails before deploy (see "Connecting to Contentful").
 
 ### Contentful publish trigger (manual setup, not in this repo)
 
