@@ -106,9 +106,7 @@ layout: default
       {% endif %}
       {% if page.grape_desc.size > 0 %}
         <dt>{{ "product.grapes" | t }}</dt>
-        {% assign grape_pair_count = page.grape_desc.size %}
-        {% if page.grape_pct.size < grape_pair_count %}{% assign grape_pair_count = page.grape_pct.size %}{% endif %}
-        {% for grape in page.grape_desc limit: grape_pair_count %}
+        {% for grape in page.grape_desc %}
           {% assign grape_pct = page.grape_pct[forloop.index0] %}
           <dd>{% if grape_pct.size > 0 %}{{ grape_pct | nb_number | escape }}% {% endif %}{{ grape | escape }}</dd>
         {% endfor %}
