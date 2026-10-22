@@ -4,7 +4,8 @@
   price above 0 (0 means "not priced yet", not free); sales_price_horeca
   is trade pricing and never shown. The whole card is clickable via the
   arrow's ::after "stretched link" (_sass/_components.scss), so no <a>
-  wraps the card's own buttons.
+  wraps the card's own buttons. The image has empty alt text unless the
+  asset has a description: the heading already names the product.
 
   Params:
     product - required, a product page (`page` on a product page, or an
@@ -16,7 +17,7 @@
 {% assign more_label = "product.see" | t: title: product.title %}
 
 <article class="card product">
-  {% include contentful-image.html asset=product.image width=240 fallback_alt=product.title lazy=include.lazy %}
+  {% include contentful-image.html asset=product.image width=240 lazy=include.lazy %}
   <div class="content">
     <p class="metadata">
         {{ product.product_type_name | escape }}<br>
