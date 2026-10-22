@@ -49,6 +49,7 @@ kramdown:
 
 exclude:
   - README.md
+  - FEATURES.md
   - CLAUDE.md
+  - Contentful-Content-Model.md
   - .env.example
-  - planning/

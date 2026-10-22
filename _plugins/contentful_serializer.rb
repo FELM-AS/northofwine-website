@@ -133,10 +133,11 @@ module ContentfulJekyll
       entry_header(entry).merge(flatten_fields(entry, 0, skip: skip)).merge("updated_at" => entry.sys[:updated_at]&.to_time)
     end
 
-    # Flattens a linked entry like #flatten_fields, so `page.author.title`
-    # works directly. Memoized per (entry id, depth), since Contentful's
-    # `includes` is already deduplicated. Frozen: the Hash is shared by
-    # reference across occurrences and nothing downstream should mutate it.
+    # Flattens a linked entry like #flatten_fields, so
+    # `page.manufacturer.title` works directly. Memoized per (entry id,
+    # depth), since Contentful's `includes` is already deduplicated.
+    # Frozen: the Hash is shared by reference across occurrences and
+    # nothing downstream should mutate it.
     def serialize_entry(entry, depth)
       @entry_cache[[entry.sys[:id], depth]] ||= entry_header(entry).merge(flatten_fields(entry, depth + 1)).freeze
     end
