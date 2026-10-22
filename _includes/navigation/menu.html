@@ -1,11 +1,12 @@
 {% comment %}
-  Menu dialog contents: close button, a Hjem link, and the shared
-  menu-items.html links.
+  Menu dialog contents: close button, then a nav with a Hjem link and the
+  shared menu-items.html links. The close button sits outside the nav, as
+  it isn't a navigation item.
 {% endcomment %}
-<nav class="menu inverted">
+{% assign close_label = "menu.close" | t %}
+{% include icon-button.html type='submit' aria_label=close_label icon='ui/x' %}
+<nav>
   <ul>
-    {% assign close_label = "menu.close" | t %}
-    {% include icon-button.html type='submit' aria_label=close_label icon='ui/x' %}
     <li><a class="button" href="{{ '/' | relative_url }}">{{ site.title }}</a></li>
     {% include navigation/menu-items.html %}
   </ul>

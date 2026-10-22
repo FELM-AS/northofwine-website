@@ -1,10 +1,14 @@
 {% comment %}
   Listing sidebar: the section heading and a link to every listing page in
   the section (page.siblings, from contentful_listing_pages.rb); button.html
-  marks the current one with aria-current. Om oss has no siblings.
+  marks the current one with aria-current. Om oss has no siblings, so it
+  gets just the heading, in a <div> rather than a navigation landmark.
 {% endcomment %}
-<nav class="filter" aria-label="{{ "navigation.filter" | t }}">
+{% assign tag = "div" %}
+{% if page.siblings.size > 0 %}{% assign tag = "nav" %}{% endif %}
+<{{ tag }} class="filter"{% if tag == "nav" %} aria-label="{{ "navigation.filter" | t }}"{% endif %}>
   <h1>{{ page.section_heading }}</h1>
+  {% if tag == "nav" %}
   <ul>
     {% for sibling in page.siblings %}
     {% assign sibling_label = sibling.root_nav_label | default: sibling.title %}
@@ -17,4 +21,5 @@
     </li>
     {% endfor %}
   </ul>
-</nav>
+  {% endif %}
+</{{ tag }}>

@@ -20,7 +20,8 @@ document.addEventListener(
 
     if (src === img.dataset.original) {
       img.src = PLACEHOLDER;
-      img.alt = {{ "image.unavailable" | t | jsonify }};
+      // A decorative image (alt="") stays decorative.
+      if (img.alt) img.alt = {{ "image.unavailable" | t | jsonify }};
     } else {
       img.src = img.dataset.original;
     }
