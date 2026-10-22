@@ -1,6 +1,23 @@
-require "cgi"
 require "contentful"
+require "kramdown"
+require "kramdown-parser-gfm"
 require_relative "contentful_rich_text"
+
+module Kramdown
+  module Parser
+    # GFM without raw HTML, for editor text: "<b>" renders as literal text,
+    # while Markdown that uses "<"/">" (autolinks, blockquotes) still works.
+    # Also drops kramdown's {: ...} and {::...} syntax, which can add HTML
+    # attributes or pass raw HTML through.
+    class NoHtmlGFM < GFM
+      def initialize(source, options)
+        super
+        @block_parsers -= [:block_html, :block_extensions]
+        @span_parsers -= [:span_html, :span_extensions]
+      end
+    end
+  end
+end
 
 module ContentfulJekyll
   # Turns a Contentful::Entry into Jekyll-usable data: a flattened field
@@ -25,8 +42,8 @@ module ContentfulJekyll
 
     # value: a Rich Text document (Hash), a plain/Markdown string, or nil --
     # rendered here, since Jekyll doesn't convert generated index.html pages.
-    # A plain string is HTML-escaped first, so an editor's "<"/"&" renders
-    # literally and only Markdown syntax is interpreted.
+    # A plain string is Markdown without raw HTML (Kramdown::Parser::NoHtmlGFM),
+    # so an editor's "<b>" renders literally.
     def render_body(value)
       case value
       when Hash
@@ -34,7 +51,7 @@ module ContentfulJekyll
       when nil
         ""
       else
-        markdown_converter.convert(CGI.escapeHTML(value.to_s))
+        Kramdown::Document.new(value.to_s, markdown_options).to_html
       end
     end
 
@@ -141,8 +158,9 @@ module ContentfulJekyll
       @rich_text_renderer ||= RichTextRenderer::Renderer.new(RICH_TEXT_MAPPINGS.merge(display_fields: @display_fields))
     end
 
-    def markdown_converter
-      @markdown_converter ||= @site.find_converter_instance(Jekyll::Converters::Markdown)
+    # The site's kramdown settings (_config.yml), with NoHtmlGFM as parser.
+    def markdown_options
+      @markdown_options ||= (@site.config["kramdown"] || {}).merge("input" => "NoHtmlGFM")
     end
   end
 end
