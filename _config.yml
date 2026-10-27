@@ -31,7 +31,7 @@ contentful_data_collections:
     body_field: description
   - content_type: region
     name: regions
-    body_field: description
+    body_field: summary
 
 # First entry is the primary locale (unprefixed URLs). Each locale also
 # needs a _data/i18n/<code>.yml. Quote a prefix like "no" -- YAML reads a

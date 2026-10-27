@@ -19,6 +19,7 @@ module ContentfulJekyll
   # - page.siblings on every Utvalg/Produsenter listing page: the section's
   #   listing pages, for navigation/filter.html.
   # - page.breadcrumb on every product page: see #link_breadcrumbs.
+  # - page.regions on every product page: see #link_regions.
   # - page.products_by_manufacturer on Produsenter pages: manufacturer id
   #   -> that manufacturer's product pages, for manufacturer-card.html.
   #
@@ -38,11 +39,12 @@ module ContentfulJekyll
       product_collection = find_collection(site.config["contentful_collections"], "product")
       manufacturer_collection = find_collection(site.config["contentful_data_collections"], "manufacturer")
       person_collection = find_collection(site.config["contentful_data_collections"], "person")
+      region_collection = find_collection(site.config["contentful_data_collections"], "region")
 
       # Each pass only sees its own locale's product pages and site.data,
       # so no listing page mixes items across locales.
       ContentfulJekyll.each_locale(site.config["contentful_locales"]) do |locale|
-        products_by_manufacturer = build_product_listing(site, locale, product_collection)
+        products_by_manufacturer = build_product_listing(site, locale, product_collection, region_collection)
         build_manufacturer_listing(site, locale, manufacturer_collection, products_by_manufacturer)
         build_about_page(site, locale, person_collection)
       end
@@ -53,7 +55,7 @@ module ContentfulJekyll
     # Utvalg: root + productTypeName/webProductTypeName filter pages, which
     # share one flat URL namespace (/utvalg/rodvin/, /utvalg/tokaj/).
     # Returns manufacturer id -> that manufacturer's product pages.
-    def build_product_listing(site, locale, collection)
+    def build_product_listing(site, locale, collection, region_collection)
       return {} unless collection
 
       context = section_context(site, locale, collection, "product", "product")
@@ -67,6 +69,7 @@ module ContentfulJekyll
       root = build_page(site, nil, products, "the product root listing", context)
       filter_pages = build_grouped_pages(site, products, %w[product_type_name web_product_type_name], context)
       link_breadcrumbs(root, filter_pages)
+      link_regions(site, products, region_collection)
       add_section(site, [root, *filter_pages])
 
       products.group_by { |page| page.data.dig("manufacturer", "id") }
@@ -143,6 +146,33 @@ module ContentfulJekyll
       root.data["items"].each { |product| product.data["breadcrumb"] = [root] }
       filter_pages.each do |filter_page|
         filter_page.data["items"].each { |product| product.data["breadcrumb"] << filter_page }
+      end
+    end
+
+    # Each product page gets page.data["regions"]: its region, then its
+    # subregion, as { "name", "entry" } for each one with a site.data
+    # region entry that has a summary, for _includes/region.html. Matched
+    # by key ("Italia / Piemonte / Barolo"), so a subregion without a
+    # region can't match. Reads the primary locale's regions.
+    def link_regions(site, products, region_collection)
+      entries = region_collection ? site.data[region_collection["name"]] || [] : []
+      by_key = entries.each_with_object({}) do |entry, result|
+        result[entry["key"]] = entry if item_field(entry, "key") && item_field(entry, "summary")
+      end
+
+      products.each do |product|
+        country, region, sub_region = %w[country region sub_region].map { |field| item_field(product, field) }
+        if sub_region && !region
+          Jekyll.logger.warn LOG_TAG, "product #{product.data["id"]} (#{product.data["title"]}) has subRegion \"#{sub_region}\" but no region -- its subregion summary can't be found"
+        end
+
+        key = country
+        product.data["regions"] = [region, sub_region].each_with_object([]) do |name, result|
+          break result unless key && name
+
+          key = "#{key} / #{name}"
+          result << { "name" => name, "entry" => by_key[key] } if by_key[key]
+        end
       end
     end
 

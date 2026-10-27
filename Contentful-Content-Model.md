@@ -72,7 +72,7 @@ Entry title: `name`. No page of its own: a card on `/produsenter/` and on its co
 | `name` | Navn | Symbol | yes | unique | Card heading, product page producer link |
 | `country` | Land | Symbol | yes | Frankrike, Italia, Tyskland, Østerrike, Spania, Portugal, Ungarn, Chile, Argentina, Australia, New Zealand, USA, Norge, Danmark | Produsenter filter page (only countries some producer has), and the `lang` of the producer's and its wines' names via `_data/countries.yml` |
 | `description` | Beskrivelse | Text (Markdown), localized | yes | | Card |
-| `summary` | Sammendrag | Text, localized | | | |
+| `summary` | Sammendrag | Text (Markdown), localized | | | |
 | `link` | Link | Symbol | | unique; must start with ftp://, http:// or https:// | Card, shown as the bare host name (`https://example.it/en/` → `example.it`), opens in a new tab |
 | `image` | Bilde | Asset | | image | Card |
 | `logo` | Logo | Asset | | image | Card |
@@ -93,13 +93,13 @@ Entry title: `name`. Shown on `/omoss/`.
 
 ## Region (`region`)
 
-Entry title: `name`. One entry per Vinmonopolet region or subregion value our wines carry. No page of its own yet. The entries are loaded from the region description drafts in the Data quality folder by `Claude outputs/Region import/region_import.py`, which matches entries by `key`.
+Entry title: `name`. One entry per Vinmonopolet region or subregion value our wines carry. No page of its own yet. The entries are loaded from the region description drafts in the Data quality folder by an import script kept outside this repo (`Claude outputs/Region import/region_import.py` in that folder), which matches entries by `key`.
 
 | Field ID | Label | Type | Required | Validation | Site |
 |---|---|---|---|---|---|
 | `name` | Navn | Symbol | yes | | |
 | `key` | Nøkkel | Symbol | yes | unique | Matched against the product's `country / region / subRegion`, e.g. `Italia / Piemonte / Barolo` |
-| `summary` | Sammendrag | Text, localized | | | Product page, under the producer, behind the region or subregion name |
+| `summary` | Sammendrag | Text (Markdown), localized | | | Product page, under the producer, behind the region or subregion name |
 | `description` | Beskrivelse | Text (Markdown), localized | | | Not shown yet |
 
 ## Conventions the site relies on

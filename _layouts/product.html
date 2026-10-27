@@ -11,7 +11,8 @@ layout: default
   shows no third rating.
 
   lang on the name and the producer link comes from the manufacturer's
-  country (country_lang).
+  country (country_lang); on the region names, from the product's.
+  page.regions is set by contentful_listing_pages.rb.
 {% endcomment %}
 {% assign product_lang = page.manufacturer.country | country_lang %}
 {% if page.product_type_name == "Rødvin" %}
@@ -35,28 +36,24 @@ layout: default
     </dl>
     {% endif %}
 
-    {% if page.manufacturer.id and page.manufacturer.title %}
+    {% assign has_producer = false %}
+    {% if page.manufacturer.id and page.manufacturer.title %}{% assign has_producer = true %}{% endif %}
+    {% if has_producer or page.regions.size > 0 %}
     <dl>
+      {% if has_producer %}
       <dt>{{ "product.producer" | t }}</dt>
       <dd>
         <a href="{{ site.manufacturer_dir | dir_href | relative_url }}#{{ page.manufacturer.id }}"{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ page.manufacturer.title | escape }}</a>
       </dd>
-      {% assign region_entry = nil %}
-      {% assign sub_region_entry = nil %}
-      {% if page.country.size > 0 and page.region.size > 0 %}
-        {% assign region_key = page.country | append: " / " | append: page.region %}
-        {% assign region_entry = site.data.regions | where: "key", region_key | first %}
-        {% if page.sub_region.size > 0 %}
-          {% assign sub_region_key = region_key | append: " / " | append: page.sub_region %}
-          {% assign sub_region_entry = site.data.regions | where: "key", sub_region_key | first %}
-        {% endif %}
       {% endif %}
-      {% if region_entry.summary.size > 0 or sub_region_entry.summary.size > 0 %}
+      {% if page.regions.size > 0 %}
+      {% assign region_lang = page.country | country_lang %}
       <dt>{{ "product.region" | t }}</dt>
       <dd>
-        {% include region.html name=page.region entry=region_entry %}
-        {% if region_entry.summary.size > 0 and sub_region_entry.summary.size > 0 %}/{% endif %}
-        {% include region.html name=page.sub_region entry=sub_region_entry %}
+        {% for region in page.regions %}
+        {% unless forloop.first %}/{% endunless %}
+        {% include region.html name=region.name entry=region.entry lang=region_lang %}
+        {% endfor %}
       </dd>
       {% endif %}
     </dl>
