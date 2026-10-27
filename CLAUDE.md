@@ -103,7 +103,7 @@ No field in the current content model is Rich Text: every description is a Markd
 
 ### Homepage & navigation
 
-**`index.html`** (Hjem) is a static page with `home: true` in its front matter: the company name, intro text and a link to Utvalg, all from the i18n dictionary. That flag makes `_layouts/default.html` drop the header and render the menu in the sidebar instead (Hjem has no header; the sidebar is the nav). The layout reads it from the page's data, never from `page.url`. The same flag puts `class="hero"` on `<body>`, which `_sass/_layout.scss` turns into two columns: the menu on `assets/images/texture.png` with the `domen.svg` illustration, and the intro beside it. The `<h1>` is `site.title` with `" of "` replaced by `<br>of&nbsp;`, so the line break and non-breaking space hold. A title without " of " renders as plain text.
+**`index.html`** (Hjem) is a static page with `home: true` in its front matter: the company name, intro text and a link to Utvalg, all from the i18n dictionary. That flag makes `_layouts/default.html` drop the header and render the menu in the sidebar instead (Hjem has no header; the sidebar is the nav). The layout reads it from the page's data, never from `page.url`. The same flag puts `class="hero"` on `<body>`, which `_sass/_layout.scss` turns into two columns: the menu and the intro beside it. `_sass/_components.scss` puts `assets/images/texture.png` and the `domen.svg` illustration behind the menu. The `<h1>` is `site.title` with `" of "` replaced by `<br>of&nbsp;`, so the line break and non-breaking space hold. A title without " of " renders as plain text.
 
 Every other page gets `_includes/header.html`, whose menu button opens the same links in a native `<dialog>` (`assets/js/menu.js`). The links (`navigation/menu-items.html`) use `site.product_dir`/`manufacturer_dir`/`about_dir`, set by the listing generator.
 
@@ -192,7 +192,7 @@ There's deliberately no `jekyll-seo-tag`, `jekyll-sitemap` or `jekyll-feed` depe
     - `twitter:card` is `summary_large_image` when an image resolves, else `summary`.
   - **`og:locale`**: the `og_locale` filter: `page.locale`, else the primary `contentful_locales` code (not `site.lang`, which is a bare `nb`), with `-` → `_` (`nb_NO`).
   - **`og:type`**: always `website`.
-- **`_includes/structured-data.html`** (JSON-LD): Organization (from `_data/company.yml`) and WebSite on Hjem, and a BreadcrumbList on product pages from the same `page.breadcrumb` as `navigation/breadcrumb.html`. There's deliberately no Product markup: prices and offers could count as alcohol advertising under alkoholloven. Values go through `json_script` (`jsonify` with `<` escaped as `<`), so editor content can't close the `<script>`.
+- **`_includes/structured-data.html`** (JSON-LD): Organization (from `_data/company.yml`) and WebSite on Hjem, and a BreadcrumbList on product pages from the same `page.breadcrumb` as `navigation/breadcrumb.html`. There's deliberately no Product markup: prices and offers could count as alcohol advertising under alkoholloven. Values go through `json_script` (`jsonify` with `<` escaped as `\u003c`), so editor content can't close the `<script>`.
 - **`sitemap.xml`** (`layout: none`) loops `site.pages` and prints `<loc>{{ p.url | absolute_url }}</loc>` for every page except:
   - `noindex` pages (404);
   - old-URL redirects (`redirect_to`);

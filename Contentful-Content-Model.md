@@ -15,7 +15,7 @@ The **Site** column says where the site reads a field. A blank means the field i
 
 - **Locales:** `nb-NO` (default) and `en`. The site builds `nb-NO` only (`contentful_locales` in `_config.yml`). Only Manufacturer `description` and `summary` are localized.
 - **Tags:** `productImage` (Product image), `imageManufacturer` (Image: Manufacturer), `imageLogo` (Image: Logo). These are for editors only and aren't shown on the site.
-- **Webhooks:** none. The site doesn't rebuild when content is published; see the "Contentful publish trigger" section in [CLAUDE.md](CLAUDE.md) for the setup steps, and [#3](https://github.com/FELM-AS/northofwine-website/issues/3).
+- **Webhooks:** none yet; see "Contentful publish trigger" in [CLAUDE.md](CLAUDE.md).
 
 ## Product (`product`)
 
@@ -73,7 +73,7 @@ Entry title: `name`. No page of its own: a card on `/produsenter/` and on its co
 | `country` | Land | Symbol | yes | Frankrike, Italia, Tyskland, Østerrike, Spania, Portugal, Ungarn, Chile, Argentina, Australia, New Zealand, USA, Norge, Danmark | Produsenter filter page (only countries some producer has), and the `lang` of the producer's and its wines' names via `_data/countries.yml` |
 | `description` | Beskrivelse | Text (Markdown), localized | yes | | Card |
 | `summary` | Sammendrag | Text, localized | | | |
-| `link` | Link | Symbol | | unique; must start with ftp://, http:// or https:// | Card, shown without the protocol, opens in a new tab |
+| `link` | Link | Symbol | | unique; must start with ftp://, http:// or https:// | Card, shown as the bare host name (`https://example.it/en/` → `example.it`), opens in a new tab |
 | `image` | Bilde | Asset | | image | Card |
 | `logo` | Logo | Asset | | image | Card |
 | `manufacturerId` | Produsent ID | Symbol | | | |
@@ -97,7 +97,7 @@ Contentful doesn't enforce these, so keep to them when editing:
 
 - **Product images** are named `<SKU>-product-image.<jpg|png>` (`image`) and `<SKU>-label-rear.<jpg|png>` (`labelBack`), and the asset title is the file name without its extension. An image shared by several products takes the lowest SKU.
 - **Alt text** comes from an image's description, else the product, producer or person name. Product image descriptions are left empty on purpose: the card's heading already names the wine.
-- **New producer country:** each `country` value needs a language code in `_data/countries.yml`, for the `lang` attribute. The build warns about a country that's missing there. (`Danmark` is in the list above but not yet in `countries.yml`.) Each of today's countries has one language. If a country with several (e.g. Switzerland) is added, decide which one its names use.
+- **New producer country:** each `country` value needs a language code in `_data/countries.yml`, for the `lang` attribute. The build warns about a country that's missing there. Each of today's countries has one language. If a country with several (e.g. Switzerland) is added, decide which one its names use.
 - **Grapes:** `grapeDesc` and `grapePct` are two lists matched by position, largest share first. A share without a grape is ignored.
 - **Vinmonopolet categories:** `productTypeName` is Vinmonopolet's category. `webProductTypeName` is for categories Vinmonopolet doesn't have (e.g. Tokaj). Both become Utvalg filters.
 - **Slugs** must be unique. Two products on the same URL fail the deploy.

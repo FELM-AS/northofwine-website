@@ -46,7 +46,7 @@ A deploy runs:
 
 - on every push to `main`;
 - by hand: **Actions → Deploy to GitHub Pages → Run workflow** (or `gh workflow run deploy.yml`);
-- on Contentful publish, once the webhook is set up. The steps are in CLAUDE.md's "Contentful publish trigger" section. Once it exists, set the repo variable `CONTENTFUL_AUTOBUILD_DISABLED` to `true` to pause those deploys during a bulk edit, and unset it to resume.
+- on Contentful publish, once the webhook is set up. Setup, and pausing these deploys during a bulk edit, are in CLAUDE.md's "Contentful publish trigger" section.
 
 ## Operations
 
@@ -55,8 +55,8 @@ A deploy runs:
 | What | Where |
 | --- | --- |
 | `CONTENTFUL_SPACE_ID`, `CONTENTFUL_ACCESS_TOKEN`, `CONTENTFUL_ENVIRONMENT` | Repo Actions secrets. To rotate the token: create a new Content Delivery API key in Contentful, update the secret, run a deploy, then delete the old key. |
-| `CONTENTFUL_AUTOBUILD_DISABLED` | Repo Actions variable (only matters once the webhook exists). |
-| Webhook token (once set up) | A fine-grained GitHub token stored in the Contentful webhook's headers, not in this repo. Rotate it in both places. |
+| `CONTENTFUL_AUTOBUILD_DISABLED` | Repo Actions variable; pauses Contentful-triggered deploys (CLAUDE.md, "Contentful publish trigger"). |
+| Webhook token | A fine-grained GitHub token stored in the Contentful webhook's headers, not in this repo. Rotate it in both places. |
 | Analytics | GoatCounter site code `northofwine` (`goatcounter_code` in `_config.yml`). Dashboard: https://northofwine.goatcounter.com |
 
 ### Domain
@@ -71,7 +71,7 @@ Open the failed run in the Actions tab. The error names the cause:
 
 - **"… not set, refusing to build production without content":** an Actions secret is missing or empty. Add it back and re-run.
 - **"… both produce "/utvalg/…/"":** two entries (or an entry and a filter value) land on the same URL. Change one slug in Contentful and re-run.
-- **html-proofer lists broken links:** fix the link (in Contentful, `_data/`, or a template). If an external site was down, re-run later.
+- **html-proofer lists broken links:** fix the link (in Contentful, `_data/`, or a template). Only 4xx responses fail the check, so an external link listed here is gone or moved, not just down: fix or remove it.
 - **"i18n: missing key …":** a template uses a text key that isn't in `_data/i18n/nb-NO.yml`. Add it.
 
 To undo a bad code change, revert the commit on `main`; the push deploys the previous version. To undo bad content, fix or unpublish the entry in Contentful and run a deploy.

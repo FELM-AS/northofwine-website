@@ -20,7 +20,7 @@ The wine catalogue: every published product as a card, in Norwegian alphabetical
 
 - Breadcrumb back to Utvalg and to the type pages the wine is listed on.
 - Name, description, production method, and a link to the producer's card on Produsenter.
-- **Taste profile** as 1–12 gauges, like Vinmonopolet's own product pages: fullness and freshness always, plus tannins for red wine and sweetness for every other type.
+- **Taste profile** as 1–12 gauges, like Vinmonopolet's own product pages: fullness and freshness, plus tannins for red wine and sweetness for every other type. A gauge without a value is left out.
 - Food pairing as a sentence ("Fisk, skalldyr og ost"), colour, smell and taste.
 - Our item number, Vinmonopolet's item number, grapes with their share, storage potential, alcohol, volume in litres, packaging and closure.
 - The bottle image in the sidebar.
@@ -89,7 +89,7 @@ The old site's `/utvalg.html`, `/produsenter.html` and `/omoss.html` forward to 
 ## Build and deploy
 
 - The site is static: GitHub Actions fetches the content from Contentful, builds the pages with Jekyll, and publishes them to GitHub Pages at northofwine.no.
-- **When it deploys:** on every push to `main`, and when started by hand in GitHub Actions. The workflow can also deploy when an entry is published in Contentful, but the Contentful webhook for that is not set up yet ([#3](https://github.com/FELM-AS/northofwine-website/issues/3)), so after editing content, start a deploy by hand. Once the webhook exists, a repo variable can pause these deploys during a bulk edit.
+- **When it deploys:** on every push to `main`, and when started by hand in GitHub Actions. The workflow can also deploy when an entry is published in Contentful, but the Contentful webhook for that is not set up yet ([#3](https://github.com/FELM-AS/northofwine-website/issues/3)), so after editing content, start a deploy by hand.
 - **Safety checks.** A deploy is stopped if:
   - the Contentful credentials are missing, so an empty site can't go live;
   - two entries end up on the same address, for example two products with the same slug;
