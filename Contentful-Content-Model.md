@@ -39,8 +39,8 @@ Entry title: `productShortName`. One page per published entry, at `/utvalg/<slug
 | `vintage` | Årgang | Symbol | | 4 digits | |
 | `vintageControlled` | Årgang i produktnavn | Boolean | | default `false`; hidden in the editor | |
 | `country` | Land | Symbol | | | Card (with `region`) |
-| `region` | Distrikt | Symbol | | | Card, product page (with its Region summary) |
-| `subRegion` | Underdistrikt | Symbol | | | Product page (with its Region summary) |
+| `region` | Distrikt | Symbol | | | Card; product page, when a Region entry matches |
+| `subRegion` | Underdistrikt | Symbol | | | Product page, when a Region entry matches |
 | `localQualityClassif` | Kvalitets-ID | Symbol | | | |
 | `manufacturer` | Produsent | Reference → manufacturer | yes | | Producer link on the product page; the producer's `country` sets the name's `lang` |
 | `colour` | Karakteristikk - Farge | Symbol | | | Product page |
@@ -93,13 +93,13 @@ Entry title: `name`. Shown on `/omoss/`.
 
 ## Region (`region`)
 
-Entry title: `name`. One entry per Vinmonopolet region or subregion value our wines carry. No page of its own yet.
+Entry title: `name`. One entry per Vinmonopolet region or subregion value our wines carry. No page of its own yet. The entries are loaded from the region description drafts in the Data quality folder by `Claude outputs/Region import/region_import.py`, which matches entries by `key`.
 
 | Field ID | Label | Type | Required | Validation | Site |
 |---|---|---|---|---|---|
 | `name` | Navn | Symbol | yes | | |
 | `key` | Nøkkel | Symbol | yes | unique | Matched against the product's `country / region / subRegion`, e.g. `Italia / Piemonte / Barolo` |
-| `summary` | Sammendrag | Text, localized | | | Product page, behind the region or subregion name |
+| `summary` | Sammendrag | Text, localized | | | Product page, under the producer, behind the region or subregion name |
 | `description` | Beskrivelse | Text (Markdown), localized | | | Not shown yet |
 
 ## Conventions the site relies on

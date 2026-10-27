@@ -127,6 +127,42 @@ dl{
         &:has(+ dt){
             margin-bottom: var(--size-line-height-regular);
         }
+
+        // Region toggles (_includes/region.html) side by side, the open
+        // one's text below them all.
+        &:has(> details){
+            display: flex;
+            flex-wrap: wrap;
+            column-gap: 0.25em;
+        }
+        > details{
+            display: contents;
+        }
+        > details > p{
+            padding: var(--size-padding-element) 0 0;
+        }
+        > details::details-content{
+            order: 1;
+            flex-basis: 100%;
+        }
+    }
+}
+
+// Styled like a link; the open one isn't underlined.
+summary{
+    cursor: pointer;
+    list-style: none;
+    text-decoration: underline;
+
+    &::-webkit-details-marker{
+        display: none;
+    }
+    &:hover{
+        color: var(--color-text-highlight);
+        text-decoration: none;
+    }
+    [open] > &{
+        text-decoration: none;
     }
 }
 

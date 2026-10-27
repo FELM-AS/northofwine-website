@@ -41,18 +41,23 @@ layout: default
       <dd>
         <a href="{{ site.manufacturer_dir | dir_href | relative_url }}#{{ page.manufacturer.id }}"{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ page.manufacturer.title | escape }}</a>
       </dd>
-    </dl>
-    {% endif %}
-
-    {% if page.country.size > 0 and page.region.size > 0 %}
-    {% assign region_key = page.country | append: " / " | append: page.region %}
-    <dl>
+      {% assign region_entry = nil %}
+      {% assign sub_region_entry = nil %}
+      {% if page.country.size > 0 and page.region.size > 0 %}
+        {% assign region_key = page.country | append: " / " | append: page.region %}
+        {% assign region_entry = site.data.regions | where: "key", region_key | first %}
+        {% if page.sub_region.size > 0 %}
+          {% assign sub_region_key = region_key | append: " / " | append: page.sub_region %}
+          {% assign sub_region_entry = site.data.regions | where: "key", sub_region_key | first %}
+        {% endif %}
+      {% endif %}
+      {% if region_entry.summary.size > 0 or sub_region_entry.summary.size > 0 %}
       <dt>{{ "product.region" | t }}</dt>
-      <dd>{% include region.html name=page.region key=region_key %}</dd>
-      {% if page.sub_region.size > 0 %}
-        <dt>{{ "product.sub_region" | t }}</dt>
-        {% assign sub_region_key = region_key | append: " / " | append: page.sub_region %}
-        <dd>{% include region.html name=page.sub_region key=sub_region_key %}</dd>
+      <dd>
+        {% include region.html name=page.region entry=region_entry %}
+        {% if region_entry.summary.size > 0 and sub_region_entry.summary.size > 0 %}/{% endif %}
+        {% include region.html name=page.sub_region entry=sub_region_entry %}
+      </dd>
       {% endif %}
     </dl>
     {% endif %}

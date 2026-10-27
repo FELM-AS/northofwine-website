@@ -1,19 +1,19 @@
 {% comment %}
-  A region or subregion name on the product page. With a summary from
-  site.data.regions it's a collapsed <details>, the name as its toggle.
-  The entry is matched by key ("Italia / Piemonte / Barolo"), built from
-  the product's own country, region and subRegion.
+  A region or subregion summary on the product page: a collapsed
+  <details> with the name as its toggle, or nothing without a summary.
+  They share name="region", so opening one closes the other, and
+  _sass/_typography.scss sets the toggles side by side with the open
+  text below them. The entry comes from site.data.regions, matched by
+  key ("Italia / Piemonte / Barolo") from the product's country, region
+  and subRegion.
 
   Params:
-    name - required, the product's region or subregion value
-    key  - required, the region entry's key
+    name  - required, the product's region or subregion value
+    entry - the matching site.data.regions item, or nil
 {% endcomment %}
-{% assign region_entry = site.data.regions | where: "key", include.key | first %}
-{% if region_entry.summary.size > 0 %}
-<details>
+{% if include.entry.summary.size > 0 %}
+<details name="region">
   <summary>{{ include.name | escape }}</summary>
-  <p>{{ region_entry.summary | escape }}</p>
+  <p>{{ include.entry.summary | escape }}</p>
 </details>
-{% else %}
-{{ include.name | escape }}
 {% endif %}
