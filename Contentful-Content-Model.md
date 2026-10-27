@@ -13,7 +13,7 @@ The **Site** column says where the site reads a field. A blank means the field i
 
 ## Space
 
-- **Locales:** `nb-NO` (default) and `en`. The site builds `nb-NO` only (`contentful_locales` in `_config.yml`). Only Manufacturer `description` and `summary` are localized.
+- **Locales:** `nb-NO` (default) and `en`. The site builds `nb-NO` only (`contentful_locales` in `_config.yml`). Only the `description` and `summary` of Manufacturer and Region are localized.
 - **Tags:** `productImage` (Product image), `imageManufacturer` (Image: Manufacturer), `imageLogo` (Image: Logo). These are for editors only and aren't shown on the site.
 - **Webhooks:** none yet; see "Contentful publish trigger" in [CLAUDE.md](CLAUDE.md).
 
@@ -39,8 +39,8 @@ Entry title: `productShortName`. One page per published entry, at `/utvalg/<slug
 | `vintage` | Årgang | Symbol | | 4 digits | |
 | `vintageControlled` | Årgang i produktnavn | Boolean | | default `false`; hidden in the editor | |
 | `country` | Land | Symbol | | | Card (with `region`) |
-| `region` | Distrikt | Symbol | | | Card |
-| `subRegion` | Underdistrikt | Symbol | | | |
+| `region` | Distrikt | Symbol | | | Card; product page, when a Region entry matches |
+| `subRegion` | Underdistrikt | Symbol | | | Product page, when a Region entry matches |
 | `localQualityClassif` | Kvalitets-ID | Symbol | | | |
 | `manufacturer` | Produsent | Reference → manufacturer | yes | | Producer link on the product page; the producer's `country` sets the name's `lang` |
 | `colour` | Karakteristikk - Farge | Symbol | | | Product page |
@@ -72,7 +72,7 @@ Entry title: `name`. No page of its own: a card on `/produsenter/` and on its co
 | `name` | Navn | Symbol | yes | unique | Card heading, product page producer link |
 | `country` | Land | Symbol | yes | Frankrike, Italia, Tyskland, Østerrike, Spania, Portugal, Ungarn, Chile, Argentina, Australia, New Zealand, USA, Norge, Danmark | Produsenter filter page (only countries some producer has), and the `lang` of the producer's and its wines' names via `_data/countries.yml` |
 | `description` | Beskrivelse | Text (Markdown), localized | yes | | Card |
-| `summary` | Sammendrag | Text, localized | | | |
+| `summary` | Sammendrag | Text (Markdown), localized | | | |
 | `link` | Link | Symbol | | unique; must start with ftp://, http:// or https:// | Card, shown as the bare host name (`https://example.it/en/` → `example.it`), opens in a new tab |
 | `image` | Bilde | Asset | | image | Card |
 | `logo` | Logo | Asset | | image | Card |
@@ -91,6 +91,17 @@ Entry title: `name`. Shown on `/omoss/`.
 | `phone` | Phone | Symbol | | 8 digits | Card |
 | `companyProfile` | Company Profile | Boolean | | default `false` | `true` makes this entry Om oss's company text instead of a person card. Exactly one entry should have it; the build warns otherwise |
 
+## Region (`region`)
+
+Entry title: `name`. One entry per Vinmonopolet region or subregion value our wines carry. No page of its own yet. The entries are loaded from the region description drafts in the Data quality folder by an import script kept outside this repo (`Claude outputs/Region import/region_import.py` in that folder), which matches entries by `key`.
+
+| Field ID | Label | Type | Required | Validation | Site |
+|---|---|---|---|---|---|
+| `name` | Navn | Symbol | yes | | |
+| `key` | Nøkkel | Symbol | yes | unique | Matched against the product's `country / region / subRegion`, e.g. `Italia / Piemonte / Barolo` |
+| `summary` | Sammendrag | Text (Markdown), localized | | | Product page, under the producer, behind the region or subregion name |
+| `description` | Beskrivelse | Text (Markdown), localized | | | Not shown yet |
+
 ## Conventions the site relies on
 
 Contentful doesn't enforce these, so keep to them when editing:
@@ -100,4 +111,5 @@ Contentful doesn't enforce these, so keep to them when editing:
 - **New producer country:** each `country` value needs a language code in `_data/countries.yml`, for the `lang` attribute. The build warns about a country that's missing there. Each of today's countries has one language. If a country with several (e.g. Switzerland) is added, decide which one its names use.
 - **Grapes:** `grapeDesc` and `grapePct` are two lists matched by position, largest share first. A share without a grape is ignored.
 - **Vinmonopolet categories:** `productTypeName` is Vinmonopolet's category. `webProductTypeName` is for categories Vinmonopolet doesn't have (e.g. Tokaj). Both become Utvalg filters.
+- **Origin:** a product's `country`, `region` and `subRegion` use Vinmonopolet's code list names, spelled as in the Region entry's `key` (case and spacing around `/` don't matter). A misspelt value shows without its summary.
 - **Slugs** must be unique. Two products on the same URL fail the deploy.

@@ -1,0 +1,17 @@
+{% comment %}
+  A region or subregion summary on the product page: a collapsed
+  <details> with the name as its toggle. They share name="region", so
+  opening one closes the other, and _sass/_typography.scss sets the
+  toggles side by side with the open text below them. The product's
+  matches are in page.regions (contentful_listing_pages.rb); summary is
+  Markdown rendered to HTML.
+
+  Params:
+    name  - required, the product's region or subregion value
+    entry - required, the matching site.data.regions item
+    lang  - optional, the language of the name
+{% endcomment %}
+<details name="region">
+  <summary{% if include.lang %} lang="{{ include.lang }}"{% endif %}>{{ include.name | escape }}</summary>
+  {{ include.entry.summary }}
+</details>

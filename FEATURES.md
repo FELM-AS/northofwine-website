@@ -20,6 +20,7 @@ The wine catalogue: every published product as a card, in Norwegian alphabetical
 
 - Breadcrumb back to Utvalg and to the type pages the wine is listed on.
 - Name, description, production method, and a link to the producer's card on Produsenter.
+- Distrikt, under the producer: the region and subregion, side by side. The ones Contentful has a description for can be opened to show it; opening the other replaces it.
 - **Taste profile** as 1–12 gauges, like Vinmonopolet's own product pages: fullness and freshness, plus tannins for red wine and sweetness for every other type. A gauge without a value is left out.
 - Food pairing as a sentence ("Fisk, skalldyr og ost"), colour, smell and taste.
 - Our item number, Vinmonopolet's item number, grapes with their share, storage potential, alcohol, volume in litres, packaging and closure.

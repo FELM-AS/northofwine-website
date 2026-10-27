@@ -19,6 +19,7 @@ module ContentfulJekyll
   # - page.siblings on every Utvalg/Produsenter listing page: the section's
   #   listing pages, for navigation/filter.html.
   # - page.breadcrumb on every product page: see #link_breadcrumbs.
+  # - page.regions on every product page: see #link_regions.
   # - page.products_by_manufacturer on Produsenter pages: manufacturer id
   #   -> that manufacturer's product pages, for manufacturer-card.html.
   #
@@ -38,6 +39,7 @@ module ContentfulJekyll
       product_collection = find_collection(site.config["contentful_collections"], "product")
       manufacturer_collection = find_collection(site.config["contentful_data_collections"], "manufacturer")
       person_collection = find_collection(site.config["contentful_data_collections"], "person")
+      region_collection = find_collection(site.config["contentful_data_collections"], "region")
 
       # Each pass only sees its own locale's product pages and site.data,
       # so no listing page mixes items across locales.
@@ -45,6 +47,7 @@ module ContentfulJekyll
         products_by_manufacturer = build_product_listing(site, locale, product_collection)
         build_manufacturer_listing(site, locale, manufacturer_collection, products_by_manufacturer)
         build_about_page(site, locale, person_collection)
+        link_regions(site, locale, product_collection, region_collection)
       end
     end
 
@@ -144,6 +147,53 @@ module ContentfulJekyll
       filter_pages.each do |filter_page|
         filter_page.data["items"].each { |product| product.data["breadcrumb"] << filter_page }
       end
+    end
+
+    # Each product page gets page.data["regions"]: its region, then its
+    # subregion (stopping at the first one missing), as { "name", "entry" },
+    # for the Distrikt row. entry is this locale's site.data region entry
+    # with a summary, matched by key ("Italia / Piemonte / Barolo", see
+    # #region_key), else nil. Without a country nothing can match.
+    # Warnings are logged on the primary locale's pass only.
+    def link_regions(site, locale, product_collection, region_collection)
+      return unless product_collection && region_collection
+
+      by_key = {}
+      (site.data[locale.data_key_for(region_collection["name"])] || []).each do |entry|
+        key = item_field(entry, "key")
+        next unless key && item_field(entry, "summary")
+
+        first = by_key[region_key(key)] ||= entry
+        next if first.equal?(entry) || !locale.primary?
+
+        Jekyll.logger.warn LOG_TAG, "region entries #{first["id"]} and #{entry["id"]} have the same key \"#{key}\" (ignoring case and spacing) -- only #{first["id"]} is used"
+      end
+
+      site.pages.each do |product|
+        next unless product.data["content_type"] == product_collection["content_type"] && product.data["locale"] == locale.page_code
+
+        country, region, sub_region = %w[country region sub_region].map { |field| item_field(product, field) }
+        if locale.primary?
+          warn_region_gap(product, "region", region, "country") if region && !country
+          warn_region_gap(product, "subRegion", sub_region, "region") if sub_region && !region
+        end
+
+        path = [country]
+        product.data["regions"] = [region, sub_region].take_while(&:itself).map do |name|
+          path << name
+          { "name" => name, "entry" => (by_key[region_key(path.join("/"))] if country) }
+        end
+      end
+    end
+
+    # "Italia/Piemonte / Barolo" -> "italia / piemonte / barolo", so spacing
+    # around "/" and case don't affect matching.
+    def region_key(key)
+      key.split("/").map(&:strip).reject(&:empty?).join(" / ").downcase
+    end
+
+    def warn_region_gap(product, field, value, missing)
+      Jekyll.logger.warn LOG_TAG, "product #{product.data["id"]} (#{product.data["title"]}) has #{field} \"#{value}\" but no #{missing} -- its region summaries can't be found"
     end
 
     # One page per distinct value of `fields` among `items` -- only values

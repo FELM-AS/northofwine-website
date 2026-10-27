@@ -51,6 +51,7 @@ sections:
 product:
   method: Metode
   producer: Produsent
+  region: Distrikt
   fullness: Fylde
   freshness: Friskhet
   tannins: Garvestoffer

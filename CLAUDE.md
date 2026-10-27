@@ -122,6 +122,7 @@ It also precomputes cross-references, so templates never scan `site.pages`:
 - `page.siblings`: a section's listing pages, for `navigation/filter.html`.
 - `page.breadcrumb` on every product page: the root listing, then the filter pages it appears on. Used by `navigation/breadcrumb.html` and the JSON-LD BreadcrumbList.
 - `page.products_by_manufacturer` on Produsenter pages.
+- `page.regions` on every product page: its region, then its subregion (stopping at the first one missing), as `{ name, entry }`, for the Distrikt row. `entry` is the locale's matching `site.data.regions` entry with a `summary`, else `nil`, and `_includes/region.html` renders only the ones that have it. Keys are compared trimmed around `/` and case-insensitively, on both sides. Two region entries whose keys only differ that way get a build warning, and the first one is used. A product with a `region` but no `country` gets a build warning, since its key can't be built; so does a `subRegion` without a `region`. Warnings are logged on the primary locale's pass only.
 - `site.config["<product|manufacturer|about>_dir"]` (primary locale only), for the nav.
 
 Listing copy comes from the UI dictionary under `sections.<content_type>` (see "UI text (i18n)"):
@@ -142,11 +143,11 @@ Adding a locale means adding its `contentful_locales` entry and a `_data/i18n/<c
 
 ### Data-only collections
 
-A `contentful_data_collections` entry (`content_type`, `name`) fetches a content type into `site.data.<name>` instead of generating pages. Here that's `manufacturer` → `site.data.manufacturers` and `person` → `site.data.people`. Each entry is flattened the same way as a generated page (`EntrySerializer#serialize_root`). A build warning is logged if `name` collides with an existing `site.data` key (e.g. a `_data/<name>.yml` file), which it then overwrites. It also takes:
+A `contentful_data_collections` entry (`content_type`, `name`) fetches a content type into `site.data.<name>` instead of generating pages. Here that's `manufacturer` → `site.data.manufacturers`, `person` → `site.data.people` and `region` → `site.data.regions`. `contentful_listing_pages.rb` matches a region entry by its `key` (`Italia / Piemonte / Barolo`), built from the product's `country`, `region` and `subRegion`, so a product finds its summary only when those carry Vinmonopolet's names (spacing around `/` and case aside) (see `page.regions` under "Listing pages"). `_includes/region.html` renders each summary as a `<details>`. Each entry is flattened the same way as a generated page (`EntrySerializer#serialize_root`). A build warning is logged if `name` collides with an existing `site.data` key (e.g. a `_data/<name>.yml` file), which it then overwrites. It also takes:
 
 - **`order`**, as for `contentful_collections`.
 - **`dir`**: ignored by `EntriesGenerator` (a data collection still gets no per-entry pages). `contentful_listing_pages.rb` reads it as the one source for that collection's listing pages (e.g. `dir: produsenter` for `/produsenter/`).
-- **`body_field`**: which field `EntrySerializer#render_body` renders. Manufacturer's and Person's `description` both use it (`body_field: description`), as Product's does, so every description on the site is Markdown rendered to HTML, and templates output it directly without `escape`/`markdownify`.
+- **`body_field`**: which field `EntrySerializer#render_body` renders. Manufacturer's and Person's `description` both use it (`body_field: description`), as Product's does, and Region's `summary` (`body_field: summary`), so every description and summary the site shows is Markdown rendered to HTML, and templates output it directly without `escape`/`markdownify`.
 
   A plain Text field is parsed by `Kramdown::Parser::NoHtmlGFM` (`contentful_serializer.rb`) through Jekyll's own kramdown converter, so `_config.yml`'s `kramdown` settings apply (`hard_wrap`, Norwegian `smart_quotes`), with `auto_ids` off. The parser restricts what editor text can do:
   - an editor's `<b>` or `{::nomarkdown}` renders as literal text;

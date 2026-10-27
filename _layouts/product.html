@@ -11,7 +11,8 @@ layout: default
   shows no third rating.
 
   lang on the name and the producer link comes from the manufacturer's
-  country (country_lang).
+  country (country_lang); on the region names, from the product's.
+  page.regions is set by contentful_listing_pages.rb.
 {% endcomment %}
 {% assign product_lang = page.manufacturer.country | country_lang %}
 {% if page.product_type_name == "Rødvin" %}
@@ -35,12 +36,30 @@ layout: default
     </dl>
     {% endif %}
 
-    {% if page.manufacturer.id and page.manufacturer.title %}
+    {% assign has_producer = false %}
+    {% if page.manufacturer.id and page.manufacturer.title %}{% assign has_producer = true %}{% endif %}
+    {% if has_producer or page.regions.size > 0 %}
     <dl>
+      {% if has_producer %}
       <dt>{{ "product.producer" | t }}</dt>
       <dd>
         <a href="{{ site.manufacturer_dir | dir_href | relative_url }}#{{ page.manufacturer.id }}"{% if product_lang %} lang="{{ product_lang }}"{% endif %}>{{ page.manufacturer.title | escape }}</a>
       </dd>
+      {% endif %}
+      {% if page.regions.size > 0 %}
+      {% assign region_lang = page.country | country_lang %}
+      <dt>{{ "product.region" | t }}</dt>
+      <dd>
+        {% for region in page.regions %}
+        {% unless forloop.first %}<span aria-hidden="true">/</span>{% endunless %}
+        {% if region.entry %}
+        {% include region.html name=region.name entry=region.entry lang=region_lang %}
+        {% else %}
+        <span{% if region_lang %} lang="{{ region_lang }}"{% endif %}>{{ region.name | escape }}</span>
+        {% endif %}
+        {% endfor %}
+      </dd>
+      {% endif %}
     </dl>
     {% endif %}
   </section>
