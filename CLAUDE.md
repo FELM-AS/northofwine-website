@@ -4,7 +4,7 @@ For developers and coding agents changing the code: how the build works (plugins
 
 ## Project
 
-This repo builds and deploys **northofwine.no**, the live website of North of Wine AS, a Norwegian wine importer in Trondheim. It's hosted under the FELM-AS GitHub organization and replaced the old site at `northofwine/northofwine.github.io`.
+This repo builds and deploys **northofwine.no**, the live website of North of Wine AS, a Norwegian wine importer in Trondheim. It's hosted under the FELM-AS GitHub organization and replaced the old site at `northofwine/northofwine.github.io`. That repo and its `northofwine` GitHub organization have since been deleted; a zip backup of the repo exists outside GitHub.
 
 The repo started from the `github-pages-contentful` template's Contentful → Jekyll → GitHub Pages machinery, but it isn't a template anymore. It's one company's site, modified in place. The generators are still config-driven (see "Architecture"), which is why parts of this file describe options this site doesn't use.
 
