@@ -1,10 +1,8 @@
 {% comment %}
-  Breadcrumb component (Plan.md): <page> / productTypeName / webProductTypeName
-  when both are set on the current product, else <page> / productTypeName.
-  include.product.breadcrumb is the product root listing, then the filter
-  pages this product appears on, set by _plugins/contentful_listing_pages.rb
-  (the generator that builds those pages), so each link is that page's own
-  URL and title.
+  Product breadcrumb: the product root listing, then the filter pages the
+  product appears on (productTypeName, webProductTypeName). The trail is
+  include.product.breadcrumb, set by _plugins/contentful_listing_pages.rb,
+  so each link is that page's own URL and title.
 
   Params:
     product - required, a product's page data, e.g. `page` on a
