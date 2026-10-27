@@ -142,7 +142,7 @@ Adding a locale means adding its `contentful_locales` entry and a `_data/i18n/<c
 
 ### Data-only collections
 
-A `contentful_data_collections` entry (`content_type`, `name`) fetches a content type into `site.data.<name>` instead of generating pages. Here that's `manufacturer` → `site.data.manufacturers` and `person` → `site.data.people`. Each entry is flattened the same way as a generated page (`EntrySerializer#serialize_root`). A build warning is logged if `name` collides with an existing `site.data` key (e.g. a `_data/<name>.yml` file), which it then overwrites. It also takes:
+A `contentful_data_collections` entry (`content_type`, `name`) fetches a content type into `site.data.<name>` instead of generating pages. Here that's `manufacturer` → `site.data.manufacturers`, `person` → `site.data.people` and `region` → `site.data.regions`. The product page (`_includes/region.html`) matches a region entry by its `key` (`Italia / Piemonte / Barolo`), built from the product's `country`, `region` and `subRegion`, so a product finds its summary only when those carry Vinmonopolet's names exactly. Each entry is flattened the same way as a generated page (`EntrySerializer#serialize_root`). A build warning is logged if `name` collides with an existing `site.data` key (e.g. a `_data/<name>.yml` file), which it then overwrites. It also takes:
 
 - **`order`**, as for `contentful_collections`.
 - **`dir`**: ignored by `EntriesGenerator` (a data collection still gets no per-entry pages). `contentful_listing_pages.rb` reads it as the one source for that collection's listing pages (e.g. `dir: produsenter` for `/produsenter/`).

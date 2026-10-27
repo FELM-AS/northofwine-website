@@ -43,6 +43,19 @@ layout: default
       </dd>
     </dl>
     {% endif %}
+
+    {% if page.country.size > 0 and page.region.size > 0 %}
+    {% assign region_key = page.country | append: " / " | append: page.region %}
+    <dl>
+      <dt>{{ "product.region" | t }}</dt>
+      <dd>{% include region.html name=page.region key=region_key %}</dd>
+      {% if page.sub_region.size > 0 %}
+        <dt>{{ "product.sub_region" | t }}</dt>
+        {% assign sub_region_key = region_key | append: " / " | append: page.sub_region %}
+        <dd>{% include region.html name=page.sub_region key=sub_region_key %}</dd>
+      {% endif %}
+    </dl>
+    {% endif %}
   </section>
   <hr>
   <section>
