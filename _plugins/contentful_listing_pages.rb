@@ -44,10 +44,12 @@ module ContentfulJekyll
       # Each pass only sees its own locale's product pages and site.data,
       # so no listing page mixes items across locales.
       ContentfulJekyll.each_locale(site.config["contentful_locales"]) do |locale|
-        products_by_manufacturer = build_product_listing(site, locale, product_collection, region_collection)
+        products_by_manufacturer = build_product_listing(site, locale, product_collection)
         build_manufacturer_listing(site, locale, manufacturer_collection, products_by_manufacturer)
         build_about_page(site, locale, person_collection)
       end
+
+      link_regions(site, product_collection, region_collection)
     end
 
     private
@@ -55,7 +57,7 @@ module ContentfulJekyll
     # Utvalg: root + productTypeName/webProductTypeName filter pages, which
     # share one flat URL namespace (/utvalg/rodvin/, /utvalg/tokaj/).
     # Returns manufacturer id -> that manufacturer's product pages.
-    def build_product_listing(site, locale, collection, region_collection)
+    def build_product_listing(site, locale, collection)
       return {} unless collection
 
       context = section_context(site, locale, collection, "product", "product")
@@ -69,7 +71,6 @@ module ContentfulJekyll
       root = build_page(site, nil, products, "the product root listing", context)
       filter_pages = build_grouped_pages(site, products, %w[product_type_name web_product_type_name], context)
       link_breadcrumbs(root, filter_pages)
-      link_regions(site, products, region_collection)
       add_section(site, [root, *filter_pages])
 
       products.group_by { |page| page.data.dig("manufacturer", "id") }
@@ -149,31 +150,43 @@ module ContentfulJekyll
       end
     end
 
-    # Each product page gets page.data["regions"]: its region, then its
-    # subregion, as { "name", "entry" } for each one with a site.data
-    # region entry that has a summary, for _includes/region.html. Matched
-    # by key ("Italia / Piemonte / Barolo"), so a subregion without a
-    # region can't match. Reads the primary locale's regions.
-    def link_regions(site, products, region_collection)
-      entries = region_collection ? site.data[region_collection["name"]] || [] : []
-      by_key = entries.each_with_object({}) do |entry, result|
-        result[entry["key"]] = entry if item_field(entry, "key") && item_field(entry, "summary")
-      end
+    # Each product page, in every locale, gets page.data["regions"]: its
+    # region, then its subregion, as { "name", "entry" } for each one with
+    # a site.data region entry that has a summary, for _includes/region.html.
+    # Matched by key ("Italia / Piemonte / Barolo", see #region_key), so a
+    # region without a country, or a subregion without a region, can't
+    # match. Reads the primary locale's regions.
+    def link_regions(site, product_collection, region_collection)
+      return unless product_collection && region_collection
 
-      products.each do |product|
+      entries = (site.data[region_collection["name"]] || []).select do |entry|
+        item_field(entry, "key") && item_field(entry, "summary")
+      end
+      by_key = entries.to_h { |entry| [region_key(entry["key"].split("/")), entry] }
+
+      site.pages.each do |product|
+        next unless product.data["content_type"] == product_collection["content_type"]
+
         country, region, sub_region = %w[country region sub_region].map { |field| item_field(product, field) }
-        if sub_region && !region
-          Jekyll.logger.warn LOG_TAG, "product #{product.data["id"]} (#{product.data["title"]}) has subRegion \"#{sub_region}\" but no region -- its subregion summary can't be found"
-        end
+        warn_region_gap(product, "region", region, "country") if region && !country
+        warn_region_gap(product, "subRegion", sub_region, "region") if sub_region && !region
 
-        key = country
-        product.data["regions"] = [region, sub_region].each_with_object([]) do |name, result|
-          break result unless key && name
-
-          key = "#{key} / #{name}"
-          result << { "name" => name, "entry" => by_key[key] } if by_key[key]
+        names = country ? [region, sub_region].take_while(&:itself) : []
+        product.data["regions"] = names.each_index.filter_map do |index|
+          key = region_key([country, *names[0..index]])
+          { "name" => names[index], "entry" => by_key[key] } if by_key[key]
         end
       end
+    end
+
+    # "Italia / Piemonte / Barolo", trimmed and lowercased, so spacing
+    # around "/" and case don't affect matching.
+    def region_key(parts)
+      parts.map(&:strip).reject(&:empty?).join(" / ").downcase
+    end
+
+    def warn_region_gap(product, field, value, missing)
+      Jekyll.logger.warn LOG_TAG, "product #{product.data["id"]} (#{product.data["title"]}) has #{field} \"#{value}\" but no #{missing} -- its region summaries can't be found"
     end
 
     # One page per distinct value of `fields` among `items` -- only values

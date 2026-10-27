@@ -132,8 +132,28 @@ dl{
             padding-top: var(--size-padding-element);
         }
 
-        // Region toggles (_includes/region.html) side by side, the open
-        // one's text below them all. Without ::details-content they stack.
+        // Region toggles (_includes/region.html): underlined like a link,
+        // keeping the native marker; the open one isn't underlined.
+        > details > summary{
+            cursor: pointer;
+            text-decoration: underline;
+
+            &:hover{
+                color: var(--color-text-highlight);
+                text-decoration: none;
+            }
+        }
+        > details[open] > summary{
+            text-decoration: none;
+        }
+
+        // The "/" between toggles only makes sense side by side.
+        > span{
+            display: none;
+        }
+
+        // Toggles side by side, the open one's text below them all.
+        // Without ::details-content they stack.
         @supports selector(::details-content){
             &:has(> details){
                 display: flex;
@@ -147,25 +167,10 @@ dl{
                 order: 1;
                 flex-basis: 100%;
             }
+            > span{
+                display: inline;
+            }
         }
-    }
-}
-
-// Styled like a link; the open one isn't underlined.
-summary{
-    cursor: pointer;
-    list-style: none;
-    text-decoration: underline;
-
-    &::-webkit-details-marker{
-        display: none;
-    }
-    &:hover{
-        color: var(--color-text-highlight);
-        text-decoration: none;
-    }
-    [open] > &{
-        text-decoration: none;
     }
 }
 

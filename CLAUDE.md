@@ -122,7 +122,7 @@ It also precomputes cross-references, so templates never scan `site.pages`:
 - `page.siblings`: a section's listing pages, for `navigation/filter.html`.
 - `page.breadcrumb` on every product page: the root listing, then the filter pages it appears on. Used by `navigation/breadcrumb.html` and the JSON-LD BreadcrumbList.
 - `page.products_by_manufacturer` on Produsenter pages.
-- `page.regions` on every product page: its region and subregion entries that have a `summary`, as `{ name, entry }`, for `_includes/region.html`. It reads the primary locale's `site.data.regions` only. A product with a `subRegion` but no `region` gets a build warning, since its key can't be built.
+- `page.regions` on every product page, in every locale: its region and subregion entries that have a `summary`, as `{ name, entry }`, for `_includes/region.html`. It's a step of its own, run once after the locale passes, and reads the primary locale's `site.data.regions` only. Keys are compared trimmed around `/` and case-insensitively. A product with a `region` but no `country`, or a `subRegion` but no `region`, gets a build warning, since its key can't be built.
 - `site.config["<product|manufacturer|about>_dir"]` (primary locale only), for the nav.
 
 Listing copy comes from the UI dictionary under `sections.<content_type>` (see "UI text (i18n)"):
@@ -143,7 +143,7 @@ Adding a locale means adding its `contentful_locales` entry and a `_data/i18n/<c
 
 ### Data-only collections
 
-A `contentful_data_collections` entry (`content_type`, `name`) fetches a content type into `site.data.<name>` instead of generating pages. Here that's `manufacturer` → `site.data.manufacturers`, `person` → `site.data.people` and `region` → `site.data.regions`. `contentful_listing_pages.rb` matches a region entry by its `key` (`Italia / Piemonte / Barolo`), built from the product's `country`, `region` and `subRegion`, so a product finds its summary only when those carry Vinmonopolet's names exactly (see `page.regions` under "Listing pages"). `_includes/region.html` renders each summary as a `<details>`. Each entry is flattened the same way as a generated page (`EntrySerializer#serialize_root`). A build warning is logged if `name` collides with an existing `site.data` key (e.g. a `_data/<name>.yml` file), which it then overwrites. It also takes:
+A `contentful_data_collections` entry (`content_type`, `name`) fetches a content type into `site.data.<name>` instead of generating pages. Here that's `manufacturer` → `site.data.manufacturers`, `person` → `site.data.people` and `region` → `site.data.regions`. `contentful_listing_pages.rb` matches a region entry by its `key` (`Italia / Piemonte / Barolo`), built from the product's `country`, `region` and `subRegion`, so a product finds its summary only when those carry Vinmonopolet's names (spacing around `/` and case aside) (see `page.regions` under "Listing pages"). `_includes/region.html` renders each summary as a `<details>`. Each entry is flattened the same way as a generated page (`EntrySerializer#serialize_root`). A build warning is logged if `name` collides with an existing `site.data` key (e.g. a `_data/<name>.yml` file), which it then overwrites. It also takes:
 
 - **`order`**, as for `contentful_collections`.
 - **`dir`**: ignored by `EntriesGenerator` (a data collection still gets no per-entry pages). `contentful_listing_pages.rb` reads it as the one source for that collection's listing pages (e.g. `dir: produsenter` for `/produsenter/`).

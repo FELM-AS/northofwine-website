@@ -51,7 +51,7 @@ layout: default
       <dt>{{ "product.region" | t }}</dt>
       <dd>
         {% for region in page.regions %}
-        {% unless forloop.first %}/{% endunless %}
+        {% unless forloop.first %}<span aria-hidden="true">/</span>{% endunless %}
         {% include region.html name=region.name entry=region.entry lang=region_lang %}
         {% endfor %}
       </dd>

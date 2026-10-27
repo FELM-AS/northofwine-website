@@ -111,5 +111,5 @@ Contentful doesn't enforce these, so keep to them when editing:
 - **New producer country:** each `country` value needs a language code in `_data/countries.yml`, for the `lang` attribute. The build warns about a country that's missing there. Each of today's countries has one language. If a country with several (e.g. Switzerland) is added, decide which one its names use.
 - **Grapes:** `grapeDesc` and `grapePct` are two lists matched by position, largest share first. A share without a grape is ignored.
 - **Vinmonopolet categories:** `productTypeName` is Vinmonopolet's category. `webProductTypeName` is for categories Vinmonopolet doesn't have (e.g. Tokaj). Both become Utvalg filters.
-- **Origin:** a product's `country`, `region` and `subRegion` use Vinmonopolet's code list names, spelled exactly as in the Region entry's `key`. A misspelt value shows without its summary.
+- **Origin:** a product's `country`, `region` and `subRegion` use Vinmonopolet's code list names, spelled as in the Region entry's `key` (case and spacing around `/` don't matter). A misspelt value shows without its summary.
 - **Slugs** must be unique. Two products on the same URL fail the deploy.
