@@ -128,47 +128,45 @@ dl{
             margin-bottom: var(--size-line-height-regular);
         }
 
-        > details > :nth-child(2){
-            padding-top: var(--size-padding-element);
-        }
-
         // Region toggles (_includes/region.html): underlined like a link,
-        // keeping the native marker; the open one isn't underlined.
-        > details > summary{
-            cursor: pointer;
-            text-decoration: underline;
+        // keeping the native marker; the open one isn't underlined. Toggles
+        // sit side by side, the open one's text below them all. Without
+        // ::details-content they stack, and the "/" between them is hidden.
+        &:has(> details[name="region"]){
+            > details > summary{
+                cursor: pointer;
+                text-decoration: underline;
 
-            &:hover{
-                color: var(--color-text-highlight);
+                &:hover{
+                    color: var(--color-text-highlight);
+                    text-decoration: none;
+                }
+            }
+            > details[open] > summary{
                 text-decoration: none;
             }
-        }
-        > details[open] > summary{
-            text-decoration: none;
-        }
+            > details > :nth-child(2){
+                padding-top: var(--size-padding-element);
+            }
+            > [aria-hidden]{
+                display: none;
+            }
 
-        // The "/" between toggles only makes sense side by side.
-        > span{
-            display: none;
-        }
-
-        // Toggles side by side, the open one's text below them all.
-        // Without ::details-content they stack.
-        @supports selector(::details-content){
-            &:has(> details){
+            @supports selector(::details-content){
                 display: flex;
                 flex-wrap: wrap;
                 column-gap: 0.25em;
-            }
-            > details{
-                display: contents;
-            }
-            > details::details-content{
-                order: 1;
-                flex-basis: 100%;
-            }
-            > span{
-                display: inline;
+
+                > details{
+                    display: contents;
+                }
+                > details::details-content{
+                    order: 1;
+                    flex-basis: 100%;
+                }
+                > [aria-hidden]{
+                    display: inline;
+                }
             }
         }
     }

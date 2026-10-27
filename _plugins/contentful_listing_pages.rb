@@ -47,9 +47,8 @@ module ContentfulJekyll
         products_by_manufacturer = build_product_listing(site, locale, product_collection)
         build_manufacturer_listing(site, locale, manufacturer_collection, products_by_manufacturer)
         build_about_page(site, locale, person_collection)
+        link_regions(site, locale, product_collection, region_collection)
       end
-
-      link_regions(site, product_collection, region_collection)
     end
 
     private
@@ -150,39 +149,47 @@ module ContentfulJekyll
       end
     end
 
-    # Each product page, in every locale, gets page.data["regions"]: its
-    # region, then its subregion, as { "name", "entry" } for each one with
-    # a site.data region entry that has a summary, for _includes/region.html.
-    # Matched by key ("Italia / Piemonte / Barolo", see #region_key), so a
-    # region without a country, or a subregion without a region, can't
-    # match. Reads the primary locale's regions.
-    def link_regions(site, product_collection, region_collection)
+    # Each product page gets page.data["regions"]: its region, then its
+    # subregion (stopping at the first one missing), as { "name", "entry" },
+    # for the Distrikt row. entry is this locale's site.data region entry
+    # with a summary, matched by key ("Italia / Piemonte / Barolo", see
+    # #region_key), else nil. Without a country nothing can match.
+    # Warnings are logged on the primary locale's pass only.
+    def link_regions(site, locale, product_collection, region_collection)
       return unless product_collection && region_collection
 
-      entries = (site.data[region_collection["name"]] || []).select do |entry|
-        item_field(entry, "key") && item_field(entry, "summary")
+      by_key = {}
+      (site.data[locale.data_key_for(region_collection["name"])] || []).each do |entry|
+        key = item_field(entry, "key")
+        next unless key && item_field(entry, "summary")
+
+        first = by_key[region_key(key)] ||= entry
+        next if first.equal?(entry) || !locale.primary?
+
+        Jekyll.logger.warn LOG_TAG, "region entries #{first["id"]} and #{entry["id"]} have the same key \"#{key}\" (ignoring case and spacing) -- only #{first["id"]} is used"
       end
-      by_key = entries.to_h { |entry| [region_key(entry["key"].split("/")), entry] }
 
       site.pages.each do |product|
-        next unless product.data["content_type"] == product_collection["content_type"]
+        next unless product.data["content_type"] == product_collection["content_type"] && product.data["locale"] == locale.page_code
 
         country, region, sub_region = %w[country region sub_region].map { |field| item_field(product, field) }
-        warn_region_gap(product, "region", region, "country") if region && !country
-        warn_region_gap(product, "subRegion", sub_region, "region") if sub_region && !region
+        if locale.primary?
+          warn_region_gap(product, "region", region, "country") if region && !country
+          warn_region_gap(product, "subRegion", sub_region, "region") if sub_region && !region
+        end
 
-        names = country ? [region, sub_region].take_while(&:itself) : []
-        product.data["regions"] = names.each_index.filter_map do |index|
-          key = region_key([country, *names[0..index]])
-          { "name" => names[index], "entry" => by_key[key] } if by_key[key]
+        path = [country]
+        product.data["regions"] = [region, sub_region].take_while(&:itself).map do |name|
+          path << name
+          { "name" => name, "entry" => (by_key[region_key(path.join("/"))] if country) }
         end
       end
     end
 
-    # "Italia / Piemonte / Barolo", trimmed and lowercased, so spacing
+    # "Italia/Piemonte / Barolo" -> "italia / piemonte / barolo", so spacing
     # around "/" and case don't affect matching.
-    def region_key(parts)
-      parts.map(&:strip).reject(&:empty?).join(" / ").downcase
+    def region_key(key)
+      key.split("/").map(&:strip).reject(&:empty?).join(" / ").downcase
     end
 
     def warn_region_gap(product, field, value, missing)

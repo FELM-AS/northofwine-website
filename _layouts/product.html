@@ -52,7 +52,11 @@ layout: default
       <dd>
         {% for region in page.regions %}
         {% unless forloop.first %}<span aria-hidden="true">/</span>{% endunless %}
+        {% if region.entry %}
         {% include region.html name=region.name entry=region.entry lang=region_lang %}
+        {% else %}
+        <span{% if region_lang %} lang="{{ region_lang }}"{% endif %}>{{ region.name | escape }}</span>
+        {% endif %}
         {% endfor %}
       </dd>
       {% endif %}

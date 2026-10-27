@@ -122,7 +122,7 @@ It also precomputes cross-references, so templates never scan `site.pages`:
 - `page.siblings`: a section's listing pages, for `navigation/filter.html`.
 - `page.breadcrumb` on every product page: the root listing, then the filter pages it appears on. Used by `navigation/breadcrumb.html` and the JSON-LD BreadcrumbList.
 - `page.products_by_manufacturer` on Produsenter pages.
-- `page.regions` on every product page, in every locale: its region and subregion entries that have a `summary`, as `{ name, entry }`, for `_includes/region.html`. It's a step of its own, run once after the locale passes, and reads the primary locale's `site.data.regions` only. Keys are compared trimmed around `/` and case-insensitively. A product with a `region` but no `country`, or a `subRegion` but no `region`, gets a build warning, since its key can't be built.
+- `page.regions` on every product page: its region, then its subregion (stopping at the first one missing), as `{ name, entry }`, for the Distrikt row. `entry` is the locale's matching `site.data.regions` entry with a `summary`, else `nil`, and `_includes/region.html` renders only the ones that have it. Keys are compared trimmed around `/` and case-insensitively, on both sides. Two region entries whose keys only differ that way get a build warning, and the first one is used. A product with a `region` but no `country` gets a build warning, since its key can't be built; so does a `subRegion` without a `region`. Warnings are logged on the primary locale's pass only.
 - `site.config["<product|manufacturer|about>_dir"]` (primary locale only), for the nav.
 
 Listing copy comes from the UI dictionary under `sections.<content_type>` (see "UI text (i18n)"):
